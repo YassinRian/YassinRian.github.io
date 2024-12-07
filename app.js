@@ -5,7 +5,8 @@ define(function () {
 
 	BasicControl.prototype.draw = function (oControlHost) {
 		const cont = oControlHost.container;
-		cont.innerHTML = "<h1>gaat dit een keer werken!!</h1>";
+		cont.innerHTML =
+			"<h1>nou met het wissen van de cache kan het werken!!</h1>";
 	};
 	return BasicControl;
 });
