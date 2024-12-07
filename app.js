@@ -5,7 +5,7 @@ define(function () {
 
 	BasicControl.prototype.draw = function (oControlHost) {
 		const cont = oControlHost.container;
-		cont.innerHTML = "<h1>nou nog een keer dan maar!!</h1>";
+		cont.innerHTML = "<h1>gaat dit een keer werken!!</h1>";
 	};
 	return BasicControl;
 });
