@@ -1,8 +1,6 @@
-define(function(){
-
-return {
-
-html: () => `
+define(function () {
+	return {
+		html: () => `
 
 <div class="cnt">
 <div class="prmt_container">
@@ -16,14 +14,12 @@ html: () => `
     <option value="powerbi">PowerBI</option>
     <option value="oracle">Oracle</option>
     <option value="sql">SQL</option>
+    <option value="clojure">Clojure</option>
   </select>
 </div>
 </div>
 </div>
 
-`	
-	
-	
-}
-
+`,
+	};
 });
