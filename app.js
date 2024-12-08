@@ -2,7 +2,7 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
 
 function App(){}
 
-function filter_lijst(_this_) {
+/* function filter_lijst(_this_) {
     let inp_val = $.trim(_this_.val().replace(/\s+/g, '').toUpperCase());
     let selectie = _this_.data().select_class;
     let selec_vals = $("." + selectie).find("option");
@@ -23,6 +23,21 @@ function filter_lijst(_this_) {
         return $(this).data().selected;
         }).show().prop('selected', true);
    
+} */
+
+function filter_lijst (_this_) {
+    let inp_val = $.trim(_this_.val().replace(/\s+/g, '').toUpperCase());
+    let selectie = _this_.data().select_class;
+    let selec_vals = $("." + selectie).find("option");
+
+    // Create a regexp based on the input value
+    let searchRegex = new RegExp(inp_val, 'i'); // 'i' for case-insensitive matching
+
+    // Directly filter, show, and select matching options
+    selec_vals.filter(function () {
+        let optionText = $(this).text().replace(/\u00A0/g, '');
+        return searchRegex.test(optionText); // Match against the regexp
+    }).prop('selected', true);
 }
 
 
@@ -62,7 +77,7 @@ $('input').on('keyup', function (e) {
         }
      else {
         let selectie = $(this).data().select_class;
-        let selec_vals = $("." + selectie).find("option");
+        let selec_vals = $("." + selectie).find("option"); // dit geeft een array terug van options
         selec_vals.map(function(){
             $(this).removeData();
             return this
