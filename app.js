@@ -21,9 +21,14 @@ function filter_lijst(_this_) {
 
     _this_.on('keyup', function(e){
         if (e.key === "Enter") {
-            selec_vals.filter(function(){
-                return $(this).data().selected;
-            }).show().prop('selected', true);
+            if (inp_val === "") {
+                // if the input is empty, remove selection
+                selec_vals.prop('selected', false).hide();
+            } else {
+                selec_vals.filter(function(){
+                    return $(this).data().selected;
+                }).show().prop('selected', true);
+            }
         }
     })
 }
