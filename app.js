@@ -2,7 +2,7 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
 
 function App(){}
 
-/* function filter_lijst(_this_) {
+function filter_lijst(_this_) {
     let inp_val = $.trim(_this_.val().replace(/\s+/g, '').toUpperCase());
     let selectie = _this_.data().select_class;
     let selec_vals = $("." + selectie).find("option");
@@ -23,9 +23,9 @@ function App(){}
         return $(this).data().selected;
         }).show().prop('selected', true);
    
-} */
+}
 
-function filter_lijst (_this_) {
+/* function filter_lijst (_this_) {
     let inp_val = $.trim(_this_.val().replace(/\s+/g, '').toUpperCase());
     let selectie = _this_.data().select_class;
     let selec_vals = $("." + selectie).find("option");
@@ -38,7 +38,7 @@ function filter_lijst (_this_) {
         let optionText = $(this).text().replace(/\u00A0/g, '');
         return searchRegex.test(optionText); // Match against the regexp
     }).prop('selected', true);
-}
+} */
 
 
 
