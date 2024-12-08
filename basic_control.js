@@ -5,7 +5,7 @@ define(function () {
 
     BasicControl.prototype.draw = function(oControlHost) {
         const cont = oControlHost.container;
-        cont.innerHTML = "<h1>even kijken ..mijn emacs werkt in elk geval!!</h1>"
+        cont.innerHTML = "<h1>nou weer terug bij af</h1>"
     };
     return BasicControl;
 });
