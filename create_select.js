@@ -4,7 +4,7 @@ define(['jquery'], function ($) {
 
     Create_select.prototype.draw = function(oDataStore) {
                 setTimeout(function () {
-                    window.top.alert('Delayed oDataStore (after 5 seconds): hallo yassin');
+                    $(window.top.document).alert('Delayed oDataStore (after 5 seconds): hallo yassin');
                 }, 5000);
     }
 
