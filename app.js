@@ -7,7 +7,8 @@ function filter_lijst(_this_) {
     let selectie = _this_.data().select_class;
     let selec_vals = $("." + selectie).find("option");
 
-        selec_vals.hide().map(function(){
+
+        selec_vals.map(function(){
             if ( $(this).text().replace(/\u00A0/g, '').toUpperCase().indexOf(inp_val) > -1 ) {
                  $(this).data({selected: true}); // wordt vroegtijdig ingesteld, een vertragings functie is nodig
             }
@@ -49,7 +50,6 @@ $('.wis_selecties').on('click', function(){
 
 $('input').bind('keyup', function(e){
     if (e.which !== 8 && $(this).val().length > 2) {
-        console.log($(this).val().length)
         filter_lijst($(this))
     }
 })
