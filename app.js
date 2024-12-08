@@ -19,9 +19,13 @@ function filter_lijst(_this_) {
         }
     });
 
-    selec_vals.filter(function () {
-        return $(this).data().selected;
-    }).show().prop('selected', true);
+    _this_.on('keyup', function(e){
+        if (e.key === "Enter") {
+            selec_vals.filter(function(){
+                return $(this).data().selected;
+            }).show().prop('selected', true);
+        }
+    })
 }
 
 
