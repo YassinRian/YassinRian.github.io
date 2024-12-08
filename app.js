@@ -7,17 +7,23 @@ function filter_lijst(_this_) {
     let selectie = _this_.data().select_class;
     let selec_vals = $("." + selectie).find("option");
 
+    // Compile the input value into a regular expression
+    let searchRegex = new RegExp(inp_val, 'i'); // 'i' for case-insensitive matching
 
-        selec_vals.map(function(){
-            if ( $(this).text().replace(/\u00A0/g, '').toUpperCase().indexOf(inp_val) > -1 ) {
-                 $(this).data({selected: true}); // wordt vroegtijdig ingesteld, een vertragings functie is nodig
-            }
-            return this
-        }).filter(function(){
-          return $(this).data().selected
-        }).show().prop('selected', true);
+    selec_vals.each(function () {
+        let optionText = $(this).text().replace(/\u00A0/g, '');
+        if (searchRegex.test(optionText)) {
+            $(this).data({ selected: true });
+        } else {
+            $(this).data({ selected: false });
+        }
+    });
 
-    }
+    selec_vals.filter(function () {
+        return $(this).data().selected;
+    }).show().prop('selected', true);
+}
+
 
 
 App.prototype.initialize = function( oControlHost, fnDoneInitializing)
