@@ -23,7 +23,10 @@ function filter_lijst(_this_) {
         if (e.key === "Enter") {
             if (inp_val === "") {
                 // if the input is empty, remove selection
-                selec_vals.data({ selected: false }).hide().prop('selected', false);
+                selec_vals.map(function(){
+                    $(this).removeData();
+                    return this
+                }).prop('selected', false)
             } else {
                 selec_vals.filter(function(){
                     return $(this).data().selected;
