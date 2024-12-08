@@ -1,13 +1,9 @@
 define(['jquery'], function ($) {
 
-    function Create_select () {};
+    function BasicControl () { };
 
-    Create_select.prototype.initialize = function() {
-                setTimeout(function () {
-                    alert('Delayed oDataStore (after 5 seconds): hallo yassin');
-                }, 5000);
+    BasicControl.prototype.draw = function(oControlHost) {
+        alert("Hallo Yassin!!")
     }
-
-
   
 });
