@@ -48,7 +48,7 @@ $('.wis_selecties').on('click', function(){
 
 
 $('input').bind('keyup', function(e){
-    if (e.which !== 8 || $(this).val().length > 5) {
+    if (e.which !== 8 && $(this).val().length > 2) {
         console.log($(this).val().length)
         filter_lijst($(this))
     }
