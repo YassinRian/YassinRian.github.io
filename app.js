@@ -66,10 +66,8 @@ $('.wis_selecties').on('click', function(){
 })
 
 
-$('input').bind('keyup', function(e){
-    if (e.which !== 8 && $(this).val().length > 2) {
+$('input').on('keyup', function(e){
         filter_lijst($(this))
-    }
 })
 
 				
