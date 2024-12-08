@@ -55,10 +55,6 @@ $('.wis_selecties').on('click', function(){
 })
 
 
-$('input').on('keyup', function(e){
-        filter_lijst($(this))
-})
-
 $('input').on('keyup', function (e) {
     if (e.key === "Enter") { // Only trigger on Enter key
         if ($(this).val().length > 1) {
