@@ -4,8 +4,6 @@ define(function () {
 
     function BasicControl () { };
 
-    BasicControl.prototype.initialize = function() {
-        alert("Hallo Yassin!!")
-    }
+  alert("hallo yassin!!")
   
 });
