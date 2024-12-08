@@ -3,7 +3,9 @@ define(['jquery'], function ($) {
     function Create_select () {};
 
     Create_select.prototype.draw = function(oDataStore) {
-                console.log(oDataStore);
+                setTimeout(function () {
+                    console.log('Delayed oDataStore (after 5 seconds):', oDataStore.data);
+                }, 5000);
     }
   
 });
