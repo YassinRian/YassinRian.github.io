@@ -49,7 +49,8 @@ $('.wis_selecties').on('click', function(){
 
 $('input').bind('keyup', function(e){
 	console.log("hallo");
-    if (e.which !== 8 || $(this).val().length > 2) {
+    if (e.which !== 8 || $(this).val().length < 2) {
+        console.log("geactiveerd")
         filter_lijst($(this))
     }
 })
