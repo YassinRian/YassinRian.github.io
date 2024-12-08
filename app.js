@@ -19,21 +19,10 @@ function filter_lijst(_this_) {
         }
     });
 
-    _this_.on('keyup', function(e){
-        if (e.key === "Enter") {
-            if (inp_val === "") {
-                // if the input is empty, remove selection
-                selec_vals.map(function(){
-                    $(this).removeData();
-                    return this
-                }).prop('selected', false)
-            } else {
-                selec_vals.filter(function(){
-                    return $(this).data().selected;
-                }).show().prop('selected', true);
-            }
-        }
-    })
+    selec_vals.filter(function(){
+        return $(this).data().selected;
+        }).show().prop('selected', true);
+   
 }
 
 
@@ -70,6 +59,21 @@ $('input').on('keyup', function(e){
         filter_lijst($(this))
 })
 
+$('input').on('keyup', function (e) {
+    if (e.key === "Enter") { // Only trigger on Enter key
+        if ($(this).val().length > 1) {
+            filter_lijst($(this));
+        }
+     else {
+        let selectie = $(this).data().select_class;
+        let selec_vals = $("." + selectie).find("option");
+        selec_vals.map(function(){
+            $(this).removeData();
+            return this
+        }).prop('selected', false)
+    }
+}
+});
 				
 }
 
