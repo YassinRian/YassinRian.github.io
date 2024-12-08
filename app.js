@@ -7,10 +7,6 @@ function filter_lijst(_this_) {
     let selectie = _this_.data().select_class;
     let selec_vals = $("." + selectie).find("option");
 
-    if (inp_val.length < 2) {
-        selec_vals.show()
-    } else {
-
         selec_vals.hide().map(function(){
             if ( $(this).text().replace(/\u00A0/g, '').toUpperCase().indexOf(inp_val) > -1 ) {
                  $(this).data({selected: true}); // wordt vroegtijdig ingesteld, een vertragings functie is nodig
@@ -21,7 +17,7 @@ function filter_lijst(_this_) {
         }).show().prop('selected', true);
 
     }
-}
+
 
 App.prototype.initialize = function( oControlHost, fnDoneInitializing)
 {
@@ -35,14 +31,12 @@ App.prototype.initialize = function( oControlHost, fnDoneInitializing)
 
 
 App.prototype.draw = function(oControlHost) {
-	
 
-
-	
-// input velden referen naar een selectie box
+// input velden referen naar een selectie box, hier wordt de link gelegd tussen input en selectie_box
 $('#box1').data({ select_class: 'select_1' })
 $('#box2').data({ select_class: 'select_2' })
 
+// events
 $('.wis_selecties').on('click', function(){
     // button heeft referentie naar een selectie box
     let class_ = $(this).attr('data-selectie');
@@ -53,10 +47,9 @@ $('.wis_selecties').on('click', function(){
 })
 
 
-
 $('input').bind('keyup', function(e){
 	console.log("hallo");
-    if (e.which !== 8 || $(this).val().length < 2) {
+    if (e.which !== 8 || $(this).val().length > 2) {
         filter_lijst($(this))
     }
 })
