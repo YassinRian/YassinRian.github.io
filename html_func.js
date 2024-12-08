@@ -2,6 +2,13 @@ define(function () {
 	return {
 		html: () => `
 
+<style>
+.select_2 {
+width: 200px;
+height: 200px;
+}
+</style>
+
 <div class="cnt">
 <div class="prmt_container">
 <input id="box2" name="box2" type="text">
