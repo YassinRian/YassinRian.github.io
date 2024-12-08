@@ -1,8 +1,10 @@
-define(['jquery'], function ($) {
+define(function () {
+
+    "use strict";
 
     function BasicControl () { };
 
-    BasicControl.prototype.draw = function(oControlHost) {
+    BasicControl.prototype.initialize = function() {
         alert("Hallo Yassin!!")
     }
   
