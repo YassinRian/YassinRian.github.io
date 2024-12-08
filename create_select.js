@@ -1,8 +1,8 @@
 define(['jquery'], function ($) {
 
-    function create_select () {};
+    function Create_select () {};
 
-    create_select.prototype.draw = function(oDataStore) {
+    Create_select.prototype.draw = function(oDataStore) {
                 console.log(oDataStore);
     }
   
