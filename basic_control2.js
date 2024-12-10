@@ -16,7 +16,8 @@ define(function() {
 
 BasicControl.prototype.initialize = function(oControlHost) {
     
-console.log(oControlHost.getParameter("p_artikel_beschrijving"));
+console.log(oControlHost.getParameter("p_artikel_beschrijving"));\
+console.log("hallllllooooooooo")
 }
 
 });
