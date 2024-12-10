@@ -7,7 +7,7 @@ define(function () {
         let { parameter } = oControlHost.configuration;
         console.log(oControlHost.configuration)
         console.log(oControlHost)
-        console.log(oControlHost.prototype.getParameter)
+        console.log(oControlHost.prototype.getParameter())
         //console.log(oControlHost.xmlElement)
         
     };
