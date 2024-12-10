@@ -19,7 +19,7 @@ BasicControl.prototype.initialize = function(oControlHost) {
     return this;
 }
 
-let instantiated_obj = new BasicControl().oControlHost;
-console.log(instantiated_obj.getParameter("p_artikel_beschrijving"));
+let instantiated_obj = new BasicControl();
+console.log(instantiated_obj.oControlHost.getParameter("p_artikel_beschrijving"));
 
 });
