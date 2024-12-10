@@ -4,7 +4,7 @@ define(function () {
     function BasicControl() { };
 
     BasicControl.prototype.initialize = function(oControlHost) {
-        let { parameter } = oControlHost.configuration;
+        let { parameter } = oControlHost.configuration; // parameter vanuit meegegeven Json in de configuratie
         console.log(oControlHost.configuration)
         console.log(oControlHost)
         // hier heb ik een instance van _b51 met een eigen object waarden die ik meegeef :)
