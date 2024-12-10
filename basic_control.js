@@ -7,6 +7,7 @@ define(function () {
         let { parameter } = oControlHost.configuration;
         console.log({parameter})
         console.log(oControlHost)
+        console.log(oControlHost.xmlElement)
         
     };
     return BasicControl;
