@@ -16,8 +16,6 @@ define(function() {
 
 BasicControl.prototype.initialize = function(oControlHost) {
     
-let instantiated_obj = new BasicControl();
-console.log(instantiated_obj);
 console.log(oControlHost.getParameter("p_artikel_beschrijving"));
 }
 
