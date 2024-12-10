@@ -19,6 +19,6 @@ BasicControl.prototype.initialize = function(oControlHost) {
 
 let controlHost = new _b51(someObject);
 let instantiated_obj = new BasicControl().initialize(controlHost);
-console.log(instantiated_obj.oControlHost.getParameter("p_artikel_beschrijving"));
+console.log(instantiated_obj.getParameter("p_artikel_beschrijving"));
 
 });
