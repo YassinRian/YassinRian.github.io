@@ -3,6 +3,11 @@ define(function() {
 
     function BasicControl() {}; // constructor obj
 
+BasicControl.prototype.initialize = function(oControlHost) {
+    this.oControlHost = oControlHost;
+    return this;
+}
+
     let someObject = {
         _05d: function() {
             return "Some value";
@@ -12,11 +17,8 @@ define(function() {
         }
     }
 
-let basicControl = new BasicControl();
 let controlHost = new _b51(someObject);
-let parameter = basicControl.prototype.initialize(controlHost).getParameter("p_artikel_omschrijving");
-let uniqueId = basicControl.prototype.initialize(controlHost).generateUniqueID();
-console.log(parameter);
-console.log(uniqueId);
+let instantiated_obj = new BasicControl().initialize(controlHost);
+console.log(instantiated_obj.oControlHost.getParameter("p_artikel_beschrijving"));
 
 });
