@@ -3,9 +3,10 @@ define(function () {
 
     function BasicControl() { };
 
-    BasicControl.prototype.initialize = function(oPage) {
-        console.log("hallo Yassin")
-        console.log(oPage.application)
+    BasicControl.prototype.initialize = function(oControlHost) {
+        let { parameter } = oControlHost.configuration;
+        console.log({parameter})
+        console.log(oControlHost)
         
     };
     return BasicControl;
