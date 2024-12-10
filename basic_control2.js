@@ -20,6 +20,6 @@ BasicControl.prototype.initialize = function(oControlHost) {
 }
 
 let instantiated_obj = new BasicControl();
-console.log(instantiated_obj.getParameter("p_artikel_beschrijving"));
+//console.log(instantiated_obj.getParameter("p_artikel_beschrijving"));
 
 });
