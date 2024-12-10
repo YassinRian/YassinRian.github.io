@@ -15,11 +15,10 @@ define(function() {
 // let controlHost = new _b51(someObject);
 
 BasicControl.prototype.initialize = function(oControlHost) {
-    this.oControlHost = oControlHost;
-    return this;
-}
-
+    
 let instantiated_obj = new BasicControl();
-//console.log(instantiated_obj.getParameter("p_artikel_beschrijving"));
+console.log(instantiated_obj);
+console.log(oControlHost.getParameter("p_artikel_beschrijving"));
+}
 
 });
