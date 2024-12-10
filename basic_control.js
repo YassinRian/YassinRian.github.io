@@ -6,7 +6,7 @@ define(function () {
     BasicControl.prototype.initialize = function(oControlHost) {
         let { parameter } = oControlHost.configuration; // parameter vanuit meegegeven Json in de configuratie
         console.log(oControlHost.configuration)
-        console.log(oControlHost)
+        console.log(oControlHost.prototype.getParameter("p_artikel_beschrijving"))
         // hier heb ik een instance van _b51 met een eigen object waarden die ik meegeef :)
         // _b51 is oControlHost (eigenlijk de instance van _b51)
         let someObject = {
