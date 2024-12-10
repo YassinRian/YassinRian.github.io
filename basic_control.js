@@ -3,7 +3,7 @@ define(function () {
 
     function BasicControl() { };
 
-    BasicControl.prototype.initialize = function() {
+    BasicControl.prototype.initialize = function(oPage) {
         console.log("hallo Yassin")
         console.log(oPage.application)
         
