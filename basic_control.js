@@ -5,9 +5,9 @@ define(function () {
 
     BasicControl.prototype.initialize = function(oControlHost) {
         let { parameter } = oControlHost.configuration;
-        console.log({parameter})
+        console.log(oControlHost.configuration)
         console.log(oControlHost)
-        console.log(oControlHost.xmlElement.textContent)
+        //console.log(oControlHost.xmlElement)
         
     };
     return BasicControl;
