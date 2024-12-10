@@ -3,9 +3,10 @@ define(function () {
 
     function BasicControl() { };
 
-    BasicControl.prototype.draw = function(oControlHost) {
-        const cont = oControlHost.container;
-        cont.innerHTML = "<h1>Yassin en Martin!!!</h1>"
+    BasicControl.prototype.initialize = function() {
+        console.log("hallo Yassin")
+        console.log(oPage.application)
+        
     };
     return BasicControl;
 });
