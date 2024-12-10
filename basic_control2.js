@@ -1,6 +1,8 @@
 define(function() {
     "use strict"
 
+    function BasicControl() {}; // constructor obj
+
     let someObject = {
         _05d: function() {
             return "Some value";
@@ -10,7 +12,11 @@ define(function() {
         }
     }
 
-    let obj_yas = new _b51(someObject);
-    let uniqueId = obj_yas.generateUniqueID();
-    console.log(uniqueId);
+let basicControl = new BasicControl();
+let controlHost = new _b51(someObject);
+let parameter = basicControl.initialize(controlHost).getParameter("p_artikel_omschrijving");
+let uniqueId = basicControl.initialize(controlHost).generateUniqueID();
+console.log(parameter);
+console.log(uniqueId);
+
 });
