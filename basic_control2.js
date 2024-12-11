@@ -25,9 +25,9 @@ define(['jquery'], function ($) {
     //     $(".b_yassin").on('click', function(){
     //         oControlHost.page.getControlByName("List1").toggleVisibility();
     //     })
-    BasicControl.prototype.draw = function (oPage) {
-       console.log(oPage);
-    }
+    BasicControl.prototype.draw = function(oPage){
+       console.log("hallo");
+    };
 
     return BasicControl;
 })
