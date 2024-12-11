@@ -31,7 +31,7 @@ define(['jquery'], function ($) {
     };
 
     BasicControl.prototype.setData = function(oDataStore) {
-        console.log(oDataStore)
+        console.log(oDataStore.rowCount)
     }
 
     return BasicControl;
