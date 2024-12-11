@@ -28,9 +28,6 @@ define(['jquery'], function ($) {
     BasicControl.prototype.draw = function (oPage) {
        console.log(oPage);
     }
-  
-
-    }
 
     return BasicControl;
 })
