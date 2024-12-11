@@ -23,6 +23,7 @@ define(['jquery'], function ($) {
         console.log(obj_yassin.rowCount);
         console.log(obj_yassin.columnNames);
         console.log(obj_yassin.json);
+        console.log(this.DataStore.rowCount);
         
 
     }
@@ -42,7 +43,6 @@ define(['jquery'], function ($) {
     // };
 
     BasicControl.prototype.setData = function(oDataStore) {
-        console.log(oDataStore.json)
         this.DataStore = oDataStore;
     }
 
