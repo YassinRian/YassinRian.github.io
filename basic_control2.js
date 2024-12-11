@@ -26,7 +26,7 @@ define(['jquery'], function ($) {
     //         oControlHost.page.getControlByName("List1").toggleVisibility();
     //     })
     BasicControl.prototype.draw = function(oPage){
-       console.log(oPage);
+       console.log(oPage.page);
     };
 
     return BasicControl;
