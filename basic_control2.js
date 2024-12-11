@@ -27,8 +27,12 @@ define(['jquery'], function ($) {
     //     })
     BasicControl.prototype.draw = function(oPage, oDataStore){
        //console.log(oPage.page.application.document.reportXML);
-       console.log(oDataStore);
+       
     };
+
+    BasicControl.prototype.setData = function(oDataStore) {
+        console.log(oDataStore)
+    }
 
     return BasicControl;
 })
