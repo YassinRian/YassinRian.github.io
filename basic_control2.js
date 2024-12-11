@@ -20,7 +20,7 @@ define(['jquery'], function ($) {
         console.log(obj_yassin.name);
         console.log(obj_yassin.rowCount);
         console.log(obj_yassin.columnNames);
-        console.log(this.DataStore.columnNames);
+        console.log(obj_yassin.json);
         
 
     }
