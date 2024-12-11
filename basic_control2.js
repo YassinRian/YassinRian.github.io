@@ -1,4 +1,4 @@
-define(function () {
+define(['jquery'], function ($) {
     "use strict"
 
     function BasicControl() { };
@@ -18,7 +18,12 @@ define(function () {
         // console.log(obj_yassin.name);
         // console.log(obj_yassin.rowCount);
         // console.log(obj_yassin.columnNames);
-        console.log(oControlHost.page.getControlByName("List1"));
+        //console.log(oControlHost.page.getControlByName("List1"));
+        oControlHost.container.innerHTML = "<button class='b_yassin'>VERBERG LIJST1</button>"
+        $(".b_yassin").on('click', function(){
+            oControlHost.page.getControlByName("List1").toggleVisibility();
+        })
+
     }
 
     return BasicControl;
