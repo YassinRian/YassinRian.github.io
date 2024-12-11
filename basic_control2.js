@@ -18,7 +18,7 @@ define(function () {
         // console.log(obj_yassin.name);
         // console.log(obj_yassin.rowCount);
         // console.log(obj_yassin.columnNames);
-        oControlHost.page.getControlByName("List1").setBackgroundColor("red");
+        console.log(oControlHost.page.getControlByName("List1"));
     }
 
     return BasicControl;
