@@ -1,23 +1,11 @@
-define(function() {
+define(function () {
     "use strict"
 
-    function BasicControl() {}; // constructor obj
+    function BasicControl() { };
 
-//     let someObject = {
-//         _05d: function() {
-//             return "Some value";
-//         },
-//         _i1m: function() {
-//             return "123";
-//         }
-//     }
+    BasicControl.prototype.draw = function(oControlHost){
+        console.log(oControlHost.getParameter("p_artikel_omschrijving"));
+    }
 
-// let controlHost = new _b51(someObject);
-
-BasicControl.prototype.initialize = function(oControlHost) {
-    
-console.log(oControlHost.getParameter("p_artikel_beschrijving"));
-console.log("hallllllooooooooo")
-}
-
-});
+    return BasicControl;
+})
