@@ -4,7 +4,7 @@ define(function () {
     function BasicControl() { };
 
     BasicControl.prototype.draw = function(oControlHost){
-        console.log(oControlHost.getParameter("p_artikel_omschrijving"));
+        console.log(oControlHost.getParameter("p_artikel_beschrijving"));
     }
 
     return BasicControl;
