@@ -22,8 +22,8 @@ define(['jquery'], function ($) {
         oControlHost.container.innerHTML = "<button class='b_yassin'>VERBERG LIJST1</button>"
         console.log(oControlHost.page.getControlByName("List1"));
         $(".b_yassin").on('click', function(){
-            //oControlHost.page.getControlByName("List1").setVisibility(true);
-            //oControlHost.page.getControlByName("List1").toggleVisibility();
+            oControlHost.page.getControlByName("List1").setVisible(true);
+            oControlHost.page.getControlByName("List1").toggleVisibility();
         })
 
     }
