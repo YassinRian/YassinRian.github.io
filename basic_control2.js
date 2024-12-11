@@ -15,9 +15,9 @@ define(function () {
             rows: [0, 1, 2]
         };
         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
-        console.log(obj.name);
-        console.log(obj.rowCount);
-        console.log(obj.columnNames);
+        console.log(obj_yassin.name);
+        console.log(obj_yassin.rowCount);
+        console.log(obj_yassin.columnNames);
     }
 
     return BasicControl;
