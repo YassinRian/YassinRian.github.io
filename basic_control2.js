@@ -14,12 +14,13 @@ define(['jquery'], function ($) {
         //     ],
         //     rows: [0, 1, 2]
         // };
-        let _psn = this.DataStore._x3c._9tg[0];
-        
+        let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
+
         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
         console.log(obj_yassin.name);
         console.log(obj_yassin.rowCount);
         console.log(obj_yassin.columnNames);
+        console.log(this.DataStore.columnNames);
         
 
     }
