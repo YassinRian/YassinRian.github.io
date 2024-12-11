@@ -25,13 +25,17 @@ define(['jquery'], function ($) {
     //     $(".b_yassin").on('click', function(){
     //         oControlHost.page.getControlByName("List1").toggleVisibility();
     //     })
-    BasicControl.prototype.draw = function(oPage, oDataStore){
-       //console.log(oPage.page.application.document.reportXML);
+    // BasicControl.prototype.draw = function(oPage, oDataStore){
+    //    //console.log(oPage.page.application.document.reportXML);
        
-    };
+    // };
 
-    BasicControl.prototype.setData = function(oDataStore) {
-        console.log(oDataStore._x3c)
+    // BasicControl.prototype.setData = function(oDataStore) {
+    //     console.log(oDataStore._x3c)
+    // }
+
+    BasicControl.prototype.draw = function(oControlHost) {
+        console.log(oControlHost);
     }
 
     return BasicControl;
