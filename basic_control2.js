@@ -30,6 +30,8 @@ define(['jquery'], function ($) {
         
         let data = obj_yassin.json.columns;
 
+        return data;
+
     }
         
         //console.log(oControlHost.page.getControlByName("List1"));
