@@ -15,6 +15,9 @@ define(['jquery'], function ($) {
         //     ],
         //     rows: [0, 1, 2]
         // };
+
+        //let data = [{name: 'Catgorie_key', dataType: 'string', values: [1, 2, 3]},{name: 'categorie', dataType: 'string', values: ['cat 1', 'cat 2', 'cat 3']}]
+      
         
         let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
         
