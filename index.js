@@ -1,7 +1,7 @@
 define( () => {
     "use strict";
 
-    class BasicControl
+    class App
     {
 
         initialize( oControlHost, fnDoneInitializing )
@@ -11,18 +11,18 @@ define( () => {
          
         dependenciesLoaded( fnDoneInitializing, oModule )
         {
-         this.data = oModule;
+         this.data = oModule.getData();
         fnDoneInitializing();
         }
 
         draw(oControlHost)
         {
             oControlHost.container.innerHTML = "Hello World!";
-            console.log(this.data.getData());
+            console.log(this.data);
         }
     }
 
-    return BasicControl;
+    return App;
 
 })
  
