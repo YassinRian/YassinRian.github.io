@@ -21,5 +21,9 @@ define(['jquery'], function ($) {
         console.log(this.DataStore, "setData");
     }
 
+    BasicControl.prototype.getData = function() {
+        console.log(this._psn);
+    }
+
     return BasicControl;
 })
