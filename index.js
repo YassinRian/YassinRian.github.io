@@ -12,14 +12,15 @@ define( () => {
         dependenciesLoaded( fnDoneInitializing, oModule )
         {
          let data_module = new oModule();
-         this.data = data_module.getData;
+         this.data = data_module.getData();
+         console.log(this.data)
         fnDoneInitializing();
         }
 
         draw(oControlHost)
         {
             oControlHost.container.innerHTML = "Hello World!";
-            console.log(this.data);
+            //console.log(this.data);
         }
     }
 
