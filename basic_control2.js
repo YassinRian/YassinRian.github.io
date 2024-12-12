@@ -8,11 +8,11 @@ define(['jquery'], function ($) {
         let _1wh = 'some_value_for_s1h';
         let _cvn = 'some_name';
         let _97n = 123
-        //let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
+        let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
        // let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
         
         //return obj_yassin.json.columns
-        console.log(this.DataStore, "draw")
+        console.log(_psn, "draw")
 
     }
 
