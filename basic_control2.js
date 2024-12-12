@@ -12,7 +12,7 @@ define(['jquery'], function ($) {
         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
         
         this.data = obj_yassin.json.columns
-        //console.log(_psn, "draw")
+        console.log(_psn, "draw")
 
     }
 
