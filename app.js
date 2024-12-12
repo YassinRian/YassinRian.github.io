@@ -32,7 +32,7 @@ console.log(_basicControl);
 fnDoneInitializing();
 }
 
-App.prototype.load = function(oControlHost) {
+App.prototype.draw = function(oControlHost) {
 
     let elm = oControlHost.container;
 	//$(elm).append(html_func_.html(basicControl.data)); // voeg html aan component
