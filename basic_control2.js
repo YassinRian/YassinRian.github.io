@@ -1,7 +1,7 @@
 define(['jquery'], function ($) {
     "use strict"
 
-    function BasicControl() { };
+    function BasicControl() { return this.data };
 
     BasicControl.prototype.draw = function(oControlHost){
         
@@ -30,7 +30,6 @@ define(['jquery'], function ($) {
         
         let data = obj_yassin.json.columns;
 
-        return data;
 
     }
         
@@ -54,5 +53,5 @@ define(['jquery'], function ($) {
 
  
 
-    return BasicControl;
+    return BasicControl();
 })
