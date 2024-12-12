@@ -22,7 +22,7 @@ define(['jquery'], function ($) {
     }
 
     BasicControl.prototype.getData = function() {
-        console.log(this._psn);
+        return this._psn
     }
 
     return BasicControl;
