@@ -23,11 +23,12 @@ define(['jquery'], function ($) {
         
         
         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
-        console.log(obj_yassin.name);
-        console.log(obj_yassin.rowCount);
-        console.log(obj_yassin.columnNames);
-        console.log(obj_yassin.json.columns); // dit werkt ook wow:)
+        //console.log(obj_yassin.name);
+        //console.log(obj_yassin.rowCount);
+        //console.log(obj_yassin.columnNames);
+        //console.log(obj_yassin.json.columns); // dit werkt ook wow:)
         
+        let data = obj_yassin.json.columns;
 
     }
         

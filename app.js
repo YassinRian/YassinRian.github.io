@@ -1,4 +1,4 @@
-define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html_func_){
+define(['jquery', 'https://yassinrian.github.io/html_func.js', 'https://yassinrian.github.io/basic_control2.js'], function($, html_func_, basicControl){
 
 function App(){}
 
@@ -28,7 +28,7 @@ function filter_lijst(_this_) {
 App.prototype.draw = function(oControlHost) {
 
     let elm = oControlHost.container;
-	$(elm).append(html_func_.html(this.DataStore.json.columns)); // voeg html aan component
+	$(elm).append(html_func_.html(basicControl.data)); // voeg html aan component
 
 // input velden referen naar een selectie box, hier wordt de link gelegd tussen input en selectie_box
 $('#box1').data({ select_class: 'select_1' })
