@@ -9,10 +9,10 @@ define(['jquery'], function ($) {
         let _cvn = 'some_name';
         let _97n = 123
         let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
-       // let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
+        let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
         
-        //return obj_yassin.json.columns
-        console.log(_psn, "draw")
+        this.data = obj_yassin.json.columns
+        //console.log(_psn, "draw")
 
     }
 
@@ -22,7 +22,7 @@ define(['jquery'], function ($) {
     }
 
     BasicControl.prototype.getData = function() {
-        return this._psn
+        return this.data
     }
 
     return BasicControl;
