@@ -23,7 +23,7 @@ define(['jquery'], function ($) {
         console.log(obj_yassin.name);
         console.log(obj_yassin.rowCount);
         console.log(obj_yassin.columnNames);
-        console.log(obj_yassin.json); // dit werkt ook wow:)
+        console.log(obj_yassin.json.columns); // dit werkt ook wow:)
         
 
     }
