@@ -13,15 +13,12 @@ define(['jquery'], function ($) {
         
         this.data = obj_yassin.json.columns
         //console.log(this.getData()) ;; dit werkt
+        return this.data
 
     }
 
     BasicControl.prototype.setData = function(oDataStore) {
         this.DataStore = oDataStore;
-    }
-
-    BasicControl.prototype.getData = function() {
-        return this.data
     }
 
     return BasicControl;
