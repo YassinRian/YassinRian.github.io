@@ -3,7 +3,7 @@ define(['jquery'], function ($) {
 
     function BasicControl() {};
 
-    BasicControl.prototype.getData = function(){
+    BasicControl.prototype.draw = function(){
         
         let _1wh = 'some_value_for_s1h';
         let _cvn = 'some_name';
@@ -12,7 +12,7 @@ define(['jquery'], function ($) {
         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
         
         return obj_yassin.json.columns
-        
+
     }
 
     BasicControl.prototype.setData = function(oDataStore) {
