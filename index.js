@@ -12,7 +12,8 @@ define( () => {
         dependenciesLoaded( fnDoneInitializing, oModule )
         {
          console.log(oModule)
-         console.log(oModule.getData());
+         let bla = new oModule();
+         console.log(bla.getData());
          fnDoneInitializing();
         }
          
