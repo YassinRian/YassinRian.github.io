@@ -13,7 +13,7 @@ define( () => {
         {
          console.log(oModule)
          let bla = new oModule();
-         console.log(bla.getData());
+         console.log(bla);
          fnDoneInitializing();
         }
          
