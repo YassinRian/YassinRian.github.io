@@ -28,7 +28,7 @@ function filter_lijst(_this_) {
 App.prototype.initialize = function(oControlHost, fnDoneInitializing) {
 let _basicControl = new basicControl();
 let data = _basicControl.getData();
-console.log(data);
+console.log(_basicControl);
 fnDoneInitializing();
 }
 
