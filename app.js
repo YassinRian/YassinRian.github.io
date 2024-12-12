@@ -36,7 +36,7 @@ App.prototype.draw = function(oControlHost) {
 
     let elm = oControlHost.container;
 	//$(elm).append(html_func_.html(basicControl.data)); // voeg html aan component
-   // console.log(this.data)
+   console.log(this.data, "vanuit draw App.js")
 
 // input velden referen naar een selectie box, hier wordt de link gelegd tussen input en selectie_box
 $('#box1').data({ select_class: 'select_1' })
