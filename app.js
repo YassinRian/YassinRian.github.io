@@ -32,8 +32,7 @@ App.prototype.setData = function(oDataStore) {
     }
 
 
-App.prototype.initialize = function( oControlHost, fnDoneInitializing)
-{
+App.prototype.draw = function(oControlHost) {
 
     let _1wh = 'some_value_for_s1h'; //some dummy value -- wat deze waarden dienen te zijn weet ik niet
     let _cvn = 'some_name'; // dummy value
@@ -45,13 +44,6 @@ App.prototype.initialize = function( oControlHost, fnDoneInitializing)
 
     let elm = oControlHost.container;
 	$(elm).append(html_func_.html(obj_yassin.json.columns)); // voeg html aan component
-	fnDoneInitializing();
-	
-};
-
-
-
-App.prototype.draw = function(oControlHost) {
 
 // input velden referen naar een selectie box, hier wordt de link gelegd tussen input en selectie_box
 $('#box1').data({ select_class: 'select_1' })
