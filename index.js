@@ -12,7 +12,7 @@ define( () => {
         dependenciesLoaded( fnDoneInitializing, oModule )
         {
          let data_module = new oModule();
-         this.data = data_module.getData();
+         this.data = data_module.getData;
         fnDoneInitializing();
         }
 
