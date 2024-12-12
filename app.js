@@ -25,11 +25,17 @@ function filter_lijst(_this_) {
    
 }
 
+App.prototype.initialize = function(oControlHost, fnDoneInitializing) {
+let _basicControl = new basicControl();
+let data = _basicControl.getData();
+fnDoneInitializing();
+}
+
 App.prototype.draw = function(oControlHost) {
 
     let elm = oControlHost.container;
 	//$(elm).append(html_func_.html(basicControl.data)); // voeg html aan component
-    console.log(basicControl())
+    console.log(this.data)
 
 // input velden referen naar een selectie box, hier wordt de link gelegd tussen input en selectie_box
 $('#box1').data({ select_class: 'select_1' })
