@@ -4,27 +4,22 @@ define( () => {
     class App
     {
 
-        // initialize( oControlHost, fnDoneInitializing )
-        // {
-        // require( ["https://yassinrian.github.io/basic_control2.js"], this.dependenciesLoaded.bind( this, fnDoneInitializing ) )
-        // }
-         
-        initialize()
+        initialize( oControlHost, fnDoneInitializing )
         {
-        return new Promise( fnResolve =>
-        {
-            require( ["https://yassinrian.github.io/basic_control2.js"], MyCode =>
-            {
-                this.data = new MyCode();
-                fnResolve();
-            } );
-        } );
+        require( ["https://yassinrian.github.io/basic_control2.js"], this.dependenciesLoaded.bind( this, fnDoneInitializing ) )
         }
+
+        dependenciesLoaded( fnDoneInitializing, oModule )
+        {
+         console.log(oModule)
+         fnDoneInitializing();
+        }
+         
 
         draw(oControlHost)
         {
             oControlHost.container.innerHTML = "Hello World!";
-            console.log(this.data);
+            //console.log(this.data);
         }
     }
 
