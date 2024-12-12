@@ -53,5 +53,5 @@ define(['jquery'], function ($) {
 
  
 
-    return BasicControl();
+    return BasicControl;
 })
