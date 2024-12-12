@@ -12,6 +12,7 @@ define( () => {
         dependenciesLoaded( fnDoneInitializing, oModule )
         {
          console.log(oModule)
+         console.log(oModule.getData());
          fnDoneInitializing();
         }
          
