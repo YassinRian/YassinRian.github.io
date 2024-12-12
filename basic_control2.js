@@ -8,15 +8,16 @@ define(['jquery'], function ($) {
         let _1wh = 'some_value_for_s1h';
         let _cvn = 'some_name';
         let _97n = 123
-        let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
-        let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
+        //let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
+       // let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
         
-        return obj_yassin.json.columns
+        //return obj_yassin.json.columns
 
     }
 
     BasicControl.prototype.setData = function(oDataStore) {
         this.DataStore = oDataStore;
+        console.log(this.DataStore);
     }
 
     return BasicControl;
