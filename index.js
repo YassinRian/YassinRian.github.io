@@ -15,7 +15,7 @@ define( () => {
         {
             require( ["https://yassinrian.github.io/basic_control2.js"], MyCode =>
             {
-                this.data = MyCode;
+                this.data = new MyCode();
                 fnResolve();
             } );
         } );
