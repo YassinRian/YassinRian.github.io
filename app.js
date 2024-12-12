@@ -25,13 +25,6 @@ function filter_lijst(_this_) {
    
 }
 
-
-
-App.prototype.setData = function(oDataStore) {
-        this.DataStore = oDataStore;
-    }
-
-
 App.prototype.draw = function(oControlHost) {
 
     let _1wh = 'some_value_for_s1h'; //some dummy value -- wat deze waarden dienen te zijn weet ik niet
@@ -75,8 +68,13 @@ $('input').on('keyup', function (e) {
     }
 }
 });
-				
+
 }
+
+App.prototype.setData = function(oDataStore) {
+    this.DataStore = oDataStore;
+}
+
 
 
 return App;
