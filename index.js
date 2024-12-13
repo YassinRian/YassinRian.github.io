@@ -8,7 +8,7 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
             this.filter_lijst = this.filter_lijst.bind(this);
         }
 
-        filter_lijst( _this_ ) 
+        filter_lijst = ( _this_ ) => 
         {
 
             let inp_val = $.trim(_this_.val().replace(/\s+/g, '').toUpperCase());
