@@ -29,19 +29,21 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
         }
 
        setData(oDataStore) {
-         this.DataStore = oDataStore;
+         let DataStore = oDataStore;
+         let _1wh = 'some_value_for_s1h';
+         let _cvn = 'some_name';
+         let _97n = 123
+         let _psn = DataStore._x3c._9tg[0]; // dit werkt !! wow:)
+         
+         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
+         this.data = obj_yassin.json.columns
+
        }
 
 
         initialize( oControlHost, fnDoneInitializing )
         {
-            let _1wh = 'some_value_for_s1h';
-            let _cvn = 'some_name';
-            let _97n = 123
-            let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
-            
-            let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
-            this.data = obj_yassin.json.columns
+
         }
          
 
