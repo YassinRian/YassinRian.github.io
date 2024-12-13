@@ -29,15 +29,7 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
         }
 
        setData(oDataStore) {
-         let DataStore = oDataStore;
-         let _1wh = 'some_value_for_s1h';
-         let _cvn = 'some_name';
-         let _97n = 123
-         let _psn = DataStore._x3c._9tg[0]; // dit werkt !! wow:)
-         
-         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
-         this.data = obj_yassin.json.columns
-
+         this.DataStore = oDataStore;
        }
 
 
@@ -49,8 +41,17 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
 
         draw(oControlHost)
         {
+
+            let _1wh = 'some_value_for_s1h';
+            let _cvn = 'some_name';
+            let _97n = 123
+            let _psn = DataStore._x3c._9tg[0]; // dit werkt !! wow:)
+            
+            let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
+            //this.data = obj_yassin.json.columns
+
             let elm = oControlHost.container;
-            $(elm).append(html_func_.html(this.data));
+            $(elm).append(html_func_.html(obj_yassin));
 
             // input velden referen naar een selectie box, hier wordt de link gelegd tussen input en selectie_box
             $('#box1').data({ select_class: 'select_1' });
