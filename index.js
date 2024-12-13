@@ -43,7 +43,7 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
         }
          
 
-        draw(oControlHost)
+        draw(oControlHost) // deze plaats alles globaal
         {
  
             let _1wh = 'some_value_for_s1h';
@@ -73,8 +73,8 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
            $('input').on('keyup', function(e) {
                if (e.key === "Enter") {  // Only trigger on Enter key
                    if ($(this).val().length > 1) {
-                       var hallo = new App();
-                       hallo.filter_lijst($(this));  // Call the filter_lijst function to filter the options
+                       var ins_app = new App(); // nieuw instantie om filter_lijst aan te roepen
+                       ins_app.filter_lijst($(this));  // Call the filter_lijst function to filter the options
                    } else {
                        let selectie = $(this).data().select_class;
                        let selec_vals = $("." + selectie).find("option");  // Get options
