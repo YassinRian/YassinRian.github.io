@@ -51,7 +51,8 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
             //this.data = obj_yassin.json.columns
 
             let elm = oControlHost.container;
-            $(elm).append(html_func_.html(obj_yassin));
+           // $(elm).append(html_func_.html(obj_yassin));
+           console.log(obj_yassin);
 
             // input velden referen naar een selectie box, hier wordt de link gelegd tussen input en selectie_box
             $('#box1').data({ select_class: 'select_1' });
