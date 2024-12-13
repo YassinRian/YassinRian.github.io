@@ -35,7 +35,7 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
 
         initialize( oControlHost, fnDoneInitializing )
         {
-
+            fnDoneInitializing();
         }
          
 
