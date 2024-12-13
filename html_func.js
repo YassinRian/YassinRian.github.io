@@ -2,8 +2,8 @@ define(function () {
 	return {
 		html: (data) => {
       // Find the datasets for keys and categories
-      const keyData = data.find(d => d.name === 'Catgorie_key');
-      const categoryData = data.find(d => d.name === 'categorie');
+      const keyData = data.find(d => d.name === 'CLUSTER_KEY');
+      const categoryData = data.find(d => d.name === 'Cluster naam');
       
       // Generate options dynamically
       const options = keyData && categoryData
