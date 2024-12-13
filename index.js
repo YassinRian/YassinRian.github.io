@@ -4,6 +4,9 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
 
     class App
     {
+        constructor() {
+            this.filter_lijst = this.filter_lijst.bind(this);
+        }
 
         filter_lijst( _this_ ) 
         {
