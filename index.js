@@ -69,7 +69,7 @@ define(['jquery', 'https://yassinrian.github.io/html_func.js'], function($, html
             $('input').on('keyup', function(e) {
                 if (e.key === "Enter") {  // Only trigger on Enter key
                     if ($(this).val().length > 1) {
-                        filter_lijst($(this));  // Call the filter_lijst function to filter the options
+                        this.filter_lijst($(this));  // Call the filter_lijst function to filter the options
                     } else {
                         let selectie = $(this).data().select_class;
                         let selec_vals = $("." + selectie).find("option");  // Get options
