@@ -4,9 +4,9 @@ define(['jquery', 'https://yassinrian.github.io/control_data2.js'], function($, 
 
     App.prototype.draw = function(oControlHost) {
         const elm = oControlHost.container;
-        $(elm).append('<input>Load Control</input>');
+        $(elm).append('<button id="button_yassin">Load Control</button>');
         
-        $('input').on('click', function() {
+        $('#button_yassin').on('click', function() {
             console.log("input click werkt !!");
             console.log(data.getData());           
         })
