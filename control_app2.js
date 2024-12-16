@@ -9,15 +9,19 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
         fnDoneInitializing();
     }
 
-
     App.prototype.draw = function(oControlHost) {
         const elm = oControlHost.container;
         $(elm).append('<button id="button_yassin">Hallo Yassin</button>');
        //console.log(this.data);
        $("#button_yassin").on('click', function(){
-        this.load();
-        console.log(this.data);
+        let app_inst = new App();
+        console.log(app_inst.getData());
        })
     }
+
+    App.prototype.getData = function() {
+        return this.data;
+    }
+    
     return App;
 }); // einde define
