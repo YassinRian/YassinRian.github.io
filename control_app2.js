@@ -7,7 +7,8 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
         let data_inst = new data_();
         let data = await data_inst.getData();
         //return this.data
-        return data
+        console.log(data)
+        //return data
     }
 
     App.prototype.draw = function(oControlHost) {
@@ -16,7 +17,7 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
        //console.log(this.data);
        $("#button_yassin").on('click', function(){
         let data2 = new App();
-        console.log(data2.hallo());
+        //console.log(data2.hallo());
        })
     }
 
