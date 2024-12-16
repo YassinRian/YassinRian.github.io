@@ -11,7 +11,7 @@ define(['jquery'], function ($) {
         let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
         
         let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
-        console.log(obj_yassin.json.columns) //dit werkt
+        this.data_control = obj_yassin.json.columns //dit werkt
   
     }
 
@@ -20,7 +20,7 @@ define(['jquery'], function ($) {
     }
 
     BasicControl.prototype.getData = function(){
-        return this.DataStore;
+        return this.data_control;
     }
 
     return BasicControl;
