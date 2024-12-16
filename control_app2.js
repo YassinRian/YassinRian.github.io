@@ -10,8 +10,18 @@ define(['jquery', 'https://yassinrian.github.io/control_data.js'], function($, d
 
             //const oModuleInstance = await oControlHost.page.getControlByName( "Control1" ).instance;
             //this.data = oModuleInstance.getData();
-        const oModuleInstance = await data_.instance;
-        console.log(oModuleInstance);
+
+            let data_ins = new data_();
+
+            data_ins.prototype.initialize = async function(oControlHost,fnDoneInitializing) {
+                const oModuleInstance = await oControlHost.page.getControlByName( "Control1" ).instance;
+                this.data = oModuleInstance.getData();
+                fnDoneInitializing();
+            }
+
+            console.log(this.data)
+            
+ 
    
 
        })
