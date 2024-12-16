@@ -2,7 +2,7 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
 
     function App(){};
 
-    App.prototype.load = async function(fnDoneInitializing) {
+    App.prototype.initialize = async function(fnDoneInitializing) {
         //const oModuleInstance = await oControlHost.page.getControlByName( "Control1" ).instance;
         let data_inst = new data_();
         this.data = await data_inst.getData();
