@@ -13,7 +13,9 @@ define(['jquery', 'https://yassinrian.github.io/control_data.js'], function($, d
 
             let data_ins = new data_();
 
-            console.log(data_ins)
+            const data = await data_ins.getData()
+
+            console.log(data)
             
        })
     }
