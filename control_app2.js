@@ -1,4 +1,4 @@
-define(['jquery', 'https://yassinrian.github.io/control_data2.js'], function($, data){
+define(['jquery', 'https://yassinrian.github.io/control_data2.js'], function($, data_){
 
     function App(){};
 
@@ -8,7 +8,8 @@ define(['jquery', 'https://yassinrian.github.io/control_data2.js'], function($, 
         
         $('#button_yassin').on('click', function() {
             console.log("input click werkt !!");
-            console.log(data.getData());           
+            let data_ins = new data_();
+            console.log(data_.getData());           
         })
     }
     return App;
