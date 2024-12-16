@@ -9,7 +9,7 @@ define(['jquery', 'https://yassinrian.github.io/control_data2.js'], function($, 
         $('#button_yassin').on('click', function() {
             console.log("input click werkt !!");
             let data_ins = new data_();
-            console.log(data_ins.getData());           
+            console.log(data_ins);           
         })
     }
     return App;
