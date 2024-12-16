@@ -15,9 +15,10 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
         const elm = oControlHost.container;
         $(elm).append('<button id="button_yassin">Hallo Yassin</button>');
        //console.log(this.data);
-       $("#button_yassin").on('click', function(){
-        let data2 = new App();
-        //console.log(data2.hallo());
+       $("#button_yassin").on('click', async function(){
+        let data_inst = new data_();
+        let data = await data_inst.getData();
+        console.log(data)
        })
     }
 
