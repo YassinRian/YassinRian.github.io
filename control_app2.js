@@ -1,4 +1,4 @@
-define(['jquery', 'https://yassinrian.github.io/control_data.js'], function($){
+define(['jquery', 'https://yassinrian.github.io/control_data.js'], function($, data_){
 
     function App(){};
 
@@ -6,11 +6,12 @@ define(['jquery', 'https://yassinrian.github.io/control_data.js'], function($){
         const elm = oControlHost.container;
         $(elm).append('<button id="button_yassin">Hallo Yassin</button>');
        
-       $("#button_yassin").on('click', function(oControlHost){
+       $("#button_yassin").on('click', async function(){
 
             //const oModuleInstance = await oControlHost.page.getControlByName( "Control1" ).instance;
             //this.data = oModuleInstance.getData();
-            console.log(oControlHost);
+        const oModuleInstance = await data_.instance;
+        console.log(oModuleInstance.getData());
    
 
        })
