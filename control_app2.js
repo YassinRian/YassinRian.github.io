@@ -6,6 +6,7 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
         //const oModuleInstance = await oControlHost.page.getControlByName( "Control1" ).instance;
         let data_inst = new data_();
         this.data = await data_inst.getData();
+        console.log(this.data)
         fnDoneInitializing();
     }
 
@@ -22,6 +23,6 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
     App.prototype.getData = function() {
         return this.data;
     }
-    
+
     return App;
 }); // einde define
