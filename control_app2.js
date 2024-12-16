@@ -4,9 +4,10 @@ define(['jquery','https://yassinrian.github.io/control_data.js'], function($, da
 
     App.prototype.hallo = async function() {
         //const oModuleInstance = await oControlHost.page.getControlByName( "Control1" ).instance;
-        let data_inst = new data_();
-        this.data = await data_inst.getData();
-        return this.data
+        //let data_inst = new data_();
+        //this.data = await data_inst.getData();
+        //return this.data
+        return data_
     }
 
     App.prototype.draw = function(oControlHost) {
