@@ -2,7 +2,7 @@ define(['jquery'], function($){
 
     function App(){};
 
-    App.prototype.initialize = function(fnDoneInitializing) {
+    App.prototype.initialize = async function(fnDoneInitializing) {
         const oModuleInstance = await oControlHost.page.getControlByName( "Control1" ).instance;
         this.data = oModuleInstance.getData();
         fnDoneInitializing();
