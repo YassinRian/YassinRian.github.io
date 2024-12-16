@@ -19,5 +19,9 @@ define(['jquery'], function ($) {
         this.DataStore = oDataStore;
     }
 
+    BasicControl.prototype.getData = function(){
+        return this.DataStore;
+    }
+
     return BasicControl;
 })
