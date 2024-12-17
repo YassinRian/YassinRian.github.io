@@ -1,4 +1,4 @@
-define(['jquery', 'https://yassinrian.github.io/control_data.js'], function($, basicControl){
+define(['jquery', 'https://yassinrian.github.io/create_select.js'], function($, basicControl){
 
     function App(){};
 
@@ -11,10 +11,8 @@ define(['jquery', 'https://yassinrian.github.io/control_data.js'], function($, b
         console.log("geklikt");
 
         let app_inst = new basicControl();           
-        await app_inst.setData(oDataStore)
         await app_inst.draw(oControlHost);
-        console.log(app_inst.getData());       
-            
+              
       });
     }
 
