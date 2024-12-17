@@ -10,7 +10,7 @@ define(['jquery'], function($){
      $("#button_yassin").on('click', async function(){
         console.log("geklikt");
         let app_inst = new App();           
-        App.draw();
+        app_inst.draw();
             
       });
     }
