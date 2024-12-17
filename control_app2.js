@@ -11,7 +11,7 @@ define(['jquery'], function($){
         console.log("geklikt");
         //let app_inst = new App();           
         //app_inst.draw(oControlHost);
-        this.App.draw(oControlHost)
+        this.draw(oControlHost)
             
       });
     }
