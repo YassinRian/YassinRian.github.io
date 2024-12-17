@@ -9,8 +9,9 @@ define(['jquery'], function($){
        
      $("#button_yassin").on('click', async function(){
         console.log("geklikt");
-        let app_inst = new App();           
-        app_inst.draw(oControlHost);
+        //let app_inst = new App();           
+        //app_inst.draw(oControlHost);
+        this.App.draw(oControlHost)
             
       });
     }
