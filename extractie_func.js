@@ -176,19 +176,17 @@ define(function(){
 
             const parser = new DOMParser();
             const doc = parser.parseFromString(xml_, "text/xml");
-            //const results = document.getElementsByClassName('results');
-            //let newtxt = '<table  class="docTable">';
-           // newtxt += shownode(doc.childNodes[0]);
+            const results = document.getElementsByClassName('results');
+            let newtxt = '<table  class="docTable">';
+            newtxt += shownode(doc.childNodes[0]);
 
-            // if (results)
+            if (results)
 
-            // {           newtxt += '</table>';
+            {           newtxt += '</table>';
 
-            //             results[0].innerHTML = newtxt.replace(/\n/g, '<br>');                  // vervang alle enters in de tekst door <br>
+                        results[0].innerHTML = newtxt.replace(/\n/g, '<br>');                  // vervang alle enters in de tekst door <br>
 
-            // }
-console.log(xml_)
-            console.log(shownode(doc.childNodes[0]));
+            }
 
         }
 
