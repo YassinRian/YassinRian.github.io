@@ -13,6 +13,10 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
         $(elm).append(`
             <div>
                 <button id="button_parse">Parse XML</button>
+                <label>
+                    <input type="checkbox" id="regexToggle" />
+                    Use Regular Expression
+                </label>
                 <div id="table_container"></div>
             </div>
         `);
