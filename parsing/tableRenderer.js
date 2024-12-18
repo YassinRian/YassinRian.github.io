@@ -40,20 +40,43 @@ define(['jquery'], function($) {
     };
 
     // Search table rows based on regex
+    // function searchTable(query, data) {
+    //     const regex = new RegExp(query, 'i');
+    //     const rows = $('#dataTable tbody tr');
+
+    //     rows.each(function() {
+    //         const nameCell = $(this).find('td').eq(0).text();
+    //         const expressionCell = $(this).find('td').eq(1).text();
+    //         const match = regex.test(nameCell) || regex.test(expressionCell);
+
+    //         if (match) {
+    //             $(this).show();
+    //         } else {
+    //             $(this).hide();
+    //         }
+    //     });
+    // }
+// Search table rows based on regex
     function searchTable(query, data) {
-        const regex = new RegExp(query, 'i');
-        const rows = $('#dataTable tbody tr');
+        try {   
+            // Escape special regex characters in the query
+            const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+            const regex = new RegExp(safeQuery, 'i');
+            const rows = $('#dataTable tbody tr');
 
-        rows.each(function() {
-            const nameCell = $(this).find('td').eq(0).text();
-            const expressionCell = $(this).find('td').eq(1).text();
-            const match = regex.test(nameCell) || regex.test(expressionCell);
+            rows.each(function() {
+                const nameCell = $(this).find('td').eq(0).text();
+                const expressionCell = $(this).find('td').eq(1).text();
+                const match = regex.test(nameCell) || regex.test(expressionCell);
 
-            if (match) {
-                $(this).show();
-            } else {
-                $(this).hide();
-            }
-        });
+                if (match) {    
+                    $(this).show();
+                } else {
+                    $(this).hide();
+                }
+            });
+        } catch (e) {
+            console.error('Invalid regex:', e);
+        }
     }
 });
