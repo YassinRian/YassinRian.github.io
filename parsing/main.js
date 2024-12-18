@@ -4,7 +4,7 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
 
     App.prototype.initialize = function(oPage, fnDoneInitializing){
         this.xml_data = oPage.page.application.document.reportXML;
-        console.log(oPage.page.application)
+        console.log(oPage.page.application.GlassContext.profile.account.userName);
         fnDoneInitializing();
       }
 
