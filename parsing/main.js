@@ -19,6 +19,7 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
 
         $('#button_parse').on('click', function() {
             // Sample XML data (this can be dynamic or fetched via an API)
+            console.log(this.xml_data);
             const xmlData = this.xml_data;
 
             // Parse the XML data
