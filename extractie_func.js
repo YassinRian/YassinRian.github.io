@@ -187,7 +187,7 @@ define(function(){
             //             results[0].innerHTML = newtxt.replace(/\n/g, '<br>');                  // vervang alle enters in de tekst door <br>
 
             // }
-
+console.log(xml_)
             console.log(shownode(doc.childNodes[0]));
 
         }
