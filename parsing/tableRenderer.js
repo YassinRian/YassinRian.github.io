@@ -49,7 +49,7 @@ define(['jquery'], function($) {
                 if (isRegex) {
                     // Remove slashes and use the query as regex
                     //const regexBody = query.slice(1, -1); // Remove leading and trailing '/'
-                    regex = new RegExp(regexBody, 'i'); // 'i' for case-insensitive
+                    regex = new RegExp(query, 'i'); // 'i' for case-insensitive
                 } else {
                     // Escape special characters for a literal search
                     const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
