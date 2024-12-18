@@ -6,7 +6,7 @@ define(['jquery'], function ($) {
 
     BasicControl.prototype.draw = function(oControlHost) {
       let elm = oControlHost.container;
-      $(elm).append("<h1>Hallo Yassin</h1>")
+      $(elm).append("<h1>Hallo Yassin Rian!</h1>")
       console.log(oControlHost.xmlElement)
 
     }
