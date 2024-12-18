@@ -8,6 +8,9 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
       }
 
     App.prototype.draw = function(oControlHost) {
+        
+        console.log(window[0].Application.GlassContext.profile.account.userName)
+        
         const elm = oControlHost.container;
 
         $(elm).append(`
@@ -36,8 +39,6 @@ $('body').append(`
         </div>
     </div>
 `);
-
-
 
         $('#button_parse').on('click', () => {
             // Sample XML data (this can be dynamic or fetched via an API)

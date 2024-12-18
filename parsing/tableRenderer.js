@@ -46,13 +46,11 @@ define(['jquery'], function($) {
     function searchTable(query, data) {
           try {
             // Determine if the query is a regex or literal search
-                //const isRegex = query.startsWith('/') && query.endsWith('/'); // Regex is wrapped in "/"
                 const isRegex = $('#regexToggle').is(':checked');
                 let regex;
 
                 if (isRegex) {
-                    // Remove slashes and use the query as regex
-                    //const regexBody = query.slice(1, -1); // Remove leading and trailing '/'
+                    // use the query as regex
                     regex = new RegExp(query, 'i'); // 'i' for case-insensitive
                 } else {
                     // Escape special characters for a literal search
@@ -76,6 +74,6 @@ define(['jquery'], function($) {
         } catch (e) {
                 console.error('Invalid regex:', e);
             }
-        }
+        } // einde searchTable
  
 });
