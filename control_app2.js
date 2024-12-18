@@ -12,6 +12,7 @@ define(['jquery', 'https://yassinrian.github.io/create_select.js'], function($, 
 
         let app_inst = new basicControl();           
         await app_inst.draw(oControlHost);
+
               
       });
     }
