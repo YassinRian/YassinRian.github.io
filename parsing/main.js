@@ -40,18 +40,18 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
 
             // Render the table with parsed data
             tableRenderer.renderTable(parsedData, '#table_container');
-            $('#table_modal').fadeIn(300);
+            $('#table_modal').fadeIn(200);
         });
 
          // Close modal handlers
          $('.close-modal').on('click', function() {
-            $('#table_modal').fadeOut(300);
+            $('#table_modal').fadeOut(200);
         });
 
         // Close modal when clicking outside
         $(window).on('click', function(event) {
             if ($(event.target).is('#table_modal')) {
-                $('#table_modal').fadeOut(300);
+                $('#table_modal').fadeOut(200);
             }
         });
 
