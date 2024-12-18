@@ -178,7 +178,7 @@ define(function(){
             const doc = parser.parseFromString(xml_, "text/xml");
             const results = document.getElementsByClassName('results');
             let newtxt = '<table  class="docTable">';
-            newtxt += this.shownode(doc.childNodes[0]);
+            newtxt += shownode(doc.childNodes[0]);
 
             if (results)
 
