@@ -18,7 +18,7 @@ define([], function() {
 
         }
 
-        table {
+        #dataTable {
 
             width: 100%;
 
@@ -34,7 +34,7 @@ define([], function() {
 
         }
 
-        thead {
+        #dataTable thead {
 
             background-color: #f4f4f4;
 
@@ -44,7 +44,7 @@ define([], function() {
 
         }
 
-        thead th {
+        #dataTable thead th {
 
             padding: 12px 15px;
 
@@ -52,25 +52,25 @@ define([], function() {
 
         }
 
-        tbody tr {
+        #dataTable tbody tr {
 
             border-bottom: 1px solid #ddd;
 
         }
 
-        tbody tr:nth-child(even) {
+        #dataTable tbody tr:nth-child(even) {
 
             background-color: #f9f9f9;
 
         }
 
-        tbody td {
+        #dataTable tbody td {
 
             padding: 12px 15px;
 
         }
 
-        tbody tr:hover {
+        #dataTable tbody tr:hover {
 
             background-color: #f1f1f1;
 
