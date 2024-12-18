@@ -16,7 +16,27 @@ define(['jquery', 'https://yassinrian.github.io/extractie_func.js'], function ($
 
       $('#yassin_button').on('click', function(){
         xml_funcs.verwerken(this.xml_data);
+
+        // parse the xml string into an XML DOM object
+        const parser = new DOMParser();
+        const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+
+        // Get all the dataItem elements
+        const dataItems = xmlDoc.querySelector('dataItem');
+
+        // Initialize an array to hold CSV rows
+        let csvRows = ['name, expression']; // Adding header row
+
+        // Iterate over each dataItem element
+        dataItems.forEach(dataItem => {
+          // Extract the name attribute and the expression text
+          const name = dataItem.getAttribute('name');
+          const expression = dataItem.querySelector('expression').textContent;
+        });
+
       })
+
+
       
     }
 
