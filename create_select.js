@@ -4,9 +4,9 @@ define(['jquery'], function ($) {
 
     function BasicControl () { };
 
-    BasicControl.prototype.draw = function(oPage, oControlHost) {
-      let elm = oControlHost.container;
-      $(elm).append("<h1>Hallo Yassin Rian!</h1>")
+    BasicControl.prototype.draw = function(oPage) {
+      //let elm = oControlHost.container;
+      //$(elm).append("<h1>Hallo Yassin Rian!</h1>")
       console.log(oPage.page.application.document.reportXML);
     }
 
