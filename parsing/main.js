@@ -1,4 +1,4 @@
-define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://yassinrian.github.io/parsing/tableRenderer.js'], function($, xmlParser, tableRenderer) {
+define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://yassinrian.github.io/parsing/tableRenderer.js', 'https://yassinrian.github.io/parsing/tableStyles.js'], function($, xmlParser, tableRenderer, styleSheet) {
     
     function App() {};
 

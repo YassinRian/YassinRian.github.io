@@ -37,46 +37,40 @@ define(['jquery'], function($) {
                 searchTable(query, data);
             });
         }
-    };
+    }; // einde rendererTable func
 
-    // Search table rows based on regex
-    // function searchTable(query, data) {
-    //     const regex = new RegExp(query, 'i');
-    //     const rows = $('#dataTable tbody tr');
-
-    //     rows.each(function() {
-    //         const nameCell = $(this).find('td').eq(0).text();
-    //         const expressionCell = $(this).find('td').eq(1).text();
-    //         const match = regex.test(nameCell) || regex.test(expressionCell);
-
-    //         if (match) {
-    //             $(this).show();
-    //         } else {
-    //             $(this).hide();
-    //         }
-    //     });
-    // }
-// Search table rows based on regex
     function searchTable(query, data) {
-        try {   
-            // Escape special regex characters in the query
-            const safeQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-            const regex = new RegExp(safeQuery, 'i');
-            const rows = $('#dataTable tbody tr');
+          try {
+            // Determine if the query is a regex or literal search
+                const isRegex = query.startsWith('/') && query.endsWith('/'); // Regex is wrapped in "/"
+                let regex;
 
-            rows.each(function() {
-                const nameCell = $(this).find('td').eq(0).text();
-                const expressionCell = $(this).find('td').eq(1).text();
-                const match = regex.test(nameCell) || regex.test(expressionCell);
-
-                if (match) {    
-                    $(this).show();
+                if (isRegex) {
+                    // Remove slashes and use the query as regex
+                    const regexBody = query.slice(1, -1); // Remove leading and trailing '/'
+                    regex = new RegExp(regexBody, 'i'); // 'i' for case-insensitive
                 } else {
-                    $(this).hide();
+                    // Escape special characters for a literal search
+                    const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+                    regex = new RegExp(escapedQuery, 'i');
                 }
-            });
+
+                const rows = $('#dataTable tbody tr');
+                rows.each(function () {
+                    const nameCell = $(this).find('td').eq(0).text();
+                    const expressionCell = $(this).find('td').eq(1).text();
+                    const match = regex.test(nameCell) || regex.test(expressionCell);
+         
+                    if (match) {
+                        $(this).show();
+                    } else {
+                        $(this).hide();
+                    }
+                });
+    
         } catch (e) {
-            console.error('Invalid regex:', e);
+                console.error('Invalid regex:', e);
+            }
         }
-    }
+ 
 });
