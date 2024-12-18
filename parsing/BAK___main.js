@@ -17,19 +17,9 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
                     <input type="checkbox" id="regexToggle" />
                     Use Regular Expression
                 </label>
+                <div id="table_container"></div>
             </div>
         `);
-
-         // Create modal for table only
-         $('body').append(`
-            <div id="table_modal" class="modal" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.5); z-index: 1000;">
-                <div class="modal-content" style="position: relative; background-color: #fff; margin: 15% auto; padding: 20px; width: 80%; max-width: 1000px; border-radius: 5px; box-shadow: 0 4px 8px rgba(0,0,0,0.1);">
-                    <span class="close-modal" style="position: absolute; right: 10px; top: 10px; font-size: 24px; cursor: pointer; color: #666;">&times;</span>
-                    <div id="table_container"></div>
-                </div>
-            </div>
-        `);
-
 
         $('#button_parse').on('click', () => {
             // Sample XML data (this can be dynamic or fetched via an API)
@@ -40,21 +30,7 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
 
             // Render the table with parsed data
             tableRenderer.renderTable(parsedData, '#table_container');
-            $('#table_modal').fadeIn(300);
         });
-
-         // Close modal handlers
-         $('.close-modal').on('click', function() {
-            $('#table_modal').fadeOut(300);
-        });
-
-        // Close modal when clicking outside
-        $(window).on('click', function(event) {
-            if ($(event.target).is('#table_modal')) {
-                $('#table_modal').fadeOut(300);
-            }
-        });
-
     };
 
     return App;
