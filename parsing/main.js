@@ -17,16 +17,16 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
             </div>
         `);
 
-        $('#button_parse').on('click', function() {
+        $('#button_parse').on('click', () => {
             // Sample XML data (this can be dynamic or fetched via an API)
             console.log(this.xml_data);
-            const xmlData = this.xml_data;
+            // const xmlData = this.xml_data;
 
-            // Parse the XML data
-            const parsedData = xmlParser.parseXML(xmlData);
+            // // Parse the XML data
+            // const parsedData = xmlParser.parseXML(xmlData);
 
-            // Render the table with parsed data
-            tableRenderer.renderTable(parsedData, '#table_container');
+            // // Render the table with parsed data
+            // tableRenderer.renderTable(parsedData, '#table_container');
         });
     };
 
