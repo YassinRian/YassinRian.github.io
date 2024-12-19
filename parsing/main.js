@@ -4,14 +4,19 @@ define(['jquery', 'https://yassinrian.github.io/parsing/xmlParser.js', 'https://
 
     App.prototype.initialize = function(oPage, fnDoneInitializing){
         this.xml_data = oPage.page.application.document.reportXML;
-        console.log(oPage.page.application.GlassContext.profile.account.userName);
+        //this.userName = oPage.page.application.GlassContext.profile.account.userName;
         fnDoneInitializing();
       }
 
     App.prototype.draw = function(oControlHost) {
-        
-        //console.log(window[0].Application.GlassContext.profile.account.userName)
-        
+
+        const { userName } = oControlHost.configuration || ''; // Add fallback empty string
+
+        // Only show button if username matches
+        if (userName === '951100') 
+    
+        {
+
         const elm = oControlHost.container;
 
         $(elm).append(`
@@ -66,6 +71,9 @@ $('body').append(`
         });
 
     };
+
+
+    } // einde if check userName
 
     return App;
 });
