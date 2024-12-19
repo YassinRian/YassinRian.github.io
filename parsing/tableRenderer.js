@@ -38,12 +38,12 @@ define(['jquery'], function($) {
             // Search functionality
             searchInput.on('input', function() {
                 const query = $(this).val();
-                searchTable(query, data);
+                searchTable(query);
             });
         }
     }; // einde rendererTable func
 
-    function searchTable(query, data) {
+    function searchTable(query) {
           try {
             // Determine if the query is a regex or literal search
                 const isRegex = $('#regexToggle').is(':checked');
