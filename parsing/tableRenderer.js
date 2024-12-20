@@ -3,51 +3,67 @@ define(['jquery'], function($) {
         renderTable: function(data, container, type) {
             const tableContainer = $(container);
             tableContainer.empty(); // Clear previous content
-
-            // Create the table with dynamic headers
+        
+            // Define the headers based on the type
+            let headers = [];
+            if (type === 'Queries') {
+                headers = ['Query Name', 'Data Item Name', 'Expression'];
+            } else if (type === 'Lists') {
+                headers = ['Name', 'Ref Query', 'Data Item', 'Label'];
+            } else if (type === 'Detail Filters') {
+                headers = ['Query Name', 'Filter Expression'];
+            }
+        
+            // Create the table
             const table = $('<table id="dataTable"></table>');
-            table.append(`
-                <thead>
-                    <tr>
-                        <th>${type === 'Queries' ? 'Query Name' : 'Name'}</th>
-                        ${type === 'Queries' ? '<th>Label</th>' : ''}
-                        ${type === 'Detail Filters' ? '<th>Filter Expression</th>' : ''}
-                        ${type === 'Lists' ? '<th>Ref Query</th><th>Data Items</th>' : ''}
-                        ${type !== 'Detail Filters' && type !== 'Lists' ? '<th>Expression</th>' : ''}
-                    </tr>
-                </thead>
-                <tbody></tbody>
-            `);
-
-            // Populate the table rows with data
-            const tbody = table.find('tbody');
-            data.forEach(row => {
-                const tr = $('<tr></tr>');
-
-                // Handle dynamic row rendering based on type
-                if (type === 'Queries') {
-                    tr.append(`<td>${row.queryName}</td>`);
-                    tr.append(`<td>${row.label || ''}</td>`);
-                    tr.append(`<td>${row.expression || ''}</td>`);
-                } else if (type === 'Lists') {
-                    tr.append(`<td>${row.name}</td>`);
-                    tr.append(`<td>${row.refQuery}</td>`);
-                    tr.append(`<td>${row.refDataItems.map(item => `${item.refDataItem} (${item.label || ''})`).join(', ')}</td>`);
-                } else if (type === 'Detail Filters') {
-                    tr.append(`<td>${row.queryName}</td>`);
-                    tr.append(`<td>${row.filterExpression}</td>`);
-                } else {
-                    // Default case for other data structures
-                    tr.append(`<td>${row.name}</td>`);
-                    tr.append(`<td>${row.expression || ''}</td>`);
-                }
-
-                tbody.append(tr);
+            const thead = $('<thead></thead>');
+            const headerRow = $('<tr></tr>');
+        
+            // Add headers dynamically
+            headers.forEach(header => {
+                headerRow.append(`<th>${header}</th>`);
             });
-
+            thead.append(headerRow);
+            table.append(thead);
+        
+            const tbody = $('<tbody></tbody>');
+        
+            // Populate rows based on data
+            data.forEach(item => {
+                if (type === 'Queries') {
+                    // Add a row for each dataItem in the query
+                    item.items.forEach(subItem => {
+                        const queryRow = $('<tr></tr>');
+                        queryRow.append(`<td>${item.name}</td>`); // Query Name
+                        queryRow.append(`<td>${subItem.name}</td>`); // Data Item Name
+                        queryRow.append(`<td>${subItem.attributes.expression || ''}</td>`); // Expression
+                        tbody.append(queryRow);
+                    });
+                } else if (type === 'Lists') {
+                    // Add a row for each refDataItem in the list
+                    item.items.forEach(subItem => {
+                        const listRow = $('<tr></tr>');
+                        listRow.append(`<td>${item.name}</td>`); // List Name
+                        listRow.append(`<td>${item.attributes.refQuery}</td>`); // Ref Query
+                        listRow.append(`<td>${subItem.name}</td>`); // Data Item Name
+                        listRow.append(`<td>${subItem.attributes.label || ''}</td>`); // Label
+                        tbody.append(listRow);
+                    });
+                } else if (type === 'Detail Filters') {
+                    // Render a row for each filter
+                    const filterRow = $('<tr></tr>');
+                    filterRow.append(`<td>${item.name}</td>`); // Query Name
+                    filterRow.append(`<td>${item.attributes.filterExpression || ''}</td>`); // Filter Expression
+                    tbody.append(filterRow);
+                }
+            });
+        
+            // Add tbody to the table
+            table.append(tbody);
+        
             // Add table to the container
             tableContainer.append(table);
-
+        
             // Add search input field
             const searchInput = $(`
                 <div>
@@ -59,35 +75,27 @@ define(['jquery'], function($) {
                 </div>
             `);
             tableContainer.prepend(searchInput);
-
+        
             // Search functionality
             searchInput.on('input', function() {
                 const query = $('#searchInput').val();
                 searchTable(query, type);
             });
         }
+        
     };
 
     function searchTable(query, type) {
         try {
             const isRegex = $('#regexToggle').is(':checked');
-            const regex = isRegex ? new RegExp(query, 'i') : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
-
+            const regex = isRegex
+                ? new RegExp(query, 'i') // Case-insensitive regex
+                : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i'); // Escape for literal search
+    
             const rows = $('#dataTable tbody tr');
-            rows.each(function() {
+            rows.each(function () {
                 const cells = $(this).find('td');
-                let match = false;
-
-                if (type === 'Queries') {
-                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text()) || regex.test(cells.eq(2).text());
-                } else if (type === 'Lists') {
-                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text()) || regex.test(cells.eq(2).text());
-                } else if (type === 'Detail Filters') {
-                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text());
-                } else {
-                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text());
-                }
-
+                const match = Array.from(cells).some(cell => regex.test($(cell).text()));
                 if (match) {
                     $(this).show();
                 } else {
@@ -98,4 +106,5 @@ define(['jquery'], function($) {
             console.error('Invalid regex:', e);
         }
     }
+    
 });

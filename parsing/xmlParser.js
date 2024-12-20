@@ -1,93 +1,75 @@
 define(function() {
     return {
-        getDataItems: function(xmlString) {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-    
-         // Extracting dataItem names and expressions
-            const dataItems = xmlDoc.querySelectorAll('dataItem');
-            let data = [];
-            dataItems.forEach(item => {
-                const name = item.getAttribute('name');
-                const expression = item.querySelector('expression').textContent;
-                data.push({ name: name, expression: expression });
-            });
-            return data;   
-        },
-        getQueries: function(xmlString) {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-            const queries = xmlDoc.querySelectorAll('query');
 
-            let queryData = [];
-            queries.forEach(query => {
-                const queryName = query.getAttribute('name');
-                const dataItems = query.querySelectorAll('dataItem');
-                let items = [];
-    
-                dataItems.forEach(item => {
-                    const name = item.getAttribute('name');
-                    const label = item.getAttribute('label');
-                    const expression = item.querySelector('expression')?.textContent;
-                    items.push({ name, label, expression });
-                });
-    
-                queryData.push({ queryName, dataItems: items });
-            });
-            return queryData;
-        },
-        getLists: function(xmlString) {
+        getQueries: function (xmlString) {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-            const lists = xmlDoc.querySelectorAll('list');
-    
-            let listData = [];
-            lists.forEach(list => {
-                const refQuery = list.getAttribute('refQuery');
-                const name = list.getAttribute('name');
-                const dataItemLabels = list.querySelectorAll('dataItemLabel');
-    
-                let refDataItems = [];
-                dataItemLabels.forEach(label => {
-                    const refDataItem = label.getAttribute('refDataItem');
-                    refDataItems.push(refDataItem);
-                });
-    
-                listData.push({ refQuery, name, refDataItems });
-            });
-    
-            return listData;
-        },
-        getDetailFilters: function(xmlString) {
-            const parser = new DOMParser();
-            const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-            const queries = xmlDoc.querySelectorAll('query');
-    
-            let filterData = [];
-            queries.forEach(query => {
-                const queryName = query.getAttribute('name');
-                const filterExpression = query.querySelector('filterExpression')?.textContent;
-    
-                if (filterExpression) {
-                    filterData.push({ queryName, filterExpression });
-                }
-            });
-            return filterData;
-        },
-        addLabelsToList: function(listData, queryData) {
-            listData.forEach(list => {
-                list.refDataItems = list.refDataItems.map(refDataItem => {
-                    const query = queryData.find(q => q.queryName === list.refQuery);
-                        if (query) {
-                        const dataItem = query.dataItems.find(item => item.name === refDataItem);
-                        if (dataItem) {
-                            return { refDataItem, label: dataItem.label };
-                        }
+            const queries = xmlDoc.querySelectorAll("query");
+        
+            return Array.from(queries).map(query => ({
+                type: "Query",
+                name: query.getAttribute("name"),
+                attributes: {},
+                items: Array.from(query.querySelectorAll("dataItem")).map(dataItem => ({
+                    name: dataItem.getAttribute("name"),
+                    attributes: {
+                        label: dataItem.getAttribute("label"),
+                        expression: dataItem.querySelector("expression")?.textContent || ""
                     }
-                        return { refDataItem, label: null };
-                });
-            });
-            return listData;
+                }))
+            }));
+        },
+        
+        getLists: function (xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+            const lists = xmlDoc.querySelectorAll("list");
+        
+            return Array.from(lists).map(list => ({
+                type: "List",
+                name: list.getAttribute("name"),
+                attributes: { refQuery: list.getAttribute("refQuery") },
+                items: Array.from(list.querySelectorAll("dataItemLabel")).map(label => ({
+                    name: label.getAttribute("refDataItem"),
+                    attributes: {}
+                }))
+            }));
+        },
+        
+        getDetailFilters: function (xmlString) {
+            const parser = new DOMParser();
+            const xmlDoc = parser.parseFromString(xmlString, "application/xml");
+            const queries = xmlDoc.querySelectorAll("query");
+        
+            return Array.from(queries)
+                .filter(query => query.querySelector("filterExpression"))
+                .map(query => ({
+                    type: "DetailFilter",
+                    name: query.getAttribute("name"),
+                    attributes: {
+                        filterExpression: query.querySelector("filterExpression")?.textContent || ""
+                    },
+                    items: []
+                }));
+        },
+        
+        addLabelsToList: function (queryData, listData) {
+            return listData.map(list => ({
+                type: "List",
+                name: list.name,
+                attributes: { refQuery: list.attributes.refQuery },
+                items: list.items.map(refItem => {
+                    const query = queryData.find(q => q.name === list.attributes.refQuery);
+                    const matchingItem = query?.items.find(qItem => qItem.name === refItem.name);
+                    return {
+                        name: refItem.name,
+                        attributes: {
+                            label: matchingItem?.attributes.label || ""
+                        }
+                    };
+                })
+            }));
         }
+        
     };
 });
