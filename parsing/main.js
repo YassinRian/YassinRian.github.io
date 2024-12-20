@@ -15,11 +15,10 @@ define([
 
     App.prototype.draw = function(oControlHost) {
         const { userName } = oControlHost.configuration || ''; // Add fallback empty string
-$(elm).append('<h1>hallo yassin</h1>');
         console.log("hallo yassin");
         if (userName === '951100') {
             const elm = oControlHost.container;
-
+$(elm).append('<h1>XML Parser</h1>');
             // Append the modal HTML content by using the modalMarkup module
             $(elm).append(modalMarkup);
 
