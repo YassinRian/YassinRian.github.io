@@ -30,7 +30,8 @@ $(elm).append('<h1>XML Parser</h1>');
 
                 switch (selectedType) {
                     case 'Queries':
-                        parsedData = xmlParser.getQueries(xmlData);
+                        console.log(xmlParser.getQueries(xmlData));
+                        // parsedData = xmlParser.getQueries(xmlData);
                         break;
                     case 'Lists':
                         const queryData = xmlParser.getQueries(xmlData);
