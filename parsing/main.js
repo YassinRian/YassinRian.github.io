@@ -17,9 +17,8 @@ define([
         const { userName } = oControlHost.configuration || ''; // Add fallback empty string
         if (userName === '951100') {
             const elm = oControlHost.container;
-            $(elm).append('<h1>XML Parser</h1>');
-            // Append the modal HTML content by using the modalMarkup module
-            $(elm).append(modalMarkup);
+            $(elm).append(modalMarkup.selectBox());
+            $('body').append(modalMarkup.modal());
 
             $('#button_parse').on('click', () => {
                 const selectedType = $('#select_parse_type').val();
