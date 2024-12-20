@@ -76,6 +76,56 @@ define([], function() {
 
         }
 
+        .modal-content.minimized {
+    height: 40px !important;
+    overflow: hidden !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+}
+
+.minimize-modal.minimized {
+    transform: rotate(180deg);
+}
+
+/* Additional modal styling (you can keep or modify this as per your need) */
+.modal-content {
+    position: relative;
+    background-color: #fff;
+    margin: 15vh auto;
+    padding: 20px;
+    width: 80%;
+    max-width: 1000px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    height: 70vh;
+    overflow-y: auto;
+    transition: all 0.3s ease;
+}
+
+.modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0,0,0,0.5);
+    z-index: 1000;
+}
+
+.modal-content > .minimize-modal {
+    cursor: pointer;
+    color: #666;
+    font-size: 24px;
+    margin-right: 15px;
+}
+
+.modal-content > .close-modal {
+    cursor: pointer;
+    color: #666;
+    font-size: 24px;
+}
+
     `;
 
  
