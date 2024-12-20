@@ -1,87 +1,101 @@
-define([], function() {
-return {
+define(['jquery'], function($) {
+    return {
+        renderTable: function(data, container, type) {
+            const tableContainer = $(container);
+            tableContainer.empty(); // Clear previous content
 
-    renderTable: function(data, container, type) {
+            // Create the table with dynamic headers
+            const table = $('<table id="dataTable"></table>');
+            table.append(`
+                <thead>
+                    <tr>
+                        <th>${type === 'Queries' ? 'Query Name' : 'Name'}</th>
+                        ${type === 'Queries' ? '<th>Label</th>' : ''}
+                        ${type === 'Detail Filters' ? '<th>Filter Expression</th>' : ''}
+                        ${type === 'Lists' ? '<th>Ref Query</th><th>Data Items</th>' : ''}
+                        ${type !== 'Detail Filters' && type !== 'Lists' ? '<th>Expression</th>' : ''}
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            `);
 
-        const tableContainer = $(container);
-        tableContainer.empty(); // Clear previous content
+            // Populate the table rows with data
+            const tbody = table.find('tbody');
+            data.forEach(row => {
+                const tr = $('<tr></tr>');
 
-        // Create the table
-        const table = $('<table id="dataTable"></table>');
-        table.append(`
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    ${type === 'Queries' ? '<th>Label</th>' : ''}
-                    <th>${type === 'Detail Filters' ? 'Filter Expression' : 'Expression'}</th>
-                </tr>
-            </thead>
-            <tbody></tbody>
-        `);
+                // Handle dynamic row rendering based on type
+                if (type === 'Queries') {
+                    tr.append(`<td>${row.queryName}</td>`);
+                    tr.append(`<td>${row.label || ''}</td>`);
+                    tr.append(`<td>${row.expression || ''}</td>`);
+                } else if (type === 'Lists') {
+                    tr.append(`<td>${row.name}</td>`);
+                    tr.append(`<td>${row.refQuery}</td>`);
+                    tr.append(`<td>${row.refDataItems.map(item => `${item.refDataItem} (${item.label || ''})`).join(', ')}</td>`);
+                } else if (type === 'Detail Filters') {
+                    tr.append(`<td>${row.queryName}</td>`);
+                    tr.append(`<td>${row.filterExpression}</td>`);
+                } else {
+                    // Default case for other data structures
+                    tr.append(`<td>${row.name}</td>`);
+                    tr.append(`<td>${row.expression || ''}</td>`);
+                }
 
-        // Populate the table rows with data
-        const tbody = table.find('tbody');
-        data.forEach(row => {
-            const tr = $('<tr></tr>');
-            tr.append(`<td>${row.name || row.queryName}</td>`);
-            if (type === 'Queries') {
-                tr.append(`<td>${row.label || ''}</td>`);
-            }
-            tr.append(`<td>${row.expression || row.filterExpression || ''}</td>`);
-            tbody.append(tr);
-        });
+                tbody.append(tr);
+            });
 
-        // Add table to the container
-        tableContainer.append(table);
+            // Add table to the container
+            tableContainer.append(table);
 
-        // Add search input field
-        const searchInput = $(`<input id="searchInput" type="text" placeholder="Enter regex to search..." />
-                                <label>
-                                    <input type="checkbox" id="regexToggle" />
-                                    Use Regular Expression
-                                </label>`);
-        tableContainer.prepend(searchInput);
+            // Add search input field
+            const searchInput = $(`
+                <div>
+                    <input id="searchInput" type="text" placeholder="Enter regex to search..." />
+                    <label>
+                        <input type="checkbox" id="regexToggle" />
+                        Use Regular Expression
+                    </label>
+                </div>
+            `);
+            tableContainer.prepend(searchInput);
 
-        // Search functionality
-        searchInput.on('input', function() {
-            const query = $(this).val();
-            searchTable(query);
-        });
-    }
-}; // einde rendererTable func
+            // Search functionality
+            searchInput.on('input', function() {
+                const query = $('#searchInput').val();
+                searchTable(query, type);
+            });
+        }
+    };
 
-function searchTable(query) {
-      try {
-        // Determine if the query is a regex or literal search
+    function searchTable(query, type) {
+        try {
             const isRegex = $('#regexToggle').is(':checked');
-            let regex;
-
-            if (isRegex) {
-                // use the query as regex
-                regex = new RegExp(query, 'i'); // 'i' for case-insensitive
-            } else {
-                // Escape special characters for a literal search
-                const escapedQuery = query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-                regex = new RegExp(escapedQuery, 'i');
-            }
+            const regex = isRegex ? new RegExp(query, 'i') : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i');
 
             const rows = $('#dataTable tbody tr');
-            rows.each(function () {
-                const nameCell = $(this).find('td').eq(0).text();
-                const expressionCell = $(this).find('td').eq(1).text();
-                const labelCell = $(this).find('td').eq(2)?.text();
-                const match = regex.test(nameCell) || regex.test(expressionCell) || regex.test(labelCell || '');
-  
+            rows.each(function() {
+                const cells = $(this).find('td');
+                let match = false;
+
+                if (type === 'Queries') {
+                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text()) || regex.test(cells.eq(2).text());
+                } else if (type === 'Lists') {
+                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text()) || regex.test(cells.eq(2).text());
+                } else if (type === 'Detail Filters') {
+                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text());
+                } else {
+                    match = regex.test(cells.eq(0).text()) || regex.test(cells.eq(1).text());
+                }
+
                 if (match) {
                     $(this).show();
                 } else {
                     $(this).hide();
                 }
             });
-
-      } catch (e) {
+        } catch (e) {
             console.error('Invalid regex:', e);
         }
-    } // einde searchTable
-
+    }
 });
