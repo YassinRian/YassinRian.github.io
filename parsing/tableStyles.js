@@ -76,7 +76,7 @@ define([], function() {
 
         }
 
-        .modal-content.minimized {
+.modal-content.minimized {
     height: 40px !important;
     overflow: hidden !important;
     padding-top: 10px !important;
