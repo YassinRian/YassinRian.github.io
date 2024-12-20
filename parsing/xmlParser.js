@@ -17,7 +17,7 @@ define(function() {
         getQueries: function(xmlString) {
             const parser = new DOMParser();
             const xmlDoc = parser.parseFromString(xmlString, "application/xml");
-            const queries = xmlDoc.querySelectorAll('query');
+            const queries = xmlDoc.querySelectorAll('queries');
 
             let queryData = [];
             queries.forEach(query => {
