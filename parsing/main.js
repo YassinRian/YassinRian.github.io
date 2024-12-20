@@ -4,7 +4,7 @@ define([
     'https://yassinrian.github.io/parsing/tableRenderer.js', 
     'https://yassinrian.github.io/parsing/tableStyles.js',
     'https://yassinrian.github.io/parsing/modalMarkup.js'], 
-    function($, xmlParser, tableRenderer, modalMarkup) {
+    function($, xmlParser, tableRenderer, tableStyles, modalMarkup) {
     
     function App() {}
 
