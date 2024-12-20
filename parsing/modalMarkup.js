@@ -9,11 +9,11 @@ define(function() {
             </select>
             <button id="button_parse">Parse</button>
         </div>
-        <div id="table_modal" style="display: none;">
+      /*   <div id="table_modal" style="display: none;">
             <div class="modal-content minimized">
                 <div id="table_container"></div>
             </div>
-        </div>
+        </div> */
 
         <div id="table_modal" class="modal">
             <div class="modal-content">
