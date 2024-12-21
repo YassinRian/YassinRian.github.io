@@ -8,6 +8,12 @@ define(["jquery"], function ($) {
 
     async initialize() {
       await this.loadDependencies();
+      $("body").append(
+        <script type="module">
+          import {(createSignal, onCleanup)} from this.esm; import {render} from
+          this.web; import {html} from this.html;
+        </script>
+      );
     }
 
     loadDependencies() {
