@@ -34,4 +34,5 @@ define(["jquery"], function ($) {
       render(App, elm);
     }
   } //einde class
+  return Main;
 }); //einde define
