@@ -51,7 +51,7 @@ define([
 
         // Check if data exists in cache
         const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData && uniqueId) {
+        if (cachedData === cacheKey) {
           console.log(`Using cached data for ${type} with ID ${uniqueId}`);
           return JSON.parse(cachedData);
         }
@@ -79,12 +79,10 @@ define([
         if (!uniqueId) {
           uniqueId = Math.random().toString(36).substr(2, 9); // Generate unique ID
           $(button).data("id", uniqueId); // Set unique ID using .data()
-
-          // Store in localStorage
-          const newCacheKey = `cache_${type}_${uniqueId}`;
-          localStorage.setItem(newCacheKey, JSON.stringify(parsedData));
         }
-
+        // Store in localStorage
+        const newCacheKey = `cache_${type}_${uniqueId}`;
+        localStorage.setItem(newCacheKey, JSON.stringify(parsedData));
         return parsedData;
       }
 
