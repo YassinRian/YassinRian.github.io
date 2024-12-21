@@ -65,8 +65,8 @@ define([
                 }
 
                 tableRenderer.renderTable(parsedData, '#table_container', selectedType);
-                $('#table_modal').fadeIn(300);
-                $('#table_modal .modal-content').removeClass('minimized');
+                $('#table_modal').fadeIn(200);
+                //$('#table_modal .modal-content').removeClass('minimized');
                 //updateMinimizeButton(false);
             });
 
