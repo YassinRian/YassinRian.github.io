@@ -136,8 +136,8 @@ $closeModal.on('click', function () {
 });
 
 // Minimize Modal
-$minimizeButton.on('click', function () {
-    console.log('minimize button clicked');
+  // Minimize Modal
+  $minimizeButton.on('click', function () {
     if ($modalContent.hasClass('minimized')) {
         // Restore modal
         $modalContent.removeClass('minimized').css({
@@ -145,7 +145,11 @@ $minimizeButton.on('click', function () {
             left: '10%',
             width: '80%',
             height: '70vh',
+            right: 'auto',
+            bottom: 'auto',
         });
+        $('body').addClass('modal-active'); // Deactivate body scrolling
+        $(this).text('Minimize'); // Change button text to "Minimize"
     } else {
         // Minimize modal
         $modalContent.addClass('minimized').css({
@@ -156,6 +160,8 @@ $minimizeButton.on('click', function () {
             width: '300px',
             height: '40px',
         });
+        $('body').removeClass('modal-active'); // Activate body scrolling
+        $(this).text('Maximize'); // Change button text to "Maximize"
     }
 });
 
