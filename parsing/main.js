@@ -27,37 +27,21 @@ define([
                 let parsedData;
 
                 switch (selectedType) {
-                    case 'Queries':
-                        //parsedData = xmlParser.getQueries(xmlData);
-                        
+                    case 'Queries':                      
                         const queriesData = parseAndCache('Queries', xmlData, xmlParser.getQueries);
                         tableRenderer.renderTable(queriesData, '#table_container', 'Queries');
-                        
-
-
                         break;
                     case 'Lists':
-
-
-                        //const queryData = xmlParser.getQueries(xmlData);
-                        //const listData = xmlParser.getLists(xmlData);
-                        //parsedData = xmlParser.addLabelsToList(queryData, listData);
-
                         const listsData = parseAndCache('Lists', xmlData, (xmlString) => {
                             const queryData = xmlParser.getQueries(xmlString);
                             const listData = xmlParser.getLists(xmlString);
                             return xmlParser.addLabelsToList(queryData, listData);
                         });
                         tableRenderer.renderTable(listsData, '#table_container', 'Lists');
-                        
-
                         break;
                     case 'Detail Filters':
-                        //parsedData = xmlParser.getDetailFilters(xmlData);
-
                         const detailFiltersData = parseAndCache('DetailFilters', xmlData, xmlParser.getDetailFilters);
                         tableRenderer.renderTable(detailFiltersData, '#table_container', 'Detail Filters');
-
                         break;
                     default:
                         console.error('Unknown type selected');
@@ -66,19 +50,7 @@ define([
 
                 tableRenderer.renderTable(parsedData, '#table_container', selectedType);
                 $('#table_modal').fadeIn(200);
-                //$('#table_modal .modal-content').removeClass('minimized');
-                //updateMinimizeButton(false);
             });
-
-
-            // function updateMinimizeButton(isMinimized) {
-            //     const button = $('.minimize-modal');
-            //     if (isMinimized) {
-            //         button.addClass('minimized').text('─');
-            //     } else {
-            //         button.removeClass('minimized').text('─');
-            //     }
-            // }
 
             function parseAndCache(type, xmlString, parserFunction) {
                 // Check if data is already cached
@@ -94,21 +66,6 @@ define([
                 return parsedData;
             }
             
-
-            // // Minimize/Maximize handler
-            // $('.minimize-modal').on('click', function() {
-            //     const modalContent = $('#table_modal .modal-content');
-            //     const isMinimized = modalContent.hasClass('minimized');
-
-            //     modalContent.toggleClass('minimized');
-            //     updateMinimizeButton(!isMinimized);
-            // });
-
-            // // Close modal handler
-            // $('.close-modal').on('click', function() {
-            //     $('#table_modal').fadeOut(300);
-            // });
-
             // Close modal when clicking outside
             $(window).on('click', function(event) {
                 if ($(event.target).is('#table_modal')) {
