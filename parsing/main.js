@@ -24,12 +24,12 @@ define([
 
       $("#button_parse").on("click", function () {
         const button = this; // The button that was clicked
-        this.type = $("#select_parse_type").val(); // Get selected type
+        const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = this.xml_data; // XML data source
 
         // Parse or retrieve cached data
-        const parsedData = parseAndCache(button, xmlData, (type) => {
-          switch (type) {
+        const parsedData = parseAndCache(button, xmlData, (xmlParser) => {
+          switch (selectedType) {
             case "Queries":
               return xmlParser.getQueries(xmlData);
             case "Lists":
