@@ -12,7 +12,7 @@ define(["jquery"], function ($) {
       } else {
         console.log(`No cached data for ${type}`);
         // Save new data to sessionStorage
-        localStorage.setItem(`cached_${type}`, JSON.stringify(data));
+        localStorage.setItem(`cached_data__${type}`, JSON.stringify(data));
       }
 
       // Define the headers based on the type
