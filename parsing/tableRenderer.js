@@ -4,17 +4,6 @@ define(["jquery"], function ($) {
       const tableContainer = $(container);
       tableContainer.empty(); // Clear previous content
 
-      // Check for cached data in sessionStorage
-      const cachedData = localStorage.getItem(`cached_data__${type}`);
-      if (cachedData) {
-        console.log(`Using cached data for ${type}`);
-        data = JSON.parse(cachedData); // Use cached data
-      } else {
-        console.log(`No cached data for ${type}`);
-        // Save new data to sessionStorage
-        localStorage.setItem(`cached_data__${type}`, JSON.stringify(data));
-      }
-
       // Define the headers based on the type
       let headers = [];
       if (type === "Queries") {
