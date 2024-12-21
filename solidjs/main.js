@@ -5,20 +5,18 @@ define(["jquery"], function ($) {
     }
 
     loadDependencies() {
-      require([
-        "https://esm.sh/solid-js@1.8.1",
-        "https://esm.sh/solid-js/web",
-        "https://esm.sh/solid-js@1.8.1/html",
-      ], (esm, web, html) => {
+      require(["https://esm.sh/preact", "https://esm.sh/solid-js@1.8.1/html"], (
+        preact,
+        html
+      ) => {
         // Create a new script element
         const script = document.createElement("script");
         // Set the script type to module
         script.type = "module";
         // Define the module imports and functionality
         script.textContent = `
-      import {createSignal, onCleanup} from ${esm};
-      import {render} from ${web}; 
-      import {html} from ${html};
+        import { h, render } from ${preact};
+        import {html} from ${html};
       `;
 
         // Append the script to the body
