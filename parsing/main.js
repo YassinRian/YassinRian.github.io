@@ -49,7 +49,7 @@ define([
                 }
 
                 tableRenderer.renderTable(parsedData, '#table_container', selectedType);
-                $('#table_modal').fadeIn(200);
+                $('#table_modal').fadeIn(150);
             });
 
             function parseAndCache(type, xmlString, parserFunction) {
@@ -69,7 +69,7 @@ define([
             // Close modal when clicking outside
             $(window).on('click', function(event) {
                 if ($(event.target).is('#table_modal')) {
-                    $('#table_modal').fadeOut(300);
+                    $('#table_modal').fadeOut(150);
                 }
             });
 
@@ -80,7 +80,6 @@ define([
 const $modal = $('#table_modal');
 const $modalContent = $modal.find('.modal-content');
 const $closeModal = $modal.find('.close-modal');
-const $minimizeButton = $modal.find('#minimize-modal');
 
 let isDragging = false;
 let offsetX = 0;
@@ -92,35 +91,7 @@ $closeModal.on('click', function () {
     $('body').removeClass('modal-active');
 });
 
-// Minimize Modal
-  // Minimize Modal
-  $minimizeButton.on('click', function () {
-    if ($modalContent.hasClass('minimized')) {
-        // Restore modal
-        $modalContent.removeClass('minimized').css({
-            top: '15%',
-            left: '10%',
-            width: '80%',
-            height: '70vh',
-            right: 'auto',
-            bottom: 'auto',
-        });
-        $('body').addClass('modal-active'); // Deactivate body scrolling
-        $(this).text('Minimize'); // Change button text to "Minimize"
-    } else {
-        // Minimize modal
-        $modalContent.addClass('minimized').css({
-            top: 'auto',
-            left: 'auto',
-            bottom: '10px',
-            right: '10px',
-            width: '300px',
-            height: '40px',
-        });
-        $('body').removeClass('modal-active'); // Activate body scrolling
-        $(this).text('Maximize'); // Change button text to "Maximize"
-    }
-});
+
 
 // Make Modal Draggable
 $modalContent.on('mousedown', function (e) {
