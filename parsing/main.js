@@ -48,14 +48,13 @@ define([
 
         // Clear irrelevant caches
         clearIrrelevantCaches(type, uniqueId);
-        console.log(xmlString);
 
         // Check if data exists in cache
-        // const cachedData = localStorage.getItem(cacheKey);
-        // if (cachedData && type && uniqueId) {
-        //   console.log(`Using cached data for ${type} with ID ${uniqueId}`);
-        //   return JSON.parse(cachedData);
-        // }
+        const cachedData = localStorage.getItem(cacheKey);
+        if (cachedData && type && uniqueId) {
+          console.log(`Using cached data for ${type} with ID ${uniqueId}`);
+          return JSON.parse(cachedData);
+        }
 
         // Parse based on type
         console.log(`Parsing and caching data for ${type}`);
