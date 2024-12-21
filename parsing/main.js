@@ -77,14 +77,14 @@ define([
 
         // Generate unique ID if not present
         if (!uniqueId) {
-          uniqueId = Math.random().toString(36).substr(2, 9);
-          $(button).attr("data-id", uniqueId);
-          $(button).attr("data-type", type);
+          uniqueId = Math.random().toString(36).substr(2, 9); // Generate unique ID
+          $(button).data("id", uniqueId); // Set unique ID using .data()
+
+          // Store in localStorage
+          const newCacheKey = `cache_${type}_${uniqueId}`;
+          localStorage.setItem(newCacheKey, JSON.stringify(parsedData));
         }
 
-        // Store in localStorage
-        const newCacheKey = `cache_${type}_${uniqueId}`;
-        localStorage.setItem(newCacheKey, JSON.stringify(parsedData));
         return parsedData;
       }
 
