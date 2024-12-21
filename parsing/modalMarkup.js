@@ -1,7 +1,7 @@
-define(function() {
-    return {
-        selectBox: () => {
-            return `
+define(function () {
+  return {
+    selectBox: () => {
+      return `
             <div>
             <label for="select_parse_type">Select Type:</label>
             <select id="select_parse_type">
@@ -11,9 +11,9 @@ define(function() {
             </select>
             <button id="button_parse">Parse</button>
             `;
-        },      
-        modal: () => {
-            return `
+    },
+    modal: () => {
+      return `
             <div id="table_modal" class="modal">
                 <div class="modal-content" draggable="true">                    
                     <div style="display: flex; justify-content: right; align-items: center;">
@@ -23,8 +23,7 @@ define(function() {
                     <div id="table_container"></div>
                 </div>
             </div>
-            `
-        }
-    }
-
+            `;
+    },
+  };
 });
