@@ -28,7 +28,7 @@ define([
         const xmlData = this.xml_data; // XML data source
 
         // Parse or retrieve cached data
-        const parsedData = parseAndCache(button, xmlData, (xmlParser) => {
+        const parsedData = parseAndCache(button, xmlData, (xmlData) => {
           switch (selectedType) {
             case "Queries":
               return xmlParser.getQueries(xmlData);
