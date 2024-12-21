@@ -7,41 +7,6 @@ define([
 ], function ($, xmlParser, tableRenderer, tableStyles, modalMarkup) {
   function App() {}
 
-  // cache functions
-  window.cache = window.cache || {};
-
-  function setCache(key, value) {
-    window.cache[key] = value;
-    console.log(`Cached data for ${key}`);
-  }
-
-  function getCache(key) {
-    const data = window.cache[key];
-    if (data) {
-      console.log(`Retrieved cached data for ${key}`);
-    } else {
-      console.log(`No cached data for ${key}`);
-    }
-    return data;
-  }
-
-  function clearCache() {
-    window.cache = {};
-    console.log("Cache cleared");
-  }
-
-  function parseAndCache(type, xmlString, parserFunction) {
-    const cacheKey = `cached_${type}`;
-    const cachedData = getCache(cacheKey);
-    if (cachedData) {
-      return cachedData;
-    }
-
-    const parsedData = parserFunction(xmlString);
-    setCache(cacheKey, parsedData);
-    return parsedData;
-  }
-
   //=======================================================================================================
   App.prototype.initialize = function (oPage, fnDoneInitializing) {
     this.xml_data = oPage.page.application.document.reportXML;
@@ -104,7 +69,42 @@ define([
         $("#table_modal").fadeIn(150);
       });
 
-      // minimize and drag modal
+      // cache functions=======================================
+      window.cache = window.cache || {};
+
+      function setCache(key, value) {
+        window.cache[key] = value;
+        console.log(`Cached data for ${key}`);
+      }
+
+      function getCache(key) {
+        const data = window.cache[key];
+        if (data) {
+          console.log(`Retrieved cached data for ${key}`);
+        } else {
+          console.log(`No cached data for ${key}`);
+        }
+        return data;
+      }
+
+      function clearCache() {
+        window.cache = {};
+        console.log("Cache cleared");
+      }
+
+      function parseAndCache(type, xmlString, parserFunction) {
+        const cacheKey = `cached_${type}`;
+        const cachedData = getCache(cacheKey);
+        if (cachedData) {
+          return cachedData;
+        }
+
+        const parsedData = parserFunction(xmlString);
+        setCache(cacheKey, parsedData);
+        return parsedData;
+      }
+
+      // minimize and drag modal=======================================
 
       const $modal = $("#table_modal");
       const $modalContent = $modal.find(".modal-content");
