@@ -7,6 +7,42 @@ define([
 ], function ($, xmlParser, tableRenderer, tableStyles, modalMarkup) {
   function App() {}
 
+  // cache functions
+  window.cache = window.cache || {};
+
+  function setCache(key, value) {
+    window.cache[key] = value;
+    console.log(`Cached data for ${key}`);
+  }
+
+  function getCache(key) {
+    const data = window.cache[key];
+    if (data) {
+      console.log(`Retrieved cached data for ${key}`);
+    } else {
+      console.log(`No cached data for ${key}`);
+    }
+    return data;
+  }
+
+  function clearCache() {
+    window.cache = {};
+    console.log("Cache cleared");
+  }
+
+  function parseAndCache(type, xmlString, parserFunction) {
+    const cacheKey = `cached_${type}`;
+    const cachedData = getCache(cacheKey);
+    if (cachedData) {
+      return cachedData;
+    }
+
+    const parsedData = parserFunction(xmlString);
+    setCache(cacheKey, parsedData);
+    return parsedData;
+  }
+
+  //=======================================================================================================
   App.prototype.initialize = function (oPage, fnDoneInitializing) {
     this.xml_data = oPage.page.application.document.reportXML;
     fnDoneInitializing();
@@ -68,39 +104,6 @@ define([
         $("#table_modal").fadeIn(150);
       });
 
-      // Function to clear cache
-      function clearCache() {
-        Object.keys(sessionStorage).forEach((key) => {
-          if (key.startsWith(cacheKeyPrefix)) {
-            sessionStorage.removeItem(key);
-          }
-        });
-        console.log("Cache cleared due to tab/window switch");
-      }
-
-      // Example: Function to parse and cache
-      function parseAndCache(type, xmlString, parserFunction) {
-        const cacheKey = `${cacheKeyPrefix}${type}`;
-        const cachedData = sessionStorage.getItem(cacheKey);
-        if (cachedData) {
-          console.log(`Using cached data for ${type}`);
-          return JSON.parse(cachedData);
-        }
-
-        console.log(`Parsing and caching data for ${type}`);
-        const parsedData = parserFunction(xmlString);
-        sessionStorage.setItem(cacheKey, JSON.stringify(parsedData));
-        return parsedData;
-      }
-
-      // Listen for visibility change event
-      document.addEventListener("visibilitychange", () => {
-        if (document.hidden) {
-          // Page is no longer visible (switched to another tab/window)
-          clearCache();
-        }
-      });
-
       // minimize and drag modal
 
       const $modal = $("#table_modal");
@@ -147,7 +150,9 @@ define([
           $modalContent.css("cursor", "move");
         }
       });
+
+      //=======================================================================================================
     } // End if statement
-  };
+  }; // End draw function
   return App;
-});
+}); // End define function
