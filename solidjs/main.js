@@ -5,9 +5,9 @@ define(["jquery"], function ($) {
     }
 
     loadDependencies() {
-      require(["https://esm.sh/preact", "https://esm.sh/solid-js@1.8.1/html"], (
+      require(["https://esm.sh/preact", "https://esm.sh/htm"], (
         preact,
-        html
+        htm
       ) => {
         // Create a new script element
         const script = document.createElement("script");
@@ -16,7 +16,7 @@ define(["jquery"], function ($) {
         // Define the module imports and functionality
         script.textContent = `
         import { h, render } from ${preact};
-        import {html} from ${html};
+        import {html} from ${htm};
       `;
 
         // Append the script to the body
@@ -25,15 +25,10 @@ define(["jquery"], function ($) {
     }
 
     draw(oControlHost) {
-      const App = () => {
-        const [count, setCount] = createSignal(0),
-          timer = setInterval(() => setCount(count() + 1), 1000);
-        onCleanup(() => clearInterval(timer));
-        return html`<div>${count}</div>`;
-      };
-
       elm = oControlHost.container;
-      render(App, elm);
+      // Create your app
+      const app = h("h1", null, "Hello World!");
+      render(app, elm);
     }
   } //einde class
   return Main;
