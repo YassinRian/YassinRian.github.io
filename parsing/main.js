@@ -29,10 +29,10 @@ define([
         const xmlData = this.xml_data; // XML data source
 
         // Ensure the button has a valid type set
-        $(this).attr("data-type", selectedType);
+        $(button).data("type", selectedType);
 
         // Parse or retrieve cached data
-        const parsedData = parseAndCache(this, xmlData);
+        const parsedData = parseAndCache(button, xmlData);
 
         // Render the table
         tableRenderer.renderTable(parsedData, "#table_container", selectedType);
