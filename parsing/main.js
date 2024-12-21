@@ -14,6 +14,7 @@ define([
     }
 
     App.prototype.draw = function(oControlHost) {
+        const cacheKeyPrefix = 'cached_';
         const { userName } = oControlHost.configuration || ''; // Add fallback empty string
         if (userName === '951100') {
             const elm = oControlHost.container;
@@ -52,27 +53,40 @@ define([
                 $('#table_modal').fadeIn(150);
             });
 
-            function parseAndCache(type, xmlString, parserFunction) {
-                // Check if data is already cached
-                const cachedData = localStorage.getItem(`cached_${type}`);
-                if (cachedData) {
-                    console.log(`Using cached data for ${type}`);
-                    return JSON.parse(cachedData);
-                }
-            
-                console.log(`Parsing and caching data for ${type}`);
-                const parsedData = parserFunction(xmlString); // Parse XML
-                localStorage.setItem(`cached_${type}`, JSON.stringify(parsedData)); // Cache the result
-                return parsedData;
-            }
-            
-            // Close modal when clicking outside
-            $(window).on('click', function(event) {
-                if ($(event.target).is('#table_modal')) {
-                    $('#table_modal').fadeOut(150);
-                }
-            });
 
+            // Function to clear cache
+    function clearCache() {
+        Object.keys(sessionStorage).forEach(key => {
+            if (key.startsWith(cacheKeyPrefix)) {
+                sessionStorage.removeItem(key);
+            }
+        });
+        console.log('Cache cleared due to tab/window switch');
+    }
+
+     // Example: Function to parse and cache
+     function parseAndCache(type, xmlString, parserFunction) {
+        const cacheKey = `${cacheKeyPrefix}${type}`;
+        const cachedData = sessionStorage.getItem(cacheKey);
+        if (cachedData) {
+            console.log(`Using cached data for ${type}`);
+            return JSON.parse(cachedData);
+        }
+
+        console.log(`Parsing and caching data for ${type}`);
+        const parsedData = parserFunction(xmlString);
+        sessionStorage.setItem(cacheKey, JSON.stringify(parsedData));
+        return parsedData;
+    }
+
+
+    // Listen for visibility change event
+    document.addEventListener('visibilitychange', () => {
+        if (document.hidden) {
+            // Page is no longer visible (switched to another tab/window)
+            clearCache();
+        }
+    });
 
 
 // minimize and drag modal
@@ -91,12 +105,15 @@ $closeModal.on('click', function () {
     $('body').removeClass('modal-active');
 });
 
-
+ // Close modal when clicking outside
+ $(window).on('click', function(event) {
+    if ($(event.target).is('#table_modal')) {
+     $('#table_modal').fadeOut(150);
+    }
+});
 
 // Make Modal Draggable
 $modalContent.on('mousedown', function (e) {
-    if ($modalContent.hasClass('minimized')) return; // Skip dragging if minimized
-
     isDragging = true;
     offsetX = e.clientX - $modalContent.offset().left;
     offsetY = e.clientY - $modalContent.offset().top;
@@ -119,11 +136,8 @@ $(document).on('mouseup', function () {
     }
 });
 
+} // End if statement
 
-
-
-        } // End if statement
-    }
-
-    return App;
+}
+ return App;
 });
