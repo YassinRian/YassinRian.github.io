@@ -67,18 +67,18 @@ define([
                 tableRenderer.renderTable(parsedData, '#table_container', selectedType);
                 $('#table_modal').fadeIn(300);
                 $('#table_modal .modal-content').removeClass('minimized');
-                updateMinimizeButton(false);
+                //updateMinimizeButton(false);
             });
 
 
-            function updateMinimizeButton(isMinimized) {
-                const button = $('.minimize-modal');
-                if (isMinimized) {
-                    button.addClass('minimized').text('─');
-                } else {
-                    button.removeClass('minimized').text('─');
-                }
-            }
+            // function updateMinimizeButton(isMinimized) {
+            //     const button = $('.minimize-modal');
+            //     if (isMinimized) {
+            //         button.addClass('minimized').text('─');
+            //     } else {
+            //         button.removeClass('minimized').text('─');
+            //     }
+            // }
 
             function parseAndCache(type, xmlString, parserFunction) {
                 // Check if data is already cached
@@ -109,12 +109,12 @@ define([
             //     $('#table_modal').fadeOut(300);
             // });
 
-            // // Close modal when clicking outside
-            // $(window).on('click', function(event) {
-            //     if ($(event.target).is('#table_modal')) {
-            //         $('#table_modal').fadeOut(300);
-            //     }
-            // });
+            // Close modal when clicking outside
+            $(window).on('click', function(event) {
+                if ($(event.target).is('#table_modal')) {
+                    $('#table_modal').fadeOut(300);
+                }
+            });
 
 
 
@@ -123,7 +123,7 @@ define([
 const $modal = $('#table_modal');
 const $modalContent = $modal.find('.modal-content');
 const $closeModal = $modal.find('.close-modal');
-const $minimizeButton = $modal.find('.minimize-modal');
+const $minimizeButton = $modal.find('#minimize-modal');
 
 let isDragging = false;
 let offsetX = 0;

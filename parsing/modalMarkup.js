@@ -18,7 +18,7 @@ define(function() {
                 <div class="modal-content" draggable="true">                    
                     <div style="display: flex; justify-content: space-between; align-items: center;">
                         <span class="close-modal" style="font-size: 24px; cursor: pointer; color: #666;">&times;</span>
-                        <button class="minimize_modal" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Minimize</button>
+                        <button id="minimize_modal" style="background-color: #007bff; color: white; border: none; padding: 5px 10px; cursor: pointer; border-radius: 3px;">Minimize</button>
                     </div>
         
                     <div id="table_container"></div>
