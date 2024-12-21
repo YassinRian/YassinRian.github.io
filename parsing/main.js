@@ -47,6 +47,7 @@ define([
 
         // Clear irrelevant caches
         clearIrrelevantCaches(type, uniqueId);
+        console.log(xmlString);
 
         // Check if data exists in cache
         // const cachedData = localStorage.getItem(cacheKey);
