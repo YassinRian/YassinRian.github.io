@@ -27,6 +27,8 @@ define([
         const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = this.xml_data; // XML data source
 
+        console.log(xmlData);
+
         // Ensure the button has a valid type set
         $(button).attr("data-type", selectedType);
 
