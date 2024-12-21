@@ -20,108 +20,33 @@ define([
       $(elm).append(modalMarkup.selectBox());
       $("body").append(modalMarkup.modal());
 
+      // Button click event=======================================
+
       $("#button_parse").on("click", function () {
-        const button = this;
+        const button = this; // The button that was clicked
         const selectedType = $("#select_parse_type").val(); // Get selected type
-        const xmlData = this.xml_data;
+        const xmlData = this.xml_data; // XML data source
 
-        // Ensure button has `data-type` and check for `data-id`
-        $(button).attr("data-type", selectedType);
-        let uniqueId = $(button).data("id");
-
-        if (!uniqueId) {
-          uniqueId = Math.random().toString(36).substr(2, 9);
-          $(button).attr("data-id", uniqueId);
-        }
-
-        const cacheKey = `cache_${selectedType}_${uniqueId}`;
-        let parsedData = getCache(cacheKey);
-
-        if (!parsedData) {
-          console.log(`No cache found for ${cacheKey}, parsing new data`);
-          switch (selectedType) {
+        // Parse or retrieve cached data
+        const parsedData = parseAndCache(button, xmlData, (type) => {
+          switch (type) {
             case "Queries":
-              parsedData = parseAndCache(
-                "Queries",
-                xmlData,
-                xmlParser.getQueries
-              );
-              break;
+              return xmlParser.getQueries(xmlData);
             case "Lists":
-              parsedData = parseAndCache("Lists", xmlData, (xmlString) => {
-                const queryData = xmlParser.getQueries(xmlString);
-                const listData = xmlParser.getLists(xmlString);
-                return xmlParser.addLabelsToList(queryData, listData);
-              });
-              break;
-            case "Detail Filters":
-              parsedData = parseAndCache(
-                "DetailFilters",
-                xmlData,
-                xmlParser.getDetailFilters
-              );
-              break;
+              const queryData = xmlParser.getQueries(xmlData);
+              const listData = xmlParser.getLists(xmlData);
+              return xmlParser.addLabelsToList(queryData, listData);
+            case "DetailFilters":
+              return xmlParser.getDetailFilters(xmlData);
             default:
-              console.error("Unknown type selected");
-              return;
+              throw new Error("Unknown type selected");
           }
-          setCache(cacheKey, parsedData);
-        } else {
-          console.log(`Using cached data for ${cacheKey}`);
-        }
+        });
 
         // Render the table
         tableRenderer.renderTable(parsedData, "#table_container", selectedType);
         $("#table_modal").fadeIn(150);
       });
-
-      function setCache(key, value) {
-        localStorage.setItem(key, JSON.stringify(value));
-        console.log(`Cached data for ${key}`);
-      }
-
-      function getCache(key) {
-        const data = localStorage.getItem(key);
-        if (data) {
-          console.log(`Retrieved cached data for ${key}`);
-          return JSON.parse(data);
-        }
-        console.log(`No cached data for ${key}`);
-        return null;
-      }
-
-      function clearCache(key) {
-        localStorage.removeItem(key);
-        console.log(`Cleared cache for ${key}`);
-      }
-
-      function parseAndCache(type, xmlString, parserFunction) {
-        const cacheKey = `cache_${type}`;
-        const cachedData = getCache(cacheKey);
-
-        // If cached data exists, return it
-        if (cachedData) {
-          console.log(`Using cached data for ${type}`);
-          return cachedData;
-        }
-
-        console.log(`Parsing and caching new data for ${type}`);
-
-        // Parse the data
-        const parsedData = parserFunction(xmlString);
-
-        // Clear any old cache entries for this type
-        Object.keys(localStorage).forEach((key) => {
-          if (key.startsWith(`cache_${type}`)) {
-            clearCache(key);
-          }
-        });
-
-        // Store the new cache
-        setCache(cacheKey, parsedData);
-
-        return parsedData;
-      }
 
       // cache functions=======================================
 
@@ -130,6 +55,9 @@ define([
         const type = $(button).data("type");
         let uniqueId = $(button).data("id"); // Retrieve existing ID if available
         const cacheKey = `cache_${type}_${uniqueId || "new"}`;
+
+        // If a previous cache exists with a different key, clear it
+        clearIrrelevantCaches(type, uniqueId);
 
         // Check if data exists in cache
         const cachedData = localStorage.getItem(cacheKey);
@@ -153,6 +81,19 @@ define([
         const newCacheKey = `cache_${type}_${uniqueId}`;
         localStorage.setItem(newCacheKey, JSON.stringify(parsedData));
         return parsedData;
+      }
+
+      function clearIrrelevantCaches(type, currentUniqueId) {
+        Object.keys(localStorage).forEach((key) => {
+          const matchesType = key.startsWith(`cache_${type}_`);
+          const matchesUniqueId = key.endsWith(`_${currentUniqueId}`);
+
+          // Clear caches that match the type but not the current unique ID
+          if (matchesType && !matchesUniqueId) {
+            localStorage.removeItem(key);
+            console.log(`Cleared irrelevant cache: ${key}`);
+          }
+        });
       }
 
       // minimize and drag modal=======================================
