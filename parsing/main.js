@@ -137,6 +137,7 @@ $closeModal.on('click', function () {
 
 // Minimize Modal
 $minimizeButton.on('click', function () {
+    console.log('minimize button clicked');
     if ($modalContent.hasClass('minimized')) {
         // Restore modal
         $modalContent.removeClass('minimized').css({
