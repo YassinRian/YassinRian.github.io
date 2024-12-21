@@ -87,6 +87,18 @@ define([
         return parsedData;
       }
 
+      function clearIrrelevantCaches(type, currentUniqueId) {
+        Object.keys(localStorage).forEach((key) => {
+          if (
+            key.startsWith(`cache_${type}_`) &&
+            !key.endsWith(`_${currentUniqueId}`)
+          ) {
+            localStorage.removeItem(key);
+            console.log(`Cleared irrelevant cache: ${key}`);
+          }
+        });
+      }
+
       // minimize and drag modal=======================================
 
       const $modal = $("#table_modal");
