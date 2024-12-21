@@ -76,32 +76,7 @@ define([], function() {
 
         }
 
-.modal-content.minimized {
-    height: 40px !important;
-    overflow: hidden !important;
-    padding-top: 10px !important;
-    padding-bottom: 10px !important;
-}
-
-.minimize-modal.minimized {
-    transform: rotate(180deg);
-}
-
-/* Additional modal styling (you can keep or modify this as per your need) */
-.modal-content {
-    position: relative;
-    background-color: #fff;
-    margin: 15vh auto;
-    padding: 20px;
-    width: 80%;
-    max-width: 1000px;
-    border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
-    height: 70vh;
-    overflow-y: auto;
-    transition: all 0.3s ease;
-}
-
+/* Modal Styling */
 .modal {
     display: none;
     position: fixed;
@@ -113,6 +88,43 @@ define([], function() {
     z-index: 1000;
 }
 
+/* Modal Content */
+.modal-content {
+    position: absolute;
+    background-color: #fff;
+    margin: 0;
+    padding: 20px;
+    width: 80%;
+    max-width: 1000px;
+    border-radius: 5px;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    top: 15%;
+    left: 10%;
+    height: 70vh;
+    overflow-y: auto;
+    cursor: move; /* Indicate draggable */
+}
+
+/* Minimized State for Modal Content */
+.modal-content.minimized {
+    width: 300px !important;
+    height: 40px !important;
+    bottom: 10px !important;
+    right: 10px !important;
+    top: auto !important;
+    left: auto !important;
+    overflow: hidden !important;
+    padding-top: 10px !important;
+    padding-bottom: 10px !important;
+    cursor: default; /* No dragging when minimized */
+}
+
+/* Minimize Button Icon Transformation */
+.minimize-modal.minimized {
+    transform: rotate(180deg);
+}
+
+/* Minimize Button */
 .modal-content > .minimize-modal {
     cursor: pointer;
     color: #666;
@@ -120,11 +132,18 @@ define([], function() {
     margin-right: 15px;
 }
 
+/* Close Button */
 .modal-content > .close-modal {
     cursor: pointer;
     color: #666;
     font-size: 24px;
 }
+
+/* Body Interaction During Modal */
+body.modal-active {
+    overflow: hidden; /* Prevent scrolling */
+}
+
 
     `;
 

@@ -95,26 +95,98 @@ define([
             }
             
 
-            // Minimize/Maximize handler
-            $('.minimize-modal').on('click', function() {
-                const modalContent = $('#table_modal .modal-content');
-                const isMinimized = modalContent.hasClass('minimized');
+            // // Minimize/Maximize handler
+            // $('.minimize-modal').on('click', function() {
+            //     const modalContent = $('#table_modal .modal-content');
+            //     const isMinimized = modalContent.hasClass('minimized');
 
-                modalContent.toggleClass('minimized');
-                updateMinimizeButton(!isMinimized);
-            });
+            //     modalContent.toggleClass('minimized');
+            //     updateMinimizeButton(!isMinimized);
+            // });
 
-            // Close modal handler
-            $('.close-modal').on('click', function() {
-                $('#table_modal').fadeOut(300);
-            });
+            // // Close modal handler
+            // $('.close-modal').on('click', function() {
+            //     $('#table_modal').fadeOut(300);
+            // });
 
-            // Close modal when clicking outside
-            $(window).on('click', function(event) {
-                if ($(event.target).is('#table_modal')) {
-                    $('#table_modal').fadeOut(300);
-                }
-            });
+            // // Close modal when clicking outside
+            // $(window).on('click', function(event) {
+            //     if ($(event.target).is('#table_modal')) {
+            //         $('#table_modal').fadeOut(300);
+            //     }
+            // });
+
+
+
+// minimize and drag modal
+
+const $modal = $('#table_modal');
+const $modalContent = $modal.find('.modal-content');
+const $closeModal = $modal.find('.close-modal');
+const $minimizeButton = $modal.find('.minimize-modal');
+
+let isDragging = false;
+let offsetX = 0;
+let offsetY = 0;
+
+// Close Modal
+$closeModal.on('click', function () {
+    $modal.hide();
+    $('body').removeClass('modal-active');
+});
+
+// Minimize Modal
+$minimizeButton.on('click', function () {
+    if ($modalContent.hasClass('minimized')) {
+        // Restore modal
+        $modalContent.removeClass('minimized').css({
+            top: '15%',
+            left: '10%',
+            width: '80%',
+            height: '70vh',
+        });
+    } else {
+        // Minimize modal
+        $modalContent.addClass('minimized').css({
+            top: 'auto',
+            left: 'auto',
+            bottom: '10px',
+            right: '10px',
+            width: '300px',
+            height: '40px',
+        });
+    }
+});
+
+// Make Modal Draggable
+$modalContent.on('mousedown', function (e) {
+    if ($modalContent.hasClass('minimized')) return; // Skip dragging if minimized
+
+    isDragging = true;
+    offsetX = e.clientX - $modalContent.offset().left;
+    offsetY = e.clientY - $modalContent.offset().top;
+    $modalContent.css('cursor', 'grabbing');
+});
+
+$(document).on('mousemove', function (e) {
+    if (isDragging) {
+        $modalContent.css({
+            left: `${e.clientX - offsetX}px`,
+            top: `${e.clientY - offsetY}px`,
+        });
+    }
+});
+
+$(document).on('mouseup', function () {
+    if (isDragging) {
+        isDragging = false;
+        $modalContent.css('cursor', 'move');
+    }
+});
+
+
+
+
         } // End if statement
     }
 
