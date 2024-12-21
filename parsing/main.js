@@ -28,15 +28,36 @@ define([
 
                 switch (selectedType) {
                     case 'Queries':
-                        parsedData = xmlParser.getQueries(xmlData);
+                        //parsedData = xmlParser.getQueries(xmlData);
+                        
+                        const queriesData = parseAndCache('Queries', xmlData, xmlParser.getQueries);
+                        tableRenderer.renderTable(queriesData, '#table_container', 'Queries');
+                        
+
+
                         break;
                     case 'Lists':
-                        const queryData = xmlParser.getQueries(xmlData);
-                        const listData = xmlParser.getLists(xmlData);
-                        parsedData = xmlParser.addLabelsToList(queryData, listData);
+
+
+                        //const queryData = xmlParser.getQueries(xmlData);
+                        //const listData = xmlParser.getLists(xmlData);
+                        //parsedData = xmlParser.addLabelsToList(queryData, listData);
+
+                        const listsData = parseAndCache('Lists', xmlData, (xmlString) => {
+                            const queryData = xmlParser.getQueries(xmlString);
+                            const listData = xmlParser.getLists(xmlString);
+                            return xmlParser.addLabelsToList(queryData, listData);
+                        });
+                        tableRenderer.renderTable(listsData, '#table_container', 'Lists');
+                        
+
                         break;
                     case 'Detail Filters':
-                        parsedData = xmlParser.getDetailFilters(xmlData);
+                        //parsedData = xmlParser.getDetailFilters(xmlData);
+
+                        const detailFiltersData = parseAndCache('DetailFilters', xmlData, xmlParser.getDetailFilters);
+                        tableRenderer.renderTable(detailFiltersData, '#table_container', 'Detail Filters');
+
                         break;
                     default:
                         console.error('Unknown type selected');
@@ -58,6 +79,21 @@ define([
                     button.removeClass('minimized').text('─');
                 }
             }
+
+            function parseAndCache(type, xmlString, parserFunction) {
+                // Check if data is already cached
+                const cachedData = localStorage.getItem(`cached_${type}`);
+                if (cachedData) {
+                    console.log(`Using cached data for ${type}`);
+                    return JSON.parse(cachedData);
+                }
+            
+                console.log(`Parsing and caching data for ${type}`);
+                const parsedData = parserFunction(xmlString); // Parse XML
+                localStorage.setItem(`cached_${type}`, JSON.stringify(parsedData)); // Cache the result
+                return parsedData;
+            }
+            
 
             // Minimize/Maximize handler
             $('.minimize-modal').on('click', function() {
