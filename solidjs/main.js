@@ -1,27 +1,25 @@
-define(["jquery"], function ($) {
+define(["jquery", "https://esm.sh/preact", "https://esm.sh/htm"], function (
+  $,
+  preact,
+  htm
+) {
   class Main {
     async initialize() {
       await this.loadDependencies();
     }
 
     loadDependencies() {
-      require(["https://esm.sh/preact", "https://esm.sh/htm"], (
-        preact,
-        htm
-      ) => {
-        // Create a new script element
-        const script = document.createElement("script");
-        // Set the script type to module
-        script.type = "module";
-        // Define the module imports and functionality
-        script.textContent = `
+      // Create a new script element
+      const script = document.createElement("script");
+      // Set the script type to module
+      script.type = "module";
+      // Define the module imports and functionality
+      script.textContent = `
         import { h, render } from ${preact};
         import {html} from ${htm};
       `;
-
-        // Append the script to the body
-        $("body").append(script);
-      });
+      // Append the script to the body
+      $("body").append(script);
     }
 
     draw(oControlHost) {
