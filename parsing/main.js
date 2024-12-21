@@ -23,40 +23,29 @@ define([
       // Button click event=======================================
 
       $("#button_parse").on("click", function () {
-        const button = this; // The button that was clicked
+        const button = this;
         const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = this.xml_data; // XML data source
 
+        // Ensure the button has a valid type set
+        $(button).attr("data-type", selectedType);
+
         // Parse or retrieve cached data
-        const parsedData = parseAndCache(button, xmlData, (xmlData) => {
-          switch (selectedType) {
-            case "Queries":
-              return xmlParser.getQueries(xmlData);
-            case "Lists":
-              const queryData = xmlParser.getQueries(xmlData);
-              const listData = xmlParser.getLists(xmlData);
-              return xmlParser.addLabelsToList(queryData, listData);
-            case "DetailFilters":
-              return xmlParser.getDetailFilters(xmlData);
-            default:
-              throw new Error("Unknown type selected");
-          }
-        });
+        const parsedData = parseAndCache(button, xmlData);
 
         // Render the table
         tableRenderer.renderTable(parsedData, "#table_container", selectedType);
         $("#table_modal").fadeIn(150);
       });
-
       // cache functions=======================================
 
-      function parseAndCache(button, xmlString, parserFunction) {
+      function parseAndCache(button, xmlString) {
         // Get attributes from the button
         const type = $(button).data("type");
-        let uniqueId = $(button).data("id"); // Retrieve existing ID if available
+        let uniqueId = $(button).data("id");
         const cacheKey = `cache_${type}_${uniqueId || "new"}`;
 
-        // If a previous cache exists with a different key, clear it
+        // Clear irrelevant caches
         clearIrrelevantCaches(type, uniqueId);
 
         // Check if data exists in cache
@@ -66,34 +55,36 @@ define([
           return JSON.parse(cachedData);
         }
 
-        // Parse and store in cache
+        // Parse based on type
         console.log(`Parsing and caching data for ${type}`);
-        const parsedData = parserFunction(xmlString);
+        let parsedData;
+        switch (type) {
+          case "Queries":
+            parsedData = xmlParser.getQueries(xmlString);
+            break;
+          case "Lists":
+            const queryData = xmlParser.getQueries(xmlString);
+            const listData = xmlParser.getLists(xmlString);
+            parsedData = xmlParser.addLabelsToList(queryData, listData);
+            break;
+          case "DetailFilters":
+            parsedData = xmlParser.getDetailFilters(xmlString);
+            break;
+          default:
+            throw new Error("Unknown type selected");
+        }
 
-        // If no uniqueId, generate one and set it as a button attribute
+        // Generate unique ID if not present
         if (!uniqueId) {
-          uniqueId = Math.random().toString(36).substr(2, 9); // Generate unique ID
-          $(button).attr("data-id", uniqueId); // Add to button
-          $(button).attr("data-type", type); // Ensure type is set
+          uniqueId = Math.random().toString(36).substr(2, 9);
+          $(button).attr("data-id", uniqueId);
+          $(button).attr("data-type", type);
         }
 
         // Store in localStorage
         const newCacheKey = `cache_${type}_${uniqueId}`;
         localStorage.setItem(newCacheKey, JSON.stringify(parsedData));
         return parsedData;
-      }
-
-      function clearIrrelevantCaches(type, currentUniqueId) {
-        Object.keys(localStorage).forEach((key) => {
-          const matchesType = key.startsWith(`cache_${type}_`);
-          const matchesUniqueId = key.endsWith(`_${currentUniqueId}`);
-
-          // Clear caches that match the type but not the current unique ID
-          if (matchesType && !matchesUniqueId) {
-            localStorage.removeItem(key);
-            console.log(`Cleared irrelevant cache: ${key}`);
-          }
-        });
       }
 
       // minimize and drag modal=======================================
