@@ -24,7 +24,7 @@ define([
 
       $("#button_parse").on("click", function () {
         const button = this; // The button that was clicked
-        const selectedType = $("#select_parse_type").val(); // Get selected type
+        this.type = $("#select_parse_type").val(); // Get selected type
         const xmlData = this.xml_data; // XML data source
 
         // Parse or retrieve cached data
