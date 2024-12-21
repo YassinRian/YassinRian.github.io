@@ -1,21 +1,19 @@
 define(["jquery"], function ($) {
   return {
     renderTable: function (data, container, type) {
-      const cacheKey = `cached_${type}`;
-      globalThis.cache = globalThis.cache || {};
-
-      // Check for cached data
-      const cachedData = globalThis.cache[cacheKey];
-      if (cachedData) {
-        console.log(`Using cached data for ${type}`);
-        data = cachedData;
-      } else {
-        console.log(`No cached data for ${type}`);
-        globalThis.cache[cacheKey] = data; // Save new data to cache
-      }
-
       const tableContainer = $(container);
       tableContainer.empty(); // Clear previous content
+
+      // Check for cached data in sessionStorage
+      const cachedData = localStorage.getItem(`cached_data__${type}`);
+      if (cachedData) {
+        console.log(`Using cached data for ${type}`);
+        data = JSON.parse(cachedData); // Use cached data
+      } else {
+        console.log(`No cached data for ${type}`);
+        // Save new data to sessionStorage
+        localStorage.setItem(`cached_${type}`, JSON.stringify(data));
+      }
 
       // Define the headers based on the type
       let headers = [];

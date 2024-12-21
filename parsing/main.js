@@ -70,37 +70,54 @@ define([
       });
 
       // cache functions=======================================
-      window.cache = window.cache || {};
 
-      function setCache(key, value) {
-        window.cache[key] = value;
-        console.log(`Cached data for ${key}`);
+      const cacheKeyPrefix = "cached_data__";
+
+      // Function to clear localStorage cache
+      function clearLocalCache() {
+        Object.keys(localStorage).forEach((key) => {
+          if (key.startsWith(cacheKeyPrefix)) {
+            localStorage.removeItem(key);
+          }
+        });
+        console.log("Local storage cache cleared due to tab/window switch");
       }
 
-      function getCache(key) {
-        const data = window.cache[key];
-        if (data) {
-          console.log(`Retrieved cached data for ${key}`);
-        } else {
-          console.log(`No cached data for ${key}`);
+      // Add a unique identifier for the current tab
+      const tabId = Math.random().toString(36).substr(2, 9);
+      localStorage.setItem("activeTabId", tabId);
+
+      // Listen for visibility change event
+      document.addEventListener("visibilitychange", () => {
+        if (document.hidden) {
+          // Page is no longer visible (switched to another tab/window)
+          const activeTab = localStorage.getItem("activeTabId");
+          if (activeTab === tabId) {
+            clearLocalCache();
+          }
         }
-        return data;
-      }
+      });
 
-      function clearCache() {
-        window.cache = {};
-        console.log("Cache cleared");
-      }
+      // Listen for storage events to handle multi-tab scenarios
+      window.addEventListener("storage", (event) => {
+        if (event.key === "activeTabId" && event.newValue !== tabId) {
+          // Another tab has become active
+          clearLocalCache();
+        }
+      });
 
+      // Example: Function to parse and cache
       function parseAndCache(type, xmlString, parserFunction) {
-        const cacheKey = `cached_${type}`;
-        const cachedData = getCache(cacheKey);
+        const cacheKey = `${cacheKeyPrefix}${type}`;
+        const cachedData = localStorage.getItem(cacheKey);
         if (cachedData) {
-          return cachedData;
+          console.log(`Using cached data for ${type}`);
+          return JSON.parse(cachedData);
         }
 
+        console.log(`Parsing and caching data for ${type}`);
         const parsedData = parserFunction(xmlString);
-        setCache(cacheKey, parsedData);
+        localStorage.setItem(cacheKey, JSON.stringify(parsedData));
         return parsedData;
       }
 
