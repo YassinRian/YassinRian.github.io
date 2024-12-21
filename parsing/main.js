@@ -51,7 +51,7 @@ define([
 
         // Check if data exists in cache
         const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData && type && uniqueId) {
+        if (cachedData && uniqueId) {
           console.log(`Using cached data for ${type} with ID ${uniqueId}`);
           return JSON.parse(cachedData);
         }
