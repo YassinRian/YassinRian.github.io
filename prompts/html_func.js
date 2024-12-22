@@ -38,7 +38,7 @@ define(['jquery'],function ($) {
       if (e.key === "Enter") {
         // Only trigger on Enter key
         if ($(this).val().length > 1) {
-          this.filter_lijst($(this)); // Call the filter_lijst function to filter the options
+          filter_lijst($(this)); // Call the filter_lijst function to filter the options
         } else {
           let selectie = $(this).data().select_class;
           let selec_vals = $("." + selectie).find("option"); // Get options
