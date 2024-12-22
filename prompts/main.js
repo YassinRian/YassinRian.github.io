@@ -5,9 +5,7 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
 
       // Initialize method: Now you can use basicControl since it's already loaded
       AppPrompts.prototype.initialize = function(oControlHost,fnDoneInitializing) {
-        console.log(oControlHost.page.getControlByName("prompt_control"));
-        let _app = new App();  // Create an instance of basicControl
-        this.data = _app.getData();  // Store the data on the instance (this)
+        this.data = oControlHost.page.getControlByName("prompt_control").dataStores[0].json;
         fnDoneInitializing();  // Callback to indicate initialization is done
     }
 
@@ -17,7 +15,9 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
     $(elm).append("<button id='btn_prompt'>Create Prompt</button>");
    
     $("#btn_prompt").on("click", () => {
-      console.log(this.data);
+      let prompt = new App();
+      prompt.setData(this.data);
+      prompt.draw(oControlHost);
     });
    
   };
