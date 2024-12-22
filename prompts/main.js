@@ -4,8 +4,8 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
   function AppPrompts() {}
 
       // Initialize method: Now you can use basicControl since it's already loaded
-      AppPrompts.prototype.initialize = async function(fnDoneInitializing) {
-        let _app = await new App();  // Create an instance of basicControl
+      AppPrompts.prototype.initialize = function(fnDoneInitializing) {
+        let _app = new App();  // Create an instance of basicControl
         this.data = _app.getData();  // Store the data on the instance (this)
         fnDoneInitializing();  // Callback to indicate initialization is done
     }
