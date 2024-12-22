@@ -3,10 +3,14 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
   
   function AppPrompts() {}
 
-      // Initialize method: Now you can use basicControl since it's already loaded
-      AppPrompts.prototype.initialize = function(oControlHost,fnDoneInitializing) {
-        this.data = oControlHost.page.getControlByName("prompt_control").dataStores[0].json;
-        fnDoneInitializing();  // Callback to indicate initialization is done
+    //   // Initialize method: Now you can use basicControl since it's already loaded
+    //   AppPrompts.prototype.initialize = function(oControlHost,fnDoneInitializing) {
+    //     this.data = oControlHost.page.getControlByName("prompt_control").dataStores[0].json;
+    //     fnDoneInitializing();  // Callback to indicate initialization is done
+    // }
+
+    AppPrompts.prototype.setData = function (oDataStore) {
+      this.dataStore = oDataStore;
     }
 
   AppPrompts.prototype.draw = function (oControlHost) {
@@ -16,7 +20,7 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
    
     $("#btn_prompt").on("click", () => {
       let prompt = new App();
-      //prompt.setData(this.data);
+      prompt.setData(this.dataStore); // setData takes oDataStore
       prompt.draw(oControlHost);
     });
    
