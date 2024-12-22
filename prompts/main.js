@@ -6,7 +6,7 @@ define(["jquery"], function ($) {
   };
   
   AppPrompts.prototype.draw = function (oControlHost) {
-    console.log(this.data);
+    console.log(this.data.control.datastores);
   };
 
   return AppPrompts;
