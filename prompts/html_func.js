@@ -33,7 +33,7 @@ define(['jquery'],function ($) {
         .find("option")
         .map(function () {
           $(this).removeData();
-          return _this_;
+          return this;
         })
         .prop("selected", false);
     },
@@ -41,7 +41,7 @@ define(['jquery'],function ($) {
       let _this_ = $(e.target); // Get the input element
       if (e.key === "Enter") {
           if (_this_.val().length > 1) {
-              filter_lijst(_this_); // Call the filter_lijst function
+              this.filter_lijst(_this_); // Call the filter_lijst function
           } else {
               let selectie = _this_.data().select_class;
               let selec_vals = $("." + selectie).find("option");
