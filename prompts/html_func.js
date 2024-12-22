@@ -8,44 +8,44 @@ define(['jquery'],function ($) {
       // Compile the input value into a regular expression
       let searchRegex = new RegExp(inp_val, "i"); // 'i' for case-insensitive matching
 
-      selec_vals.each(function () {
+      selec_vals.each(function (_this_) {
         let optionText = $(this).text().replace(/\u00A0/g, "");
         if (searchRegex.test(optionText)) {
-          $(this).data({ selected: true });
+          $(_this_).data({ selected: true });
         } else {
-          $(this).data({ selected: false });
+          $(_this_).data({ selected: false });
         }
       });
 
       selec_vals
-        .filter(function () {
-          return $(this).data().selected;
+        .filter(function (_this_) {
+          return $(_this_).data().selected;
         })
         .show()
         .prop("selected", true);
     },
-    wis_selecties: (e) => {
-      let class_ = $(this).attr("data-selectie");
+    wis_selecties: function(_this_) {
+      let class_ = $(_this_).attr("data-selectie");
       $("." + class_)
         .find("option")
         .map(function () {
-          $(this).removeData();
-          return this;
+          $(_this_).removeData();
+          return _this_;
         })
         .prop("selected", false);
     },
-    input_func: (e) => {
+    input_func: function(e, _this_) {
       if (e.key === "Enter") {
         // Only trigger on Enter key
-        if ($(this).val().length > 1) {
-          filter_lijst($(this)); // Call the filter_lijst function to filter the options
+        if ($(_this_).val().length > 1) {
+          this.filter_lijst($(_this_)); // Call the filter_lijst function to filter the options
         } else {
-          let selectie = $(this).data().select_class;
+          let selectie = $(_this_).data().select_class;
           let selec_vals = $("." + selectie).find("option"); // Get options
           selec_vals
             .map(function () {
-              $(this).removeData();
-              return this;
+              $(_this_).removeData();
+              return _this_;
             })
             .prop("selected", false);
         }
