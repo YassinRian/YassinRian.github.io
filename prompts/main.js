@@ -3,7 +3,7 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
 
 
       // Initialize method: Now you can use basicControl since it's already loaded
-      App.prototype.initialize = function(fnDoneInitializing) {
+      AppPrompts.prototype.initialize = function(fnDoneInitializing) {
         let _basicControl = new AppPrompts();  // Create an instance of basicControl
         this.data = _basicControl.getData();  // Store the data on the instance (this)
         console.log(this.data);  // You can log the data here
