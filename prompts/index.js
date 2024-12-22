@@ -1,4 +1,4 @@
-define(["jquery", "https://yassinrian.github.io/html_func.js"], function ($,html_func_) {
+define(["jquery", "https://yassinrian.github.io/prompts/html_func.js"], function ($,html_func_) {
   "use strict";
 
   class App {
@@ -28,25 +28,14 @@ define(["jquery", "https://yassinrian.github.io/html_func.js"], function ($,html
     }
 
     setData(oDataStore) {
-      this.DataStore = oDataStore;
-    }
-
-    initialize(oControlHost, fnDoneInitializing) {
-      fnDoneInitializing();
+      this.data = oDataStore.control.dataStores[0].json;
     }
 
     draw(oControlHost) // deze plaats alles globaal
      {
-      let _1wh = "some_value_for_s1h";
-      let _cvn = "some_name";
-      let _97n = 123;
-      let _psn = this.DataStore._x3c._9tg[0]; // dit werkt !! wow:)
-
-      let obj_yassin = new _3a5(_1wh, _cvn, _97n, _psn);
-      //this.data = obj_yassin.json.columns
 
       let elm = oControlHost.container;
-      $(elm).append(html_func_.html(obj_yassin.json.columns));
+      $(elm).append(html_func_.html(this.data.columns));
 
       $("#box1").data({ select_class: "select_1" });
       $("#box2").data({ select_class: "select_2" });
