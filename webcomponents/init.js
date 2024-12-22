@@ -2,11 +2,8 @@ define(["jquery", "https://yassinrian.github.io/webcomponents/webcomp1.js"], fun
   "use strict";
 
   class WebComponent {
-    constructor() {
-      this.init();
-    }
 
-    async initilize(fnDoneInitializing) {
+    async initialize(fnDoneInitializing) {
       await shoelace.loadShoelaceModule();
       console.log("WebComponent initialized");
       fnDoneInitializing();
