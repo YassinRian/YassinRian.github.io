@@ -56,14 +56,16 @@ define(['jquery'],function ($) {
 		html: (data) => {
       console.log(data);
       // Find the datasets for keys and categories
-      const keyData = data.find(d => d.name === 'CLUSTER_KEY');
-      const categoryData = data.find(d => d.name === 'Cluster naam');
+      //const keyData = data.find(d => d.name === 'CLUSTER_KEY');
+      const keyData = data[0].name
+      //const categoryData = data.find(d => d.name === 'Cluster naam');
+      const displayData = data[1].name
       
       // Generate options dynamically
-      const options = keyData && categoryData
+      const options = keyData && displayData
         ? keyData.values.map((key, index) => {
-            const category = categoryData.values[index];
-            return `<option value="${key}">${category}</option>`;
+            const display = displayData.values[index];
+            return `<option value="${key}">${display}</option>`;
           }).join('') : '';
     
       // Return the HTML structure with dynamic options
