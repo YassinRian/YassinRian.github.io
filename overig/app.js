@@ -1,3 +1,4 @@
+// testen van meerdere datasets
 define([], function() {
     
     class App {
@@ -10,7 +11,7 @@ define([], function() {
         }
 
         setData(oDataStore) {
-            this.dataStore = oDataStore.control.getDataStore("cluster_ds");
+            this.dataStore = oDataStore.control.getDataStore("cluster_ds"); // gets the dataset of cluster_ds
             //this.dataStore = oDataStore;
         }
     }
