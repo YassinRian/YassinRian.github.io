@@ -5,6 +5,10 @@ define([], function() {
             console.log(this.oDataStore)
         }
 
+        draw() {
+            console.log('draw app')
+        }
+
         setData(oDataStore) {
             this.oDataStore = oDataStore;
         }
