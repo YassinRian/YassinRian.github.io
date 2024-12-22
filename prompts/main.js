@@ -1,4 +1,4 @@
-define(["jquery"], function ($) {
+define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, App) {
   function AppPrompts() {}
 
   AppPrompts.prototype.draw = function (oControlHost) {
