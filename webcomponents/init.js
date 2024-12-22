@@ -14,7 +14,7 @@ define([
         try {
           // Load styles and Shoelace components
           styles.addShoelaceStylesheet();
-          await shoelace.loadShoelaceModules();
+          await shoelace.init();
           console.log("WebComponent initialized");
         } catch (error) {
           console.error("Error initializing WebComponent:", error);
