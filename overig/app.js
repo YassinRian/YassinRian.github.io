@@ -2,14 +2,15 @@ define([], function() {
     
     class App {
         constructor() {
-            console.log(this.dataStore)
+            this.dataStore = null;
         }
 
         draw(oControlHost) {
-            console.log(oControlHost)
+            console.log(this.dataStore)
         }
 
         setData(oDataStore) {
+            //this.dataStore = oDataStore.control.getDataStore("cluster_ds");
             this.dataStore = oDataStore;
         }
     }
