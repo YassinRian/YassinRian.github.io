@@ -2,7 +2,7 @@ define(["jquery"], function ($) {
   function AppPrompts() {}
 
   AppPrompts.prototype.setData = function (oDataStore) {
-    this.data = oDataStore.control;
+    this.data = oDataStore.control.dataStores;
   };
   
   AppPrompts.prototype.draw = function (oControlHost) {
