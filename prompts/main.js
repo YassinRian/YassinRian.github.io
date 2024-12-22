@@ -3,8 +3,9 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
 
   App.prototype.initialize = async function (oControlHost, fnDoneInitializing) {
     const oModuleInstance = await oControlHost.page.getControlByName("prompt_control").instance;
-    this.data = oModuleInstance.getData();
-    console.log(this.data);
+
+    //this.data = oModuleInstance.getData();
+    console.log(oModuleInstance);
     fnDoneInitializing();
   };
 
@@ -14,9 +15,7 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
     $(elm).append("<button id='btn_prompt'>Create Prompt</button>");
    
     $("#btn_prompt").on("click", () => {
-      console.log(this.data);
-      let ins_app = new App();
-      ins_app.draw(oControlHost);
+      oModuleInstance.draw(oControlHost);
     });
    
   };
