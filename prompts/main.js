@@ -1,13 +1,16 @@
 define(["jquery"], function ($) {
   function AppPrompts() {}
 
-  AppPrompts.prototype.setData = function (oDataStore) {
-    this.data = oDataStore.control.dataStores[0].json;
-  };
-  
   AppPrompts.prototype.draw = function (oControlHost) {
-
-    console.log(this.data);
+    let elm = oControlHost.container;
+    
+    $(elm).append("<button id='btn_prompt'>Create Prompt</button>");
+   
+    $("#btn_prompt").on("click", () => {
+      let ins_app = new App();
+      ins_app.draw(oControlHost);
+    });
+   
   };
 
   return AppPrompts;
