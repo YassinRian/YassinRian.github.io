@@ -1,4 +1,4 @@
-define(function () {
+define(['jquery'],function ($) {
 	return {
     filter_lijst: (_this_) => {
       let inp_val = $.trim(_this_.val().replace(/\s+/g, "").toUpperCase());
