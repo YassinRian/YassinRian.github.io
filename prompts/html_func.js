@@ -37,14 +37,13 @@ define(['jquery'],function ($) {
         })
         .prop("selected", false);
     },
-    input_func: function(e) {
+    input_func: function(e, func) {
       let _this_ = $(e.target); // Get the input element
       if (e.key === "Enter") {
           if (_this_.val().length > 1) {
-              this.filter_lijst(_this_); // Call the filter_lijst function
+              func(_this_); // Call the filter_lijst function
           } else {
-              let selectie = _this_.data().select_class;
-              let selec_vals = $("." + selectie).find("option");
+              let selec_vals = $("." + _this_.data().select_class).find("option");
               selec_vals
                   .map(function () {
                       $(this).removeData();

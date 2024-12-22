@@ -6,6 +6,7 @@ define(["jquery", "https://yassinrian.github.io/prompts/html_func.js"], function
       this.data = null;
       this.input_func = html_func_.input_func;
       this.wis_selecties = html_func_.wis_selecties;
+      this.filter_lijst = html_func_.filter_lijst;
     }
   
     setData(oDataStore) {
@@ -23,7 +24,7 @@ define(["jquery", "https://yassinrian.github.io/prompts/html_func.js"], function
 
       // Set up event handlers
       $(".wis_selecties").on("click", (e) => this.wis_selecties(e.currentTarget));
-      $("input").on("keyup", (e) => this.input_func(e));
+      $("input").on("keyup", (e) => this.input_func(e, this.filter_lijst));
     } // draw
   } // class
 
