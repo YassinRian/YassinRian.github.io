@@ -13,7 +13,7 @@ define([
       async init() {
         try {
           // Load styles and Shoelace components
-          styles.addShoelaceStylesheet();
+          await styles.addShoelaceStylesheet();
           await shoelace.init();
           console.log("WebComponent initialized");
         } catch (error) {
