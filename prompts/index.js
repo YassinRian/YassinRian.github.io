@@ -22,8 +22,8 @@ define(["jquery", "https://yassinrian.github.io/prompts/html_func.js"], function
       $("#box2").data({ select_class: "select_2" });
 
       // Set up event handlers
-      $(".wis_selecties").on("click", this.wis_selecties(this));
-      $("input").on("keyup", this.input_func(this));
+      $(".wis_selecties").on("click", (e) => this.wis_selecties(e.currentTarget));
+      $("input").on("keyup", (e) => this.input_func(e));
     } // draw
   } // class
 

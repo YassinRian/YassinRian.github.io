@@ -1,56 +1,59 @@
 define(['jquery'],function ($) {
 	return {
-    filter_lijst: (_this_) => {
-      let inp_val = $.trim(_this_.val().replace(/\s+/g, "").toUpperCase());
-      let selectie = _this_.data().select_class;
+    filter_lijst: function (inputElement) {
+      let inp_val = $.trim($(inputElement).val().replace(/\s+/g, "").toUpperCase());
+      let selectie = $(inputElement).data().select_class;
       let selec_vals = $("." + selectie).find("option");
-
+  
       // Compile the input value into a regular expression
       let searchRegex = new RegExp(inp_val, "i"); // 'i' for case-insensitive matching
-
-      selec_vals.each(function (_this_) {
-        let optionText = $(this).text().replace(/\u00A0/g, "");
-        if (searchRegex.test(optionText)) {
-          $(_this_).data({ selected: true });
-        } else {
-          $(_this_).data({ selected: false });
-        }
+  
+      // Iterate over each option and set data attributes based on matching
+      selec_vals.each(function () {
+          let optionText = $(this).text().replace(/\u00A0/g, ""); // Clean up non-breaking spaces
+          if (searchRegex.test(optionText)) {
+              $(this).data({ selected: true });
+          } else {
+              $(this).data({ selected: false });
+          }
       });
-
+  
+      // Filter the options based on the data attribute and update their state
       selec_vals
-        .filter(function (_this_) {
-          return $(_this_).data().selected;
-        })
-        .show()
-        .prop("selected", true);
-    },
-    wis_selecties: function(_this_) {
-      let class_ = $(_this_).attr("data-selectie");
+          .filter(function () {
+              return $(this).data().selected; // Only include options marked as selected
+          })
+          .show() // Make them visible
+          .prop("selected", true); // Select them
+  },
+  
+    wis_selecties: function(element) {
+      let class_ = $(element).attr("data-selectie");
       $("." + class_)
         .find("option")
         .map(function () {
-          $(_this_).removeData();
+          $(this).removeData();
           return _this_;
         })
         .prop("selected", false);
     },
-    input_func: function(_this_) {
+    input_func: function(e) {
+      let _this_ = $(e.target); // Get the input element
       if (e.key === "Enter") {
-        // Only trigger on Enter key
-        if ($(_this_).val().length > 1) {
-          this.filter_lijst($(_this_)); // Call the filter_lijst function to filter the options
-        } else {
-          let selectie = $(_this_).data().select_class;
-          let selec_vals = $("." + selectie).find("option"); // Get options
-          selec_vals
-            .map(function () {
-              $(_this_).removeData();
-              return _this_;
-            })
-            .prop("selected", false);
-        }
+          if (_this_.val().length > 1) {
+              this.filter_lijst(_this_); // Call the filter_lijst function
+          } else {
+              let selectie = _this_.data().select_class;
+              let selec_vals = $("." + selectie).find("option");
+              selec_vals
+                  .map(function () {
+                      $(this).removeData();
+                      return this;
+                  })
+                  .prop("selected", false);
+          }
       }
-    },
+  },
 		html: (data) => {
       // Find the datasets for keys and categories
       const keyData = data.find(d => d.name === 'CLUSTER_KEY');
