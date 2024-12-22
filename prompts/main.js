@@ -16,7 +16,7 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
    
     $("#btn_prompt").on("click", () => {
       let prompt = new App();
-      prompt.setData(this.data);
+      //prompt.setData(this.data);
       prompt.draw(oControlHost);
     });
    
