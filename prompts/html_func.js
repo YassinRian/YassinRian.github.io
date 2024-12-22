@@ -41,7 +41,7 @@ define(['jquery'],function ($) {
       let _this_ = $(e.target); // Get the input element
       if (e.key === "Enter") {
           if (_this_.val().length > 1) {
-              this.filter_lijst(_this_); // Call the filter_lijst function
+              filter_lijst(_this_); // Call the filter_lijst function
           } else {
               let selectie = _this_.data().select_class;
               let selec_vals = $("." + selectie).find("option");
