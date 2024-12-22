@@ -2,15 +2,15 @@ define([], function() {
     
     class App {
         constructor() {
-            console.log(this.oDataStore)
+            console.log(this.dataStore)
         }
 
-        draw() {
-            console.log('draw app')
+        draw(oControlHost) {
+            console.log(oControlHost)
         }
 
         setData(oDataStore) {
-            this.oDataStore = oDataStore;
+            this.dataStore = oDataStore;
         }
     }
     
