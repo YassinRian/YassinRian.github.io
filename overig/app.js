@@ -10,8 +10,8 @@ define([], function() {
         }
 
         setData(oDataStore) {
-            //this.dataStore = oDataStore.control.getDataStore("cluster_ds");
-            this.dataStore = oDataStore;
+            this.dataStore = oDataStore.control.getDataStore("cluster_ds");
+            //this.dataStore = oDataStore;
         }
     }
     
