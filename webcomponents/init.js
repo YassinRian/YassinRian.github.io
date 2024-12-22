@@ -20,4 +20,6 @@ define(["jquery", "https://yassinrian.github.io/webcomponents/webcomp1.js"], fun
             </sl-alert>`;
   }
 } // End of class
+
+  return WebComponent;
 }); // End of define
