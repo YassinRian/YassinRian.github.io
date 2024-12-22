@@ -14,6 +14,7 @@ define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, 
     $(elm).append("<button id='btn_prompt'>Create Prompt</button>");
    
     $("#btn_prompt").on("click", () => {
+      console.log(this.data);
       let ins_app = new App();
       ins_app.draw(oControlHost);
     });
