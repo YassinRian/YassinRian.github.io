@@ -14,7 +14,7 @@ define([
         try {
           // Load styles and Shoelace components
           styles.addShoelaceStylesheet();
-          await shoelace.loadShoelaceModule();
+          await shoelace.loadShoelaceModules();
           console.log("WebComponent initialized");
         } catch (error) {
           console.error("Error initializing WebComponent:", error);
@@ -63,6 +63,10 @@ define([
             <strong>Your account has been deleted</strong><br />
             We're very sorry to see you go!
           </sl-alert>
+          <sl-animated-image
+            src="https://shoelace.style/assets/images/tie.webp"
+            alt="Animation of a shoe being tied"
+          ></sl-animated-image>
         `);
       } // End of draw
     } // End of class
