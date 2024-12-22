@@ -54,6 +54,7 @@ define(['jquery'],function ($) {
       }
   },
 		html: (data) => {
+      console.log(data);
       // Find the datasets for keys and categories
       const keyData = data.find(d => d.name === 'CLUSTER_KEY');
       const categoryData = data.find(d => d.name === 'Cluster naam');
