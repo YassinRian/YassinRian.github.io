@@ -17,6 +17,7 @@ define(["jquery"], function ($) {
     init: async function () {
       await this.loadShoelaceModules([
         "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/components/alert/alert.js",
+        "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/shoelace.js",
         "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/shoelace.js"
       ]);
       console.log("Shoelace WebComponents initialized");
