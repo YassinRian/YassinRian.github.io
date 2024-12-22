@@ -1,12 +1,14 @@
-define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, App) {
+define(["jquery",'https://yassinrian.github.io/prompts/index.js'], function ($, AppPrompts) {
   function AppPrompts() {}
 
-  App.prototype.initialize = async function (oControlHost, fnDoneInitializing) {
-    const oModuleInstance = await oControlHost.page.getControlByName("prompt_control").instance;
 
-    this.data = oModuleInstance;
-    fnDoneInitializing();
-  };
+      // Initialize method: Now you can use basicControl since it's already loaded
+      App.prototype.initialize = function(fnDoneInitializing) {
+        let _basicControl = new AppPrompts();  // Create an instance of basicControl
+        this.data = _basicControl.getData();  // Store the data on the instance (this)
+        console.log(this.data);  // You can log the data here
+        fnDoneInitializing();  // Callback to indicate initialization is done
+    }
 
   AppPrompts.prototype.draw = function (oControlHost) {
     let elm = oControlHost.container;
