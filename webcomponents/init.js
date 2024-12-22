@@ -6,9 +6,10 @@ define(["jquery", "https://yassinrian.github.io/webcomponents/webcomp1.js"], fun
       this.init();
     }
 
-    async init() {
+    async initilize(fnDoneInitializing) {
       await shoelace.loadShoelaceModule();
       console.log("WebComponent initialized");
+      fnDoneInitializing();
     }
 
     draw(oControlHost) {
