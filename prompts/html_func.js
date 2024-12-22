@@ -64,8 +64,8 @@ define(['jquery'],function ($) {
         
       // Generate options dynamically
       const options = keyData && displayData
-        ? keyData.values.map((key, index) => {
-            const display = displayData.values[index];
+        ? keyData.map((key, index) => {
+            const display = displayData[index];
             return `<option value="${key}">${display}</option>`;
           }).join('') : '';
     
