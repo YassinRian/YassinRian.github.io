@@ -56,11 +56,6 @@ define([
   <strong>Your account has been deleted</strong><br />
   We're very sorry to see you go!
 </sl-alert>
-<sl-animated-image
-  src="https://shoelace.style/assets/images/tie.webp"
-  alt="Animation of a shoe being tied"
-></sl-animated-image>
-
         
         `);
     } // End of draw
