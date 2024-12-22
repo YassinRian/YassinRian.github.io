@@ -26,6 +26,12 @@ define(["jquery", "https://yassinrian.github.io/prompts/html_func.js"], function
       $(".wis_selecties").on("click", (e) => this.wis_selecties(e.currentTarget));
       $("input").on("keyup", (e) => this.input_func(e, this.filter_lijst));
     } // draw
+ 
+    getData() {
+      return this.data;
+    }
+ 
+ 
   } // class
 
   return App;
