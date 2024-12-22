@@ -4,7 +4,7 @@ define([
 ], function ($, shoelace) {
   "use strict";
 
-  class WebComponent {
+  class WebComponent { // this class will only be ceated after the shoelace module is loaded ..nice!
     constructor() {
       this.init();
     }
