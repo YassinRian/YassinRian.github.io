@@ -34,7 +34,7 @@ define(['jquery'],function ($) {
         })
         .prop("selected", false);
     },
-    input_func: function(e, _this_) {
+    input_func: function(_this_) {
       if (e.key === "Enter") {
         // Only trigger on Enter key
         if ($(_this_).val().length > 1) {

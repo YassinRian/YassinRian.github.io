@@ -23,7 +23,7 @@ define(["jquery", "https://yassinrian.github.io/prompts/html_func.js"], function
 
       // Set up event handlers
       $(".wis_selecties").on("click", this.wis_selecties(this));
-      $("input").on("keyup", this.input_func(e,this));
+      $("input").on("keyup", this.input_func(this));
     } // draw
   } // class
 
