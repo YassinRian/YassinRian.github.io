@@ -5,7 +5,7 @@ define(["jquery", "https://yassinrian.github.io/prompts/html_func.js"], function
     constructor() {
       this.data = null;
       this.input_func = html_func_.input_func;
-      this.filter_lijst = html_func_.filter_lijst;
+      this.wis_selecties = html_func_.wis_selecties;
     }
   
     setData(oDataStore) {
