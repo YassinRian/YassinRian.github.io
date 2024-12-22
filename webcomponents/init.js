@@ -1,6 +1,6 @@
 define([
   "jquery",
-  "https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/shoelace.js",
+  //"https://cdn.jsdelivr.net/npm/@shoelace-style/shoelace@2.19.1/cdn/shoelace.js",
   "https://yassinrian.github.io/webcomponents/webcomp1.js",
 ], function ($,style,shoelace) {
   "use strict";
@@ -11,7 +11,7 @@ define([
     }
 
     async init() {
-      await style.addShoelaceStylesheet();
+      //await style.addShoelaceStylesheet();
       await shoelace.loadShoelaceModule();
       console.log("WebComponent initialized");
     }
