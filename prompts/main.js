@@ -3,13 +3,11 @@ define(["jquery"], function ($) {
 
   AppPrompts.prototype.setData = function (oDataStore) {
     this.data = oDataStore;
-  }
-
-  AppPrompts.prototype.initialize = async function (oControlHost, fnDoneInitializing) {
-    this.data = await oControlHost.data.get();
-    console.log(this.data);
-    fnDoneInitializing();
   };
-  return AppPrompts;
   
+  AppPrompts.prototype.draw = function (oControlHost) {
+    console.log(this.data);
+  };
+
+  return AppPrompts;
 });
