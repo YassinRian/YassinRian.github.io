@@ -57,7 +57,7 @@ define([], function () {
     z-index: 1000;
 }
 
-/* Modal Content */
+/* Resizable Modal */
 .modal-content {
     position: absolute;
     background-color: #fff;
@@ -65,15 +65,31 @@ define([], function () {
     padding: 20px;
     width: 80%;
     max-width: 1000px;
+    min-width: 300px; /* Set minimum width */
     border-radius: 5px;
     box-shadow: 0 4px 8px rgba(0,0,0,0.1);
     top: 15%;
     left: 10%;
     height: 70vh;
+    min-height: 200px; /* Set minimum height */
     overflow-y: auto;
     cursor: move; /* Indicate draggable */
+    resize: both; /* Allow resizing from bottom-right corner */
 }
 
+/* Resizable Handle (optional for better UI) */
+.modal-content::after {
+    content: "";
+    width: 15px;
+    height: 15px;
+    background: rgba(0, 0, 0, 0.2);
+    position: absolute;
+    bottom: 5px;
+    right: 5px;
+    cursor: se-resize;
+    z-index: 10;
+    border-radius: 2px;
+}
 
 /* Close Button */
 .modal-content > .close-modal {

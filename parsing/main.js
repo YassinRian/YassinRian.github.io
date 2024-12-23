@@ -98,17 +98,9 @@ define([
         });
       }
 
-      // minimize and drag modal=======================================
 
-      const $modal = $("#table_modal");
-      const $modalContent = $modal.find(".modal-content");
-      const $closeModal = $modal.find(".close-modal");
+      // Close Modal=======================================
 
-      let isDragging = false;
-      let offsetX = 0;
-      let offsetY = 0;
-
-      // Close Modal
       $closeModal.on("click", function () {
         $modal.hide();
         $("body").removeClass("modal-active");
@@ -121,28 +113,43 @@ define([
         }
       });
 
-      // Make Modal Draggable
-      $modalContent.on("mousedown", function (e) {
-        isDragging = true;
-        offsetX = e.clientX - $modalContent.offset().left;
-        offsetY = e.clientY - $modalContent.offset().top;
-        $modalContent.css("cursor", "grabbing");
-      });
+      // minimize and drag modal=======================================
 
+      const $modal = $(".modal-content");
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+  
+      $modal.on("mousedown", function (e) {
+          // Avoid dragging when interacting with the close button
+          if ($(e.target).hasClass("close-modal")) return;
+  
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          initialLeft = $modal.offset().left;
+          initialTop = $modal.offset().top;
+  
+          $("body").css("user-select", "none"); // Prevent text selection while dragging
+      });
+  
       $(document).on("mousemove", function (e) {
-        if (isDragging) {
-          $modalContent.css({
-            left: `${e.clientX - offsetX}px`,
-            top: `${e.clientY - offsetY}px`,
+          if (!isDragging) return;
+  
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+  
+          $modal.css({
+              left: initialLeft + dx + "px",
+              top: initialTop + dy + "px",
+              position: "absolute", // Ensure it's absolutely positioned
           });
-        }
       });
-
+  
       $(document).on("mouseup", function () {
-        if (isDragging) {
-          isDragging = false;
-          $modalContent.css("cursor", "move");
-        }
+          if (isDragging) {
+              isDragging = false;
+              $("body").css("user-select", ""); // Restore text selection
+          }
       });
 
       //=======================================================================================================
