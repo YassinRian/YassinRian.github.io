@@ -99,8 +99,15 @@ define([
       }
 
 
-      // Close Modal=======================================
+// Modal logic=======================================================================================================
+
+
       const $closeModal = $modal.find(".close-modal");
+      const $modal = $(".modal-content");
+      let isDragging = false;
+      let startX, startY, initialLeft, initialTop;
+
+       // Close Modal=======================================     
       $closeModal.on("click", function () {
         $modal.hide();
         $("body").removeClass("modal-active");
@@ -114,10 +121,6 @@ define([
       });
 
       // minimize and drag modal=======================================
-
-      const $modal = $(".modal-content");
-      let isDragging = false;
-      let startX, startY, initialLeft, initialTop;
   
       $modal.on("mousedown", function (e) {
           // Avoid dragging when interacting with the close button
