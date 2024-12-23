@@ -53,28 +53,28 @@ define([], function () {
     left: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0, 0, 0, 0.5);
     z-index: 1000;
+    overflow: visible; /* Ensure child resizing works */
 }
 
-/* Resizable Modal */
 .modal-content {
     position: absolute;
     background-color: #fff;
-    margin: 0;
     padding: 20px;
+    resize: both; /* Enable horizontal and vertical resizing */
+    overflow: auto;
     width: 80%;
-    max-width: 1000px;
-    min-width: 300px; /* Set minimum width */
+    max-width: calc(100% - 20px); /* Prevent resizing beyond parent width */
+    min-width: 300px;
+    height: 70vh;
+    max-height: calc(100% - 20px); /* Prevent resizing beyond parent height */
+    min-height: 200px;
     border-radius: 5px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     top: 15%;
     left: 10%;
-    height: 70vh;
-    min-height: 200px; /* Set minimum height */
-    overflow-y: auto;
-    cursor: move; /* Indicate draggable */
-    resize: both; /* Allow resizing from bottom-right corner */
+    box-sizing: border-box; /* Ensure padding doesn't interfere */
 }
 
 /* Resizable Handle (optional for better UI) */

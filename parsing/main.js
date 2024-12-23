@@ -113,11 +113,11 @@ define([
       });
 
       // Close modal when clicking outside
-      $(window).on("click", function (event) {
-        if ($(event.target).is("#table_modal")) {
-          $("#table_modal").fadeOut(150);
-        }
-      });
+      // $(window).on("click", function (event) {
+      //   if ($(event.target).is("#table_modal")) {
+      //     $("#table_modal").fadeOut(150);
+      //   }
+      // });
 
       // minimize and drag modal=======================================
   
