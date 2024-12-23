@@ -101,9 +101,8 @@ define([
 
 // Modal logic=======================================================================================================
 
-
-      const $closeModal = $modal.find(".close-modal");
       const $modal = $(".modal-content");
+      const $closeModal = $modal.find(".close-modal");
       let isDragging = false;
       let startX, startY, initialLeft, initialTop;
 
