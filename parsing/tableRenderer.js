@@ -73,12 +73,12 @@ define(["jquery"], function ($) {
 
       // Add search input field
       const searchInput = $(
-        `<div>
+        `<div class="search-container">
           <input id="searchInput" type="text" placeholder="Enter regex to search..." />
-          <label>
+            <label class="checkbox-container">
               <input type="checkbox" id="regexToggle" />
               Use Regular Expression
-          </label>
+            </label>
         </div>`
       );
       tableContainer.prepend(searchInput);

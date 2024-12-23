@@ -103,6 +103,50 @@ body.modal-active {
     overflow: hidden; /* Prevent scrolling */
 }
 
+/* Search Container */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px; /* Space between elements */
+    margin-bottom: 15px; /* Add some spacing below the input */
+    padding: 10px;
+    background-color: #f9f9f9; /* Light background for input container */
+    border: 1px solid #ddd; /* Border for the container */
+    border-radius: 8px; /* Rounded corners */
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
+}
+
+/* Search Input */
+#searchInput {
+    flex: 1; /* Make input take up available space */
+    padding: 10px 15px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    outline: none;
+    transition: all 0.3s ease;
+}
+
+/* Focus State for Input */
+#searchInput:focus {
+    border-color: #007bff; /* Blue border on focus */
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Glow effect */
+}
+
+/* Checkbox Container */
+.checkbox-container {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #555;
+}
+
+/* Checkbox */
+#regexToggle {
+    margin-right: 5px; /* Space between checkbox and label */
+}
+
+
 `;
 
   // Dynamically inject CSS into the document
