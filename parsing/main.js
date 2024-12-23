@@ -100,7 +100,7 @@ define([
 
 
       // Close Modal=======================================
-
+      const $closeModal = $modal.find(".close-modal");
       $closeModal.on("click", function () {
         $modal.hide();
         $("body").removeClass("modal-active");
