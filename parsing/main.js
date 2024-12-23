@@ -109,7 +109,7 @@ define([
        // Close Modal=======================================     
       $closeModal.on("click", function () {
         $modal.hide();
-        $("body").removeClass("modal-active");
+        $("body").removeClass("modal");
       });
 
       // Close modal when clicking outside
@@ -122,47 +122,49 @@ define([
       // minimize and drag modal=======================================
   
       $modal.on("mousedown", function (e) {
-        // Check if the click is in the resize area
-        const rect = this.getBoundingClientRect();
-        const isInResizeZone = 
-            e.clientX > rect.right - 15 && e.clientY > rect.bottom - 15;
-
-        if (isInResizeZone) {
-            // Allow native resizing
-            return;
-        }
-
-        // Avoid dragging when interacting with the close button
-        if ($(e.target).hasClass("close-modal")) return;
-
-        isDragging = true;
-        startX = e.clientX;
-        startY = e.clientY;
-        initialLeft = $modal.offset().left;
-        initialTop = $modal.offset().top;
-
-        $("body").css("user-select", "none"); // Prevent text selection while dragging
-    });
-
-    $(document).on("mousemove", function (e) {
-        if (!isDragging) return;
-
-        const dx = e.clientX - startX;
-        const dy = e.clientY - startY;
-
-        $modal.css({
-            left: initialLeft + dx + "px",
-            top: initialTop + dy + "px",
-            position: "absolute", // Ensure it's absolutely positioned
-        });
-    });
-
-    $(document).on("mouseup", function () {
-        if (isDragging) {
-            isDragging = false;
-            $("body").css("user-select", ""); // Restore text selection
-        }
-    });
+          // Prevent dragging if the target is an input box or any interactive element
+          if ($(e.target).is("input, textarea, select, button")) {
+              return;
+          }
+  
+          // Check if the click is in the resize area
+          const rect = this.getBoundingClientRect();
+          const isInResizeZone = 
+              e.clientX > rect.right - 15 && e.clientY > rect.bottom - 15;
+  
+          if (isInResizeZone) {
+              // Allow native resizing
+              return;
+          }
+  
+          isDragging = true;
+          startX = e.clientX;
+          startY = e.clientY;
+          initialLeft = $modal.offset().left;
+          initialTop = $modal.offset().top;
+  
+          $("body").css("user-select", "none"); // Prevent text selection while dragging
+      });
+  
+      $(document).on("mousemove", function (e) {
+          if (!isDragging) return;
+  
+          const dx = e.clientX - startX;
+          const dy = e.clientY - startY;
+  
+          $modal.css({
+              left: initialLeft + dx + "px",
+              top: initialTop + dy + "px",
+              position: "absolute", // Ensure it's absolutely positioned
+          });
+      });
+  
+      $(document).on("mouseup", function () {
+          if (isDragging) {
+              isDragging = false;
+              $("body").css("user-select", ""); // Restore text selection
+          }
+      });
 
       //=======================================================================================================
     } // End if statement
