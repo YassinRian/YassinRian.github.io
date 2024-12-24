@@ -55,7 +55,7 @@ define(["jquery"], function ($) {
             listRow.append(`<td>${subItem.attributes.label || ""}</td>`);
             tbody.append(listRow);
           });
-        } else if (type === "Detail Filters") {
+        } else if (type === "Filters") {
           const filterRow = $("<tr></tr>");
           filterRow.append(`<td>${item.name}</td>`);
           filterRow.append(
