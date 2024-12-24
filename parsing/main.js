@@ -14,7 +14,7 @@ define([
   // };
 
   App.prototype.draw = async function (oControlHost) {
-    await this.xml_data = oControlHost.page.application.document.reportXML;
+    this.xml_data = await oControlHost.page.application.document.reportXML;
     const { userName } = oControlHost.configuration || ""; // Add fallback empty string
 
     if (userName === "951100") {
