@@ -97,23 +97,32 @@ define(["jquery"], function ($) {
       tableContainer.prepend(searchInput);
 
       // Search functionality
+      // searchInput.on("input", function () {
+      //   const query = $("#searchInput").val();
+      //   searchTable(query, columnSearchFlags);
+      // });
+
+      console.log("Search input element:", $("#searchInput"));
       searchInput.on("input", function () {
         const query = $("#searchInput").val();
+        console.log("Query detected:", query); // Debugging
         searchTable(query, columnSearchFlags);
       });
 
       // Add a popup container
-      const popup = $('<div id="popup" style="display:none; position:absolute; z-index:1000; background:#fff; border:1px solid #ccc; padding:5px;"></div>');
+      const popup = $(
+        '<div id="popup" style="display:none; position:absolute; z-index:1000; background:#fff; border:1px solid #ccc; padding:5px;"></div>'
+      );
       tableContainer.append(popup);
     },
   };
 
- //==================================== showPopup function ================================================================================
+  //==================================== showPopup function ================================================================================
 
   function showPopup(index, data, type, element) {
     const popup = $("#popup");
     const groups = new Set();
-  
+
     data.forEach((item) => {
       if (type === "Queries" && index === 0) {
         groups.add(item.name);
@@ -125,7 +134,7 @@ define(["jquery"], function ($) {
         groups.add(item.attributes.refQuery);
       }
     });
-  
+
     const content = Array.from(groups).join("<br>");
     popup
       .html(content)
@@ -136,11 +145,10 @@ define(["jquery"], function ($) {
       })
       .addClass("show"); // Add animation class
   }
-  
+
   function hidePopup() {
     $("#popup").css("display", "none").removeClass("show"); // Remove animation class
   }
-
 
   //==================================== searchtable function ================================================================================
 
@@ -149,28 +157,28 @@ define(["jquery"], function ($) {
     try {
       const isRegex = $("#regexToggle").is(":checked");
       const searchTerms = query.split(":::"); // Split query by column separator
-  
+
       const rows = $("#dataTable tbody tr");
       rows.each(function () {
         const cells = $(this).find("td");
         let match = true; // Assume the row matches until proven otherwise
-  
+
         // Loop through each search term and match it with its corresponding column
         searchTerms.forEach((term, index) => {
           if (term.trim() === "" || !columnSearchFlags[index]) {
             return; // Skip empty terms or columns not marked for searching
           }
-  
+
           const regex = isRegex
             ? new RegExp(term, "i") // Case-insensitive regex
             : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape literal search
-  
+
           const cellText = $(cells[index]).text() || ""; // Get cell text for this column
           if (!regex.test(cellText)) {
             match = false; // If any term doesn't match its column, reject the row
           }
         });
-  
+
         // Show or hide the row based on the match result
         if (match) {
           $(this).show();
@@ -182,5 +190,4 @@ define(["jquery"], function ($) {
       console.error("Invalid regex or search error:", e);
     }
   }
-  
 });
