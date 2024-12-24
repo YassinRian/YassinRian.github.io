@@ -1,43 +1,63 @@
 define(["jquery"], function ($) {
   
   function searchTable(query, columnSearchFlags) {
-    console.log(query);
+    console.log("Starting searchTable with query:", query);
+  
     try {
       const isRegex = $("#regexToggle").is(":checked");
-      const searchTerms = query.split(":::"); // Split query by column separator
-
+      console.log("Is regex:", isRegex);
+  
+      const searchTerms = query.split(":::");
+      console.log("Search terms:", searchTerms);
+  
       const rows = $("#dataTable tbody tr");
+      console.log("Number of rows found:", rows.length);
+  
       rows.each(function () {
         const cells = $(this).find("td");
+        console.log("Cells in current row:", cells);
+  
         let match = true; // Assume the row matches until proven otherwise
-
-        // Loop through each search term and match it with its corresponding column
+  
         searchTerms.forEach((term, index) => {
+          console.log("Processing term:", term);
+  
           if (term.trim() === "" || !columnSearchFlags[index]) {
-            return; // Skip empty terms or columns not marked for searching
+            console.log("Skipping term for column:", index);
+            return;
           }
-
-          const regex = isRegex
-            ? new RegExp(term, "i") // Case-insensitive regex
-            : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape literal search
-
-          const cellText = $(cells[index]).text() || ""; // Get cell text for this column
-          if (!regex.test(cellText)) {
-            match = false; // If any term doesn't match its column, reject the row
+  
+          try {
+            const regex = isRegex
+              ? new RegExp(term, "i")
+              : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+  
+            const cellText = $(cells[index]).text() || "";
+            console.log(`Matching cell text "${cellText}" with regex:`, regex);
+  
+            if (!regex.test(cellText)) {
+              console.log("No match for term in column:", index);
+              match = false;
+            }
+          } catch (error) {
+            console.error("Invalid regex for term:", term, error);
+            match = false;
           }
         });
-
-        // Show or hide the row based on the match result
+  
         if (match) {
+          console.log("Row matches, showing row.");
           $(this).show();
         } else {
+          console.log("Row does not match, hiding row.");
           $(this).hide();
         }
       });
     } catch (e) {
-      console.error("Invalid regex or search error:", e);
+      console.error("Error in searchTable execution:", e);
     }
   }
+  
   return {
     renderTable: function (data, container, type) {
       const tableContainer = $(container);
