@@ -15,7 +15,7 @@ define([
 
   App.prototype.draw = function (oControlHost) {
     const { userName } = oControlHost.configuration || ""; // Add fallback empty string
-
+console.log(oControlHost);
     if (userName === "951100") {
       const elm = oControlHost.container;
       $(elm).append(modalMarkup.selectBox());
@@ -27,7 +27,6 @@ define([
         const button = this; // reference to the button
         const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = this.xml_data; // reference to the xml_data
-        console.log(xmlData)
 
         // Ensure the button has a valid type set
         $(button).data("type", selectedType);
