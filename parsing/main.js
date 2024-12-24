@@ -14,6 +14,7 @@ define([
   // };
 
   App.prototype.draw = async function (oControlHost) {
+    console.log(oControlHost);
     this.xml_data = await oControlHost.page.application.document.reportXML;
     const { userName } = oControlHost.configuration || ""; // Add fallback empty string
 
