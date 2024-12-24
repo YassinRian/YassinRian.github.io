@@ -23,9 +23,20 @@ define(["jquery"], function ($) {
       const columnSearchFlags = Array(headers.length).fill(false);
       headers.forEach((header, index) => {
         const th = $(`<th>${header}</th>`);
-        const checkbox = $(
-          `<input type="checkbox" data-index="${index}" />`
-        ).on("change", function () {
+
+        // Add hover functionality for the column
+        th.hover(
+          function () {
+            showPopup(index, data, type, $(this));
+          },
+          function () {
+            hidePopup();
+          }
+        );
+
+        const checkbox = $(`
+          <input type="checkbox" data-index="${index}" />
+        `).on("change", function () {
           columnSearchFlags[index] = $(this).is(":checked");
         });
         th.append("<br>").append(checkbox);
@@ -74,15 +85,15 @@ define(["jquery"], function ($) {
       tableContainer.append(table);
 
       // Add search input field
-      const searchInput = $(
-        `<div class="search-container">
+      const searchInput = $(`
+        <div class="search-container">
           <input id="searchInput" type="text" placeholder="Enter regex to search..." />
-            <label class="checkbox-container">
-              <input type="checkbox" id="regexToggle" />
-              Use Regular Expression
-            </label>
-        </div>`
-      );
+          <label class="checkbox-container">
+            <input type="checkbox" id="regexToggle" />
+            Use Regular Expression
+          </label>
+        </div>
+      `);
       tableContainer.prepend(searchInput);
 
       // Search functionality
@@ -90,8 +101,40 @@ define(["jquery"], function ($) {
         const query = $("#searchInput").val();
         searchTable(query, columnSearchFlags);
       });
+
+      // Add a popup container
+      const popup = $('<div id="popup" style="display:none; position:absolute; z-index:1000; background:#fff; border:1px solid #ccc; padding:5px;"></div>');
+      tableContainer.append(popup);
     },
   };
+
+  function showPopup(index, data, type, element) {
+    const popup = $("#popup");
+    const groups = new Set();
+
+    data.forEach((item) => {
+      if (type === "Queries" && index === 0) {
+        groups.add(item.name);
+      } else if (type === "Queries" && index === 1) {
+        item.items.forEach((subItem) => groups.add(subItem.name));
+      } else if (type === "Lists" && index === 0) {
+        groups.add(item.name);
+      } else if (type === "Lists" && index === 1) {
+        groups.add(item.attributes.refQuery);
+      }
+    });
+
+    const content = Array.from(groups).join("<br>");
+    popup.html(content).css({
+      display: "block",
+      top: element.offset().top + element.height(),
+      left: element.offset().left,
+    });
+  }
+
+  function hidePopup() {
+    $("#popup").css("display", "none");
+  }
 
   function searchTable(query, columnSearchFlags) {
     try {
