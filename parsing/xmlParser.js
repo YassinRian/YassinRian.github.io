@@ -47,8 +47,9 @@ define(function () {
 
       return Array.from(queries)
         .filter((query) => query.querySelector("filterExpression"))
-        .map((query) => ({
-          console.log(query);
+        .map((query) => (
+          console.log(query),
+          {
           type: "DetailFilter",
           name: query.getAttribute("name"),
           attributes: {

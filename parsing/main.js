@@ -71,7 +71,6 @@ define([
             break;
           case "DetailFilters":
             parsedData = xmlParser.getDetailFilters(xmlString);
-            console.log(parsedData);
             break;
           default:
             throw new Error("Unknown type selected");
