@@ -41,6 +41,7 @@ define(function () {
     },
 
     getDetailFilters: function (xmlString) {
+      console.log("ik ben hier!!");
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlString, "application/xml");
       const queries = xmlDoc.querySelectorAll("query");
