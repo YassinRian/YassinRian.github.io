@@ -13,8 +13,8 @@ define([
   //   fnDoneInitializing();
   // };
 
-  App.prototype.draw = function (oControlHost) {
-    //this.xml_data = oControlHost.page.application.document.reportXML;
+  App.prototype.draw = async function (oControlHost) {
+    await this.xml_data = oControlHost.page.application.document.reportXML;
     const { userName } = oControlHost.configuration || ""; // Add fallback empty string
 
     if (userName === "951100") {
@@ -24,8 +24,7 @@ define([
 
       // Button click event=======================================
 
-      $("#button_parse").on("click", async (oControlHost) => {
-        await this.xml_data = oControlHost.page.application.document.reportXML;
+      $("#button_parse").on("click", () => {
         const button = this; // reference to the button
         const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = this.xml_data; // reference to the xml_data
