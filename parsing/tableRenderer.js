@@ -7,7 +7,7 @@ define(["jquery"], function ($) {
       // Define the headers based on the type
       let headers = [];
       if (type === "Queries") {
-        headers = ["Query Name", "Data Item Name", "Expression"];
+        headers = ["Query Name", "Data Item Name", "Expression", "Label"];
       } else if (type === "Lists") {
         headers = ["Name", "Ref Query", "Data Item", "Label"];
       } else if (type === "Detail Filters") {
@@ -44,6 +44,7 @@ define(["jquery"], function ($) {
             queryRow.append(`<td>${item.name}</td>`);
             queryRow.append(`<td>${subItem.name}</td>`);
             queryRow.append(`<td>${subItem.attributes.expression || ""}</td>`);
+            queryRow.append(`<td>${subItem.attributes.label || ""}</td>`);
             tbody.append(queryRow);
           });
         } else if (type === "Lists") {

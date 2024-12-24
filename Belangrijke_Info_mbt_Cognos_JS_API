@@ -3,5 +3,7 @@ _pr = Control
 _3a5 = Data Sets
 _7kn = Queries
 _3f4 = page
-_wcg = 
+_wcg = application
 _rkw = document
+
+let op de parsing functie werkt alleen als Report Studio open is en het rapport vandaar uit is opgeroepen.
