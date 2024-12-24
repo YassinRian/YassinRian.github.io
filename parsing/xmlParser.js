@@ -46,7 +46,7 @@ define(function () {
       const queries = xmlDoc.querySelectorAll("query");
 
       return Array.from(queries)
-        .filter((query) => query.querySelector("detailFilters"))
+        .filter((query) => query.querySelector("detailFilter"))
         .map((query) => ({
           type: "DetailFilter",
           name: query.getAttribute("name"),
