@@ -145,6 +145,7 @@ define(["jquery"], function ($) {
   //==================================== searchtable function ================================================================================
 
   function searchTable(query, columnSearchFlags) {
+    console.log(query);
     try {
       const isRegex = $("#regexToggle").is(":checked");
       const searchTerms = query.split(":::"); // Split query by column separator
