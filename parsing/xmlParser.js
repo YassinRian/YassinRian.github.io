@@ -41,16 +41,13 @@ define(function () {
     },
 
     getDetailFilters: function (xmlString) {
-      console.log(xmlString);
       const parser = new DOMParser();
       const xmlDoc = parser.parseFromString(xmlString, "application/xml");
       const queries = xmlDoc.querySelectorAll("query");
 
       return Array.from(queries)
         .filter((query) => query.querySelector("filterExpression"))
-        .map((query) => (
-          console.log(query),
-          {
+        .map((query) => ({
           type: "DetailFilter",
           name: query.getAttribute("name"),
           attributes: {

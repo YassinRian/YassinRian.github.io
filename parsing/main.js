@@ -27,6 +27,7 @@ define([
         const button = this; // reference to the button
         const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = this.xml_data; // reference to the xml_data
+        console.log(xmlData)
 
         // Ensure the button has a valid type set
         $(button).data("type", selectedType);
