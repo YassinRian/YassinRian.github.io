@@ -152,7 +152,7 @@ body.modal-active {
   display: none;
   position: absolute;
   z-index: 1000;
-  background: rgba(255, 255, 255, 0.95);
+  background: rgba(125, 121, 121, 0.89);
   border: 1px solid #ccc;
   border-radius: 8px;
   padding: 10px;

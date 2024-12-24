@@ -147,19 +147,28 @@ define(["jquery"], function ($) {
   function searchTable(query, columnSearchFlags) {
     try {
       const isRegex = $("#regexToggle").is(":checked");
-      const regex = isRegex
-        ? new RegExp(query, "i") // Case-insensitive regex
-        : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape for literal search
-
+      const searchTerms = query.split(":::"); // Split by the chosen divider
+  
       const rows = $("#dataTable tbody tr");
       rows.each(function () {
         const cells = $(this).find("td");
-        const match = Array.from(cells).some((cell, index) => {
-          if (columnSearchFlags.some((flag) => flag)) {
-            return columnSearchFlags[index] && regex.test($(cell).text());
+        let match = true; // Assume the row matches until proven otherwise
+  
+        searchTerms.forEach((term, index) => {
+          if (term.trim() === "" || !columnSearchFlags[index]) {
+            return; // Skip empty search terms or columns not marked for searching
           }
-          return regex.test($(cell).text());
+  
+          const regex = isRegex
+            ? new RegExp(term, "i") // Case-insensitive regex
+            : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape for literal search
+  
+          const cellText = $(cells[index]).text() || ""; // Get the cell text
+          if (!regex.test(cellText)) {
+            match = false; // If any column doesn't match, reject the row
+          }
         });
+  
         if (match) {
           $(this).show();
         } else {
@@ -167,7 +176,7 @@ define(["jquery"], function ($) {
         }
       });
     } catch (e) {
-      console.error("Invalid regex:", e);
+      console.error("Invalid regex or search error:", e);
     }
   }
 });
