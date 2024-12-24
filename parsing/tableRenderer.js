@@ -1,4 +1,43 @@
 define(["jquery"], function ($) {
+  
+  function searchTable(query, columnSearchFlags) {
+    console.log(query);
+    try {
+      const isRegex = $("#regexToggle").is(":checked");
+      const searchTerms = query.split(":::"); // Split query by column separator
+
+      const rows = $("#dataTable tbody tr");
+      rows.each(function () {
+        const cells = $(this).find("td");
+        let match = true; // Assume the row matches until proven otherwise
+
+        // Loop through each search term and match it with its corresponding column
+        searchTerms.forEach((term, index) => {
+          if (term.trim() === "" || !columnSearchFlags[index]) {
+            return; // Skip empty terms or columns not marked for searching
+          }
+
+          const regex = isRegex
+            ? new RegExp(term, "i") // Case-insensitive regex
+            : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape literal search
+
+          const cellText = $(cells[index]).text() || ""; // Get cell text for this column
+          if (!regex.test(cellText)) {
+            match = false; // If any term doesn't match its column, reject the row
+          }
+        });
+
+        // Show or hide the row based on the match result
+        if (match) {
+          $(this).show();
+        } else {
+          $(this).hide();
+        }
+      });
+    } catch (e) {
+      console.error("Invalid regex or search error:", e);
+    }
+  }
   return {
     renderTable: function (data, container, type) {
       const tableContainer = $(container);
@@ -102,10 +141,8 @@ define(["jquery"], function ($) {
       //   searchTable(query, columnSearchFlags);
       // });
 
-      console.log("Search input element:", $("#searchInput"));
       searchInput.on("input", function () {
         const query = $("#searchInput").val();
-        console.log("Query detected:", query); // Debugging
         searchTable(query, columnSearchFlags);
       });
 
@@ -148,46 +185,5 @@ define(["jquery"], function ($) {
 
   function hidePopup() {
     $("#popup").css("display", "none").removeClass("show"); // Remove animation class
-  }
-
-  //==================================== searchtable function ================================================================================
-
-  function searchTable(query, columnSearchFlags) {
-    console.log(query);
-    try {
-      const isRegex = $("#regexToggle").is(":checked");
-      const searchTerms = query.split(":::"); // Split query by column separator
-
-      const rows = $("#dataTable tbody tr");
-      rows.each(function () {
-        const cells = $(this).find("td");
-        let match = true; // Assume the row matches until proven otherwise
-
-        // Loop through each search term and match it with its corresponding column
-        searchTerms.forEach((term, index) => {
-          if (term.trim() === "" || !columnSearchFlags[index]) {
-            return; // Skip empty terms or columns not marked for searching
-          }
-
-          const regex = isRegex
-            ? new RegExp(term, "i") // Case-insensitive regex
-            : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape literal search
-
-          const cellText = $(cells[index]).text() || ""; // Get cell text for this column
-          if (!regex.test(cellText)) {
-            match = false; // If any term doesn't match its column, reject the row
-          }
-        });
-
-        // Show or hide the row based on the match result
-        if (match) {
-          $(this).show();
-        } else {
-          $(this).hide();
-        }
-      });
-    } catch (e) {
-      console.error("Invalid regex or search error:", e);
-    }
   }
 });
