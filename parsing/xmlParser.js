@@ -74,6 +74,7 @@ define(function () {
             name: refItem.name,
             attributes: {
               label: matchingItem?.attributes.label || "",
+              expression: matchingItem?.attributes.expression || "",
             },
           };
         }),

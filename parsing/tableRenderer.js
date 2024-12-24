@@ -9,7 +9,7 @@ define(["jquery"], function ($) {
       if (type === "Queries") {
         headers = ["Query Name", "Data Item Name", "Expression", "Label"];
       } else if (type === "Lists") {
-        headers = ["Name", "Ref Query", "Data Item", "Label"];
+        headers = ["Name", "Ref Query", "Data Item", "Expression", "Label"];
       } else if (type === "Detail Filters") {
         headers = ["Query Name", "Filter Expression"];
       }
@@ -53,6 +53,7 @@ define(["jquery"], function ($) {
             listRow.append(`<td>${item.name}</td>`);
             listRow.append(`<td>${item.attributes.refQuery}</td>`);
             listRow.append(`<td>${subItem.name}</td>`);
+            listRow.append(`<td>${subItem.attributes.expression || ""}</td>`);
             listRow.append(`<td>${subItem.attributes.label || ""}</td>`);
             tbody.append(listRow);
           });
