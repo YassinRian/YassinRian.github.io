@@ -37,6 +37,7 @@ define([
         // Render the table
         tableRenderer.renderTable(parsedData, "#table_container", selectedType);
         $("#table_modal").fadeIn(150);
+        $(".modal-content").show();
       });
       // cache functions=======================================
 
@@ -109,7 +110,6 @@ define([
        // Close Modal=======================================     
       $closeModal.on("click", function () {
         $modal.hide();
-        //$("body").removeClass("modal-active");
         $("#table_modal").fadeOut(150);
       });
 
