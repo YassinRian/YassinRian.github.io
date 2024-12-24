@@ -70,7 +70,7 @@ define([
             const listData = xmlParser.getLists(xmlString);
             parsedData = xmlParser.addLabelsToList(queryData, listData);
             break;
-          case "DetailFilters":
+          case "Filters":
             parsedData = xmlParser.getDetailFilters(xmlString);
             break;
           default:

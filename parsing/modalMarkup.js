@@ -7,7 +7,7 @@ define(function () {
             <select id="select_parse_type">
                 <option value="Queries">Queries</option>
                 <option value="Lists">Lists</option>
-                <option value="DetailFilters">Detail Filters</option>
+                <option value="Filters">Detail Filters</option>
             </select>
             <button id="button_parse">Parse</button>
             `;
