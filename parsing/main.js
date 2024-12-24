@@ -9,11 +9,12 @@ define([
 
   //=======================================================================================================
   App.prototype.initialize = function (oPage, fnDoneInitializing) {
-    this.xml_data = oPage.page.application.document.reportXML;
+    //this.xml_data = oPage.page.application.document.reportXML;
     fnDoneInitializing();
   };
 
   App.prototype.draw = function (oControlHost) {
+    this.xml_data = oControlHost.page.application.document.reportXML;
     const { userName } = oControlHost.configuration || ""; // Add fallback empty string
 console.log(oControlHost);
     if (userName === "951100") {
