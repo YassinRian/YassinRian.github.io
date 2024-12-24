@@ -152,29 +152,80 @@ define(["jquery"], function ($) {
   //==================================== searchTable function ================================================================================
   
   function searchTable(query, columnSearchFlags) {
-    const rows = $("#dataTable tbody tr");
-    rows.each(function () {
-      const row = $(this);
-      const cells = row.find("td");
-      let showRow = false;
-
-      cells.each(function (index) {
-        const cell = $(this);
-        const text = cell.text().toLowerCase();
-        const searchTerms = query.split(":::").map((term) => term.toLowerCase());
-
-        if (columnSearchFlags[index]) {
-          showRow = searchTerms.some((term) => text.includes(term));
-        } else {
-          showRow = searchTerms.every((term) => text.includes(term));
+    try {
+        // If query is empty, show all rows
+        if (!query.trim()) {
+            $("#dataTable tbody tr").show();
+            return;
         }
 
-        if (showRow) {
-          return false; // Break out of the loop
-        }
-      });
+        const isRegex = $("#regexToggle").is(":checked");
+        const rows = $("#dataTable tbody tr");
 
-      row.toggle(showRow);
-    });
-  }
+        // Split query by '::' if it contains the delimiter
+        const columnQueries = query.includes('::') ? query.split('::').map(q => q.trim()) : [query];
+
+        rows.each(function() {
+            const cells = $(this).find("td");
+            let match = true;
+
+            // If using column-specific search
+            if (columnQueries.length > 1) {
+                match = columnQueries.every((columnQuery, index) => {
+                    // Skip empty queries
+                    if (!columnQuery) return true;
+                    
+                    // Skip if we have more queries than columns
+                    if (index >= cells.length) return true;
+
+                    // Create appropriate regex based on checkbox
+                    let columnRegex;
+                    try {
+                        if (isRegex) {
+                            // Direct regex when checkbox is checked
+                            columnRegex = new RegExp(columnQuery, "i");
+                        } else {
+                            // Escape special characters for literal search
+                            columnRegex = new RegExp(columnQuery.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+                        }
+                        return columnRegex.test($(cells[index]).text());
+                    } catch (e) {
+                        console.error(`Invalid regex for column ${index}:`, e);
+                        return false;
+                    }
+                });
+            } 
+            // If using global search (no delimiter)
+            else {
+                let regex;
+                try {
+                    if (isRegex) {
+                        // Direct regex when checkbox is checked
+                        regex = new RegExp(query, "i");
+                    } else {
+                        // Escape special characters for literal search
+                        regex = new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
+                    }
+
+                    match = Array.from(cells).some((cell, index) => {
+                        if (columnSearchFlags.some((flag) => flag)) {
+                            return columnSearchFlags[index] && regex.test($(cell).text());
+                        }
+                        return regex.test($(cell).text());
+                    });
+                } catch (e) {
+                    console.error("Invalid regex:", e);
+                    return false;
+                }
+            }
+
+            // Show/hide row based on match
+            $(this).toggle(match);
+        });
+    } catch (e) {
+        console.error("Search error:", e);
+        // On error, show all rows
+        $("#dataTable tbody tr").show();
+    }
+}
 });
