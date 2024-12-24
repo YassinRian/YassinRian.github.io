@@ -109,7 +109,7 @@ define([
        // Close Modal=======================================     
       $closeModal.on("click", function () {
         $modal.hide();
-        $("body").removeClass("modal-active");
+        //$("body").removeClass("modal-active");
         $("#table_modal").fadeOut(150);
       });
 
