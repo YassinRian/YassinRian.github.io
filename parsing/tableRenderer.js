@@ -87,7 +87,7 @@ define(["jquery"], function ($) {
       // Add search input field
       const searchInput = $(`
         <div class="search-container">
-          <input id="searchInput" type="text" placeholder="Enter regex to search..." />
+          <input id="searchInput" type="text" placeholder="Enter search terms column-by-column using ':::' (e.g., 'term1:::term2:::term3')" />
           <label class="checkbox-container">
             <input type="checkbox" id="regexToggle" />
             Use Regular Expression
@@ -147,28 +147,19 @@ define(["jquery"], function ($) {
   function searchTable(query, columnSearchFlags) {
     try {
       const isRegex = $("#regexToggle").is(":checked");
-      const searchTerms = query.split(":::"); // Split by the chosen divider
-  
+      const regex = isRegex
+        ? new RegExp(query, "i") // Case-insensitive regex
+        : new RegExp(query.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape for literal search
+
       const rows = $("#dataTable tbody tr");
       rows.each(function () {
         const cells = $(this).find("td");
-        let match = true; // Assume the row matches until proven otherwise
-  
-        searchTerms.forEach((term, index) => {
-          if (term.trim() === "" || !columnSearchFlags[index]) {
-            return; // Skip empty search terms or columns not marked for searching
+        const match = Array.from(cells).some((cell, index) => {
+          if (columnSearchFlags.some((flag) => flag)) {
+            return columnSearchFlags[index] && regex.test($(cell).text());
           }
-  
-          const regex = isRegex
-            ? new RegExp(term, "i") // Case-insensitive regex
-            : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i"); // Escape for literal search
-  
-          const cellText = $(cells[index]).text() || ""; // Get the cell text
-          if (!regex.test(cellText)) {
-            match = false; // If any column doesn't match, reject the row
-          }
+          return regex.test($(cell).text());
         });
-  
         if (match) {
           $(this).show();
         } else {
@@ -176,7 +167,7 @@ define(["jquery"], function ($) {
         }
       });
     } catch (e) {
-      console.error("Invalid regex or search error:", e);
+      console.error("Invalid regex:", e);
     }
   }
 });
