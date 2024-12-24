@@ -147,6 +147,72 @@ body.modal-active {
 }
 
 
+/* Style for the popup container */
+#popup {
+  display: none;
+  position: absolute;
+  z-index: 1000;
+  background: rgba(255, 255, 255, 0.95);
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  padding: 10px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  font-size: 14px;
+  color: #333;
+  max-width: 300px;
+  word-wrap: break-word;
+  pointer-events: none; /* Ensures it doesn't interfere with hover events */
+}
+
+/* Optional: Add a subtle animation for appearance */
+#popup {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Show the popup with animation */
+#popup.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Add hover style for table headers */
+table#dataTable th {
+  position: relative; /* Needed for accurate positioning of the popup */
+  cursor: pointer;
+  padding: 10px;
+  background: #f9f9f9;
+  border: 1px solid #ddd;
+  text-align: left;
+  font-weight: bold;
+}
+
+table#dataTable th:hover {
+  background: #e9ecef; /* Subtle background change on hover */
+}
+
+/* Styling the table */
+table#dataTable {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+table#dataTable th,
+table#dataTable td {
+  padding: 10px;
+  border: 1px solid #ddd;
+}
+
+table#dataTable tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+table#dataTable tr:hover {
+  background-color: #eaeaea;
+}
+
+
 `;
 
   // Dynamically inject CSS into the document

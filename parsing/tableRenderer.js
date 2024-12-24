@@ -108,10 +108,12 @@ define(["jquery"], function ($) {
     },
   };
 
+ //==================================== showPopup function ================================================================================
+
   function showPopup(index, data, type, element) {
     const popup = $("#popup");
     const groups = new Set();
-
+  
     data.forEach((item) => {
       if (type === "Queries" && index === 0) {
         groups.add(item.name);
@@ -123,18 +125,24 @@ define(["jquery"], function ($) {
         groups.add(item.attributes.refQuery);
       }
     });
-
+  
     const content = Array.from(groups).join("<br>");
-    popup.html(content).css({
-      display: "block",
-      top: element.offset().top + element.height(),
-      left: element.offset().left,
-    });
+    popup
+      .html(content)
+      .css({
+        display: "block",
+        top: element.offset().top + element.height(),
+        left: element.offset().left,
+      })
+      .addClass("show"); // Add animation class
+  }
+  
+  function hidePopup() {
+    $("#popup").css("display", "none").removeClass("show"); // Remove animation class
   }
 
-  function hidePopup() {
-    $("#popup").css("display", "none");
-  }
+
+  //==================================== searchtable function ================================================================================
 
   function searchTable(query, columnSearchFlags) {
     try {
