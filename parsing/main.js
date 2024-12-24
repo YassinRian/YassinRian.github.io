@@ -7,15 +7,15 @@ define([
 ], function ($, xmlParser, tableRenderer, tableStyles, modalMarkup) {
   function App() {}
 
-  //=======================================================================================================
+ // =======================================================================================================
   // App.prototype.initialize = function (oPage, fnDoneInitializing) {
   //   //this.xml_data = oPage.page.application.document.reportXML;
   //   fnDoneInitializing();
   // };
 
-  App.prototype.draw = async function (oControlHost) {
+  App.prototype.draw = function (oControlHost) {
     console.log(oControlHost);
-    this.xml_data = await oControlHost.page.application.document.reportXML;
+    //this.xml_data = oControlHost.page.application.document.GetReportXml();
     const { userName } = oControlHost.configuration || ""; // Add fallback empty string
 
     if (userName === "951100") {
@@ -28,7 +28,8 @@ define([
       $("#button_parse").on("click", () => {
         const button = this; // reference to the button
         const selectedType = $("#select_parse_type").val(); // Get selected type
-        const xmlData = this.xml_data; // reference to the xml_data
+        //const xmlData = this.xml_data; // reference to the xml_data
+        const xmlData = oControlHost.page.application.document.GetReportXml(); // reference to the xml_data
 
         // Ensure the button has a valid type set
         $(button).data("type", selectedType);
