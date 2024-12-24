@@ -1,63 +1,5 @@
 define(["jquery"], function ($) {
   
-  function searchTable(query, columnSearchFlags) {
-    console.log("Starting searchTable with query:", query);
-  
-    try {
-      const isRegex = $("#regexToggle").is(":checked");
-      console.log("Is regex:", isRegex);
-  
-      const searchTerms = query.split(":::");
-      console.log("Search terms:", searchTerms);
-  
-      const rows = $("#dataTable tbody tr");
-      console.log("Number of rows found:", rows.length);
-  
-      rows.each(function () {
-        const cells = $(this).find("td");
-        console.log("Cells in current row:", cells);
-  
-        let match = true; // Assume the row matches until proven otherwise
-  
-        searchTerms.forEach((term, index) => {
-          console.log("Processing term:", term);
-  
-          if (term.trim() === "" || !columnSearchFlags[index]) {
-            console.log("Skipping term for column:", index);
-            return;
-          }
-  
-          try {
-            const regex = isRegex
-              ? new RegExp(term, "i")
-              : new RegExp(term.replace(/[.*+?^${}()|[\]\\]/g, "\\$&"), "i");
-  
-            const cellText = $(cells[index]).text() || "";
-            console.log(`Matching cell text "${cellText}" with regex:`, regex);
-  
-            if (!regex.test(cellText)) {
-              console.log("No match for term in column:", index);
-              match = false;
-            }
-          } catch (error) {
-            console.error("Invalid regex for term:", term, error);
-            match = false;
-          }
-        });
-  
-        if (match) {
-          console.log("Row matches, showing row.");
-          $(this).show();
-        } else {
-          console.log("Row does not match, hiding row.");
-          $(this).hide();
-        }
-      });
-    } catch (e) {
-      console.error("Error in searchTable execution:", e);
-    }
-  }
-  
   return {
     renderTable: function (data, container, type) {
       const tableContainer = $(container);
@@ -205,5 +147,34 @@ define(["jquery"], function ($) {
 
   function hidePopup() {
     $("#popup").css("display", "none").removeClass("show"); // Remove animation class
+  }
+
+  //==================================== searchTable function ================================================================================
+  
+  function searchTable(query, columnSearchFlags) {
+    const rows = $("#dataTable tbody tr");
+    rows.each(function () {
+      const row = $(this);
+      const cells = row.find("td");
+      let showRow = false;
+
+      cells.each(function (index) {
+        const cell = $(this);
+        const text = cell.text().toLowerCase();
+        const searchTerms = query.split(":::").map((term) => term.toLowerCase());
+
+        if (columnSearchFlags[index]) {
+          showRow = searchTerms.some((term) => text.includes(term));
+        } else {
+          showRow = searchTerms.every((term) => text.includes(term));
+        }
+
+        if (showRow) {
+          return false; // Break out of the loop
+        }
+      });
+
+      row.toggle(showRow);
+    });
   }
 });
