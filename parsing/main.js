@@ -26,6 +26,8 @@ define([
         const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = oControlHost.page.application.document.GetReportXml(); // reference to the xml_data
         const searchInput = modalMarkup.searchInput(); // Add search input
+
+        console.log(xmlData);
   
         // Ensure the button has a valid type set
         $(button).data("type", selectedType);
