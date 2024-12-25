@@ -8,7 +8,6 @@ define([
       const tableContainer = $(container);
       tableContainer.empty();
 
-      // Define headers based on type
       let headers = [];
       if (type === "Queries") {
         headers = ["Query Name", "Data Item Name", "Expression", "Label"];
@@ -18,29 +17,34 @@ define([
         headers = ["Query Name", "Filter Expression"];
       }
 
-      // Create table structure
+      let sortOrder = 1; // 1 for ascending, -1 for descending
+      let currentSortIndex = null;
+
       const table = $('<table id="dataTable"></table>');
       const thead = $("<thead></thead>");
       const headerRow = $("<tr></tr>");
 
-      // Add headers with hover functionality
       const columnSearchFlags = Array(headers.length).fill(false);
       let activePopup = null;
 
       headers.forEach((header, index) => {
         const th = $(`<th class="table-header">
-                  <div class="header-content">${header}</div>
+                  <div class="header-content">
+                      ${header}
+                      <span class="sort-icons">
+                          <span class="sort-asc" style="cursor: pointer;">▲</span>
+                          <span class="sort-desc" style="cursor: pointer;">▼</span>
+                      </span>
+                  </div>
                   <div class="checkbox-container">
                       <input type="checkbox" data-index="${index}" />
                   </div>
               </th>`);
 
         if (index === 0) {
-          // Setup hover handling
+          // Restore popup functionality for the first column
           let isOverHeader = false;
           let isOverPopup = false;
-
-        
 
           th.on("mouseenter", function () {
             if (activePopup) {
@@ -49,8 +53,8 @@ define([
             isOverHeader = true;
             const currentElement = $(this);
 
-            activePopup = showPopup(data, currentElement);          
-              activePopup
+            activePopup = showPopup(data, currentElement);
+            activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
               })
@@ -63,8 +67,6 @@ define([
                   }
                 }, 300);
               });
-
-
           }).on("mouseleave", function () {
             isOverHeader = false;
             setTimeout(() => {
@@ -74,52 +76,50 @@ define([
                   activePopup = null;
                 }
               }
-            }, 300); // Delay removal to allow mouse to enter popup
+            }, 300);
+          });
 
-          }); //end th.on
-
-          // Add a visual indicator that this column has popup functionality
           th.find(".header-content").append(
             ' <span style="cursor: help; color: #666;" title="Hover for analysis">📊</span>'
           );
         }
+
+        // Sort functionality with arrow icons
+        th.find(".sort-asc, .sort-desc").on("click", function (e) {
+          e.stopPropagation();
+
+          const isAscending = $(this).hasClass("sort-asc");
+          sortOrder = isAscending ? 1 : -1;
+
+          if (currentSortIndex !== index) {
+            currentSortIndex = index;
+          }
+
+          data.sort((a, b) => {
+            const valA = getCellValue(a, index, type);
+            const valB = getCellValue(b, index, type);
+
+            if (valA == null) return sortOrder;
+            if (valB == null) return -sortOrder;
+
+            return valA.toString().localeCompare(valB.toString()) * sortOrder;
+          });
+
+          this.renderTable(data, container, type, searchInput);
+        }.bind(this));
+
         // Add checkbox handler
         th.find('input[type="checkbox"]').on("change", function (e) {
-          e.stopPropagation(); // Prevent event from bubbling
+          e.stopPropagation();
           columnSearchFlags[index] = $(this).is(":checked");
         });
 
-                      // Add sort functionality
-                      th.on("click", function () {
-                        if (currentSortIndex === index) {
-                          sortOrder *= -1; // Reverse order if same column is clicked
-                        } else {
-                          sortOrder = 1; // Reset to ascending for a new column
-                          currentSortIndex = index;
-                        }
-              
-                        data.sort((a, b) => {
-                          const valA = getCellValue(a, index, type);
-                          const valB = getCellValue(b, index, type);
-              
-                          // Handle null/undefined gracefully
-                          if (valA == null) return sortOrder;
-                          if (valB == null) return -sortOrder;
-              
-                          return valA.toString().localeCompare(valB.toString()) * sortOrder;
-                        });
-              
-                        this.renderTable(data, container, type, searchInput);
-                      }.bind(this));
-
         headerRow.append(th);
       });
-   
 
       thead.append(headerRow);
       table.append(thead);
 
-      // Add tbody and populate data
       const tbody = $("<tbody></tbody>");
       data.forEach((item) => {
         if (type === "Queries") {
@@ -153,7 +153,6 @@ define([
       tableContainer.append(table);
       tableContainer.prepend(searchInput);
 
-      // Add search handler
       $("#searchInput").on("input", function () {
         searchTable($(this).val(), columnSearchFlags);
       });
@@ -174,9 +173,6 @@ define([
         }
         return "";
       }
-
-
     }, //end renderTable
   }; //end return
 }); //end define
-
