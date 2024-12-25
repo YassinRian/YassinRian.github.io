@@ -15,9 +15,6 @@ define([
 
     if (userName === "951100") {
       const elm = oControlHost.container;
-    
-      // Add styles first
-      $('head').append(styles);
       
       // Add the control group with both buttons
       $(elm).append(modalMarkup.selectBox());
