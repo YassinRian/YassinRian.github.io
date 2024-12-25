@@ -5,7 +5,7 @@ define([
   "https://yassinrian.github.io/parsing/tableStyles.js",
   "https://yassinrian.github.io/parsing/modalMarkup.js",
   "https://yassinrian.github.io/parsing/sortedXml.js",
-], function ($, xmlParser, tableRenderer,_, modalMarkup, addXmlExportButton) {
+], function ($, xmlParser, tableRenderer,_, modalMarkup, sortedXml) {
   function App() {}
 
  // =======================================================================================================
@@ -18,7 +18,7 @@ define([
       $(elm).append(modalMarkup.selectBox());
       $("body").append(modalMarkup.modal());
     
-      addXmlExportButton(oControlHost, elm);
+      sortedXml.addButton(oControlHost, elm);
       // Button click event=======================================
 
       $("#button_parse").on("click", () => {
