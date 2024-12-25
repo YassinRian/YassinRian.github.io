@@ -4,7 +4,7 @@ define([
 function ($,searchTable) { 
   
   return {
-    renderTable: function (data, container, type, searchInput) {
+    renderTable: function (data, container, type, searchInput, showPopup) {
       const tableContainer = $(container);
       tableContainer.empty();
 
@@ -45,10 +45,7 @@ function ($,searchTable) {
               activePopup.remove();
             }
             isOverHeader = true;
-            //activePopup = showPopup(index, data, type, $(this));
-            
-            require(["https://yassinrian.github.io/parsing/popUp.js"], async function (showPopup) {
-              activePopup = await showPopup(index, data, type, $(this)); // Ensure showPopup is loaded
+            activePopup = showPopup(index, data, type, $(this));            
               activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
@@ -62,7 +59,6 @@ function ($,searchTable) {
                   }
                 }, 300);
               });
-            });
 
 
           }).on("mouseleave", function () {
