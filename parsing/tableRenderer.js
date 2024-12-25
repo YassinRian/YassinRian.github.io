@@ -18,7 +18,7 @@ define(["jquery"], function ($) {
                   updateValueCount(values, value);
                   total++;
               });
-          } else if (type === "Detail Filters") {
+          } else if (type === "Filters") {
               const value = getColumnValue(item, null, columnIndex, type);
               updateValueCount(values, value);
               total++;
@@ -57,7 +57,7 @@ define(["jquery"], function ($) {
               case 3: return subItem.attributes.expression || '';
               case 4: return subItem.attributes.label || '';
           }
-      } else if (type === "Detail Filters") {
+      } else if (type === "Filters") {
           switch (columnIndex) {
               case 0: return item.name;
               case 1: return item.attributes.filterExpression || '';
