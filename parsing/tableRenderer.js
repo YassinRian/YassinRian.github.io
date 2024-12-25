@@ -97,57 +97,13 @@ define(["jquery"], function ($) {
       `);
       tableContainer.prepend(searchInput);
 
-      // Search functionality
-      // searchInput.on("input", function () {
-      //   const query = $("#searchInput").val();
-      //   searchTable(query, columnSearchFlags);
-      // });
-
+      // Add search functionality
       searchInput.on("input", function () {
         const query = $("#searchInput").val();
         searchTable(query, columnSearchFlags);
       });
 
-      // Add a popup container
-      const popup = $(
-        '<div id="popup" style="display:none; position:absolute; z-index:1000; background:#fff; border:1px solid #ccc; padding:5px;"></div>'
-      );
-      tableContainer.append(popup);
-    },
-  };
 
-  //==================================== showPopup function ================================================================================
-
-  function showPopup(index, data, type, element) {
-    const popup = $("#popup");
-    const groups = new Set();
-
-    data.forEach((item) => {
-      if (type === "Queries" && index === 0) {
-        groups.add(item.name);
-      } else if (type === "Queries" && index === 1) {
-        item.items.forEach((subItem) => groups.add(subItem.name));
-      } else if (type === "Lists" && index === 0) {
-        groups.add(item.name);
-      } else if (type === "Lists" && index === 1) {
-        groups.add(item.attributes.refQuery);
-      }
-    });
-
-    const content = Array.from(groups).join("<br>");
-    popup
-      .html(content)
-      .css({
-        display: "block",
-        top: element.offset().top + element.height(),
-        left: element.offset().left,
-      })
-      .addClass("show"); // Add animation class
-  }
-
-  function hidePopup() {
-    $("#popup").css("display", "none").removeClass("show"); // Remove animation class
-  }
 
   //==================================== searchTable function ================================================================================
   
@@ -227,5 +183,181 @@ define(["jquery"], function ($) {
         // On error, show all rows
         $("#dataTable tbody tr").show();
     }
+} // End of searchTable function
+
+//==================================== analyzeColumnData, getColumnValue, updateValueCount, showPopup, hidePopup functions ================================================================================
+
+// Add these functions within your return object, alongside renderTable
+
+function analyzeColumnData(data, columnIndex, type) {
+  const values = new Map(); // Use Map to maintain insertion order
+  let total = 0;
+
+  // Extract all values for the given column based on type
+  data.forEach(item => {
+      if (type === "Queries") {
+          item.items.forEach(subItem => {
+              const value = getColumnValue(item, subItem, columnIndex, type);
+              updateValueCount(values, value);
+              total++;
+          });
+      } else if (type === "Lists") {
+          item.items.forEach(subItem => {
+              const value = getColumnValue(item, subItem, columnIndex, type);
+              updateValueCount(values, value);
+              total++;
+          });
+      } else if (type === "Detail Filters") {
+          const value = getColumnValue(item, null, columnIndex, type);
+          updateValueCount(values, value);
+          total++;
+      }
+  });
+
+  // Sort by frequency (descending) and calculate percentages
+  const sortedData = Array.from(values.entries())
+      .sort((a, b) => b[1] - a[1])
+      .map(([value, count]) => ({
+          value: value || '(empty)',
+          count,
+          percentage: ((count / total) * 100).toFixed(1)
+      }));
+
+  return {
+      total,
+      uniqueCount: values.size,
+      frequencies: sortedData.slice(0, 10) // Top 10 most frequent values
+  };
 }
-});
+
+function getColumnValue(item, subItem, columnIndex, type) {
+  if (type === "Queries") {
+      switch (columnIndex) {
+          case 0: return item.name;
+          case 1: return subItem.name;
+          case 2: return subItem.attributes.expression || '';
+          case 3: return subItem.attributes.label || '';
+      }
+  } else if (type === "Lists") {
+      switch (columnIndex) {
+          case 0: return item.name;
+          case 1: return item.attributes.refQuery || '';
+          case 2: return subItem.name;
+          case 3: return subItem.attributes.expression || '';
+          case 4: return subItem.attributes.label || '';
+      }
+  } else if (type === "Detail Filters") {
+      switch (columnIndex) {
+          case 0: return item.name;
+          case 1: return item.attributes.filterExpression || '';
+      }
+  }
+  return '';
+}
+
+function updateValueCount(map, value) {
+  const normalizedValue = value.trim();
+  map.set(normalizedValue, (map.get(normalizedValue) || 0) + 1);
+}
+
+function showPopup(index, data, type, element) {
+  // Remove any existing popup
+  hidePopup();
+
+  // Analyze the column data
+  const analysis = analyzeColumnData(data, index, type);
+
+  // Create popup content
+  const popup = $('<div class="column-popup"></div>').css({
+      position: 'absolute',
+      backgroundColor: 'white',
+      border: '1px solid #ccc',
+      borderRadius: '4px',
+      padding: '10px',
+      boxShadow: '0 2px 5px rgba(0,0,0,0.2)',
+      zIndex: 1000,
+      maxWidth: '400px',
+      maxHeight: '400px',
+      overflowY: 'auto'
+  });
+
+  // Add summary content
+  popup.append(`
+      <div style="margin-bottom: 10px;">
+          <strong>Total Values:</strong> ${analysis.total}<br>
+          <strong>Unique Values:</strong> ${analysis.uniqueCount}
+      </div>
+      <div style="margin-bottom: 10px;">
+          <strong>Top Values:</strong>
+      </div>
+  `);
+
+  // Add frequency table
+  const table = $('<table style="width: 100%; border-collapse: collapse;"></table>');
+  table.append(`
+      <tr style="background-color: #f5f5f5;">
+          <th style="padding: 5px; border: 1px solid #ddd;">Value</th>
+          <th style="padding: 5px; border: 1px solid #ddd;">Count</th>
+          <th style="padding: 5px; border: 1px solid #ddd;">%</th>
+      </tr>
+  `);
+
+  analysis.frequencies.forEach(item => {
+      table.append(`
+          <tr>
+              <td style="padding: 5px; border: 1px solid #ddd;">${item.value}</td>
+              <td style="padding: 5px; border: 1px solid #ddd; text-align: right;">${item.count}</td>
+              <td style="padding: 5px; border: 1px solid #ddd; text-align: right;">${item.percentage}%</td>
+          </tr>
+      `);
+  });
+
+  popup.append(table);
+
+  // Position the popup below the header
+  const pos = element.offset();
+  popup.css({
+      left: pos.left + 'px',
+      top: (pos.top + element.outerHeight()) + 'px'
+  });
+
+  // Add the popup to the body
+  $('body').append(popup);
+}
+
+function hidePopup() {
+  $('.column-popup').remove();
+}
+
+// Add some CSS to your stylesheet
+const style = $('<style>').text(`
+  .column-popup {
+      background-color: white;
+      border: 1px solid #ccc;
+      border-radius: 4px;
+      padding: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      z-index: 1000;
+      max-width: 400px;
+      max-height: 400px;
+      overflow-y: auto;
+  }
+  .column-popup table {
+      width: 100%;
+      border-collapse: collapse;
+  }
+  .column-popup th, .column-popup td {
+      padding: 5px;
+      border: 1px solid #ddd;
+  }
+  .column-popup th {
+      background-color: #f5f5f5;
+  }
+`);
+$('head').append(style);
+
+
+
+} // End of renderTable function
+} // End of return object
+}); // End of define function
