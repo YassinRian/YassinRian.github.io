@@ -1,14 +1,12 @@
 define([
 "jquery",  
-"https://yassinrian.github.io/parsing/searchTable.js",
-"https://yassinrian.github.io/parsing/popUp.js",
-],function ($, searchTable, showPopup) {
+"https://yassinrian.github.io/parsing/searchTable.js"
+],function ($, searchTable) {
   
-  let activePopup_async = showPopup(data, $(this));
 
-  // requirejs(["https://yassinrian.github.io/parsing/popUp.js"], function ($) {
-  //   activePopup_async = showPopup(data, $(this));
-  // });
+  requirejs(["https://yassinrian.github.io/parsing/popUp.js"], function ($) {
+    activePopup_async = showPopup(data, $(this));
+  });
 //======================================================================================================================
   return {
     renderTable: function (data, container, type, searchInput) {
