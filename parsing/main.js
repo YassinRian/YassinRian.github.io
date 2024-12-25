@@ -24,6 +24,7 @@ define([
         const button = this; // reference to the button
         const selectedType = $("#select_parse_type").val(); // Get selected type
         const xmlData = oControlHost.page.application.document.GetReportXml(); // reference to the xml_data
+        const searchInput = modalMarkup.searchInput(); // Add search input
   
         // Ensure the button has a valid type set
         $(button).data("type", selectedType);
@@ -32,7 +33,7 @@ define([
         const parsedData = parseAndCache(button, xmlData);
 
         // Render the table
-        tableRenderer.renderTable(parsedData, "#table_container", selectedType);
+        tableRenderer.renderTable(parsedData, "#table_container", selectedType, searchInput);
         $("#table_modal").fadeIn(150);
         $(".modal-content").show();
       });

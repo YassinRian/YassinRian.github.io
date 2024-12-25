@@ -283,17 +283,6 @@ function showPopup(index, data, type, th) {
 
       table.append(tbody);
       tableContainer.append(table);
-
-      // Add search input
-      const searchInput = $(`
-              <div class="search-container">
-                  <input id="searchInput" type="text" placeholder="Enter search terms column-by-column using '::' (e.g., 'term1::term2::term3')" />
-                  <label class="checkbox-container">
-                      <input type="checkbox" id="regexToggle" />
-                      Use Regular Expression
-                  </label>
-              </div>
-          `);
       tableContainer.prepend(searchInput);
 
       // Add search handler
@@ -301,41 +290,6 @@ function showPopup(index, data, type, th) {
         searchTable($(this).val(), columnSearchFlags);
       });
 
-      // Add CSS
-      const style = $("<style>").text(`
-              .table-header {
-                  position: relative;
-              }
-              .header-content {
-                  margin-bottom: 5px;
-              }
-              .checkbox-container {
-                  position: relative;
-              }
-              .column-popup {
-                  background-color: white;
-                  border: 1px solid #ccc;
-                  border-radius: 4px;
-                  padding: 10px;
-                  box-shadow: 0 2px 5px rgba(0,0,0,0.2);
-                  z-index: 1000;
-                  max-width: 400px;
-                  max-height: 400px;
-                  overflow-y: auto;
-              }
-              .column-popup table {
-                  width: 100%;
-                  border-collapse: collapse;
-              }
-              .column-popup th, .column-popup td {
-                  padding: 5px;
-                  border: 1px solid #ddd;
-              }
-              .column-popup th {
-                  background-color: #f5f5f5;
-              }
-          `);
-      $("head").append(style);
 
 
     }, //end renderTable

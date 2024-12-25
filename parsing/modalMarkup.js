@@ -25,5 +25,17 @@ define(function () {
             </div>
             `;
     },
+        // Add search input
+       searchInput: () => {
+        return `
+        <div class="search-container">
+            <input id="searchInput" type="text" placeholder="Enter search terms column-by-column using '::' (e.g., 'term1::term2::term3')" />
+            <label class="checkbox-container">
+                <input type="checkbox" id="regexToggle" />
+                Use Regular Expression
+            </label>
+        </div>
+        `;
+       }
   };
 });
