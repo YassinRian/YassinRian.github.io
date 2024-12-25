@@ -124,7 +124,7 @@ define([
               activePopup.remove();
             }
             isOverHeader = true;
-            activePopup = showPopup(index, data, type, $(this));            
+            activePopup = showPopup(data, $(this));            
               activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
