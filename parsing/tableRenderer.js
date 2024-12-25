@@ -1,7 +1,13 @@
 define([
 "jquery",  
-"https://yassinrian.github.io/parsing/searchTable.js"
+"https://yassinrian.github.io/parsing/searchTable.js",
 ],function ($, searchTable) {
+
+  let showPopupPromise = new Promise((resolve) => {
+    require(["https://yassinrian.github.io/parsing/popUp.js"], function (loadedShowPopup) {
+      resolve(loadedShowPopup);
+    });
+  });
 
  // =================================== function showPopup ==================================================================== 
   // function showPopup (data, th) {
@@ -128,8 +134,10 @@ define([
               activePopup.remove();
             }
             isOverHeader = true;
-            //activePopup = showPopup(data, $(this));           
-            activePopup = requirejs(["https://yassinrian.github.io/parsing/popUp.js"]);
+            //activePopup = showPopup(data, $(this));  
+            showPopupPromise.then((resolvedShowPopup) => {
+              activePopup = resolvedShowPopup(data, $(this));
+            });         
               activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
