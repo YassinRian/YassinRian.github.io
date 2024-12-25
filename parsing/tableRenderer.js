@@ -162,18 +162,20 @@ define(["jquery"], function ($) {
     }
   }
 
-  function showPopup(index, data, type) {
+ // ====================  showPopup  ====================
+
+ function showPopup(index, data, type, th) {
     // Create a map to count unique item names
     const nameMap = new Map();
     let total = 0;
-
+  
     // Count occurrences of item names
     data.forEach((item) => {
       const name = item.name.trim();
       nameMap.set(name, (nameMap.get(name) || 0) + 1);
       total++;
     });
-
+  
     // Sort by frequency
     const sortedNames = Array.from(nameMap.entries())
       .sort((a, b) => b[1] - a[1])
@@ -182,10 +184,10 @@ define(["jquery"], function ($) {
         count,
         percentage: ((count / total) * 100).toFixed(1),
       }));
-
+  
     // Create popup content
     const popup = $('<div class="column-popup"></div>');
-
+  
     // Add summary content
     popup.append(`
             <div style="margin-bottom: 10px;">
@@ -196,7 +198,7 @@ define(["jquery"], function ($) {
                 <strong>Name Distribution:</strong>
             </div>
         `);
-
+  
     // Add frequency table
     const table = $(
       '<table style="width: 100%; border-collapse: collapse;"></table>'
@@ -208,7 +210,7 @@ define(["jquery"], function ($) {
                 <th style="padding: 5px; border: 1px solid #ddd;">%</th>
             </tr>
         `);
-
+  
     sortedNames.forEach((item) => {
       table.append(`
                 <tr>
@@ -218,9 +220,9 @@ define(["jquery"], function ($) {
                 </tr>
             `);
     });
-
+  
     popup.append(table);
-
+  
     // Position and style popup
     const headerRect = th[0].getBoundingClientRect();
     popup.css({
@@ -237,11 +239,11 @@ define(["jquery"], function ($) {
       maxHeight: "400px",
       overflowY: "auto",
     });
-
+  
     $("body").append(popup);
     return popup;
   }
-
+ // ====================  showPopup  ====================
   return {
     renderTable: function (data, container, type) {
       const tableContainer = $(container);
