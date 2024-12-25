@@ -1,6 +1,5 @@
 define(["jquery"], function ($) {
-  return {
-    searchTable: function (query, columnSearchFlags) {
+  return function searchTable(query, columnSearchFlags) {
       try {
         // If query is empty, show all rows
         if (!query.trim()) {
@@ -79,6 +78,5 @@ define(["jquery"], function ($) {
         console.error("Search error:", e);
         $("#dataTable tbody tr").show();
       }
-    }, //end searchTable
-  };
+    } //end searchTable
 });

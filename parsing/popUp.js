@@ -1,6 +1,6 @@
 define(["jquery"], function ($) {
-    return {
-        showPopup: function (data, th) {
+    return 
+        function showPopup (data, th) {
             // Create a map to count unique item names
             const nameMap = new Map();
             let total = 0;
@@ -79,7 +79,5 @@ define(["jquery"], function ($) {
             $("body").append(popup);
             return popup;
           } //end showPopup
-    }
-    
-  });
+    });
   
