@@ -1,7 +1,7 @@
 define([
 "jquery", 
 "https://yassinrian.github.io/parsing/popUp.js", 
-"https://yassinrian.github.io/parsing/searchTable"], 
+"https://yassinrian.github.io/parsing/searchTable.js"], 
 
 function ($, showPopup, searchTable) { 
   return {
