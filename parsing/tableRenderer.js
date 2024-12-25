@@ -28,82 +28,80 @@ define([
       let activePopup = null;
 
       headers.forEach((header, index) => {
-        const th = $(`<th class="table-header">
-                  <div class="header-content">
-                      <span class="hover-analysis-icon" style="cursor: help; color: #666; margin-right: 10px;" title="Hover for analysis">📊</span>
-                      ${header}
-                      <span class="sort-icons">
-                          <span class="sort-asc" style="cursor: pointer;">▲</span>
-                          <span class="sort-desc" style="cursor: pointer;">▼</span>
-                      </span>
-                  </div>
-                  <div class="checkbox-container">
-                      <input type="checkbox" data-index="${index}" />
-                  </div>
-              </th>`);
-
         // Add popup functionality only on "Hover for analysis" icon
         if (index === 0) {
+          // Add hover-analysis icon only for the first column
+          th = $(`<th class="table-header">
+      <div class="header-content">
+          <span class="hover-analysis-icon" style="cursor: help; color: #666; margin-right: 10px;" title="Hover for analysis">📊</span>
+          ${header}
+          <span class="toggle-sort-icon" style="cursor: pointer; margin-left: 10px;" title="Sort">⬆️</span>
+      </div>
+      <div class="checkbox-container">
+          <input type="checkbox" data-index="${index}" />
+      </div>
+  </th>`);
+
           let isOverIcon = false;
           let isOverPopup = false;
 
-          th.find(".hover-analysis-icon").on("mouseenter", function () {
-            if (activePopup) {
-              activePopup.remove();
-            }
-            isOverIcon = true;
-            const currentElement = $(this);
+          th.find(".hover-analysis-icon")
+            .on("mouseenter", function () {
+              if (activePopup) {
+                activePopup.remove();
+              }
+              isOverIcon = true;
+              const currentElement = $(this);
 
-            activePopup = showPopup(data, currentElement);
-            activePopup
-              .on("mouseenter", function () {
-                isOverPopup = true;
-              })
-              .on("mouseleave", function () {
-                isOverPopup = false;
-                setTimeout(() => {
-                  if (!isOverIcon && !isOverPopup) {
+              activePopup = showPopup(data, currentElement);
+              activePopup
+                .on("mouseenter", function () {
+                  isOverPopup = true;
+                })
+                .on("mouseleave", function () {
+                  isOverPopup = false;
+                  setTimeout(() => {
+                    if (!isOverIcon && !isOverPopup) {
+                      activePopup.remove();
+                      activePopup = null;
+                    }
+                  }, 300);
+                });
+            })
+            .on("mouseleave", function () {
+              isOverIcon = false;
+              setTimeout(() => {
+                if (!isOverIcon && !isOverPopup) {
+                  if (activePopup) {
                     activePopup.remove();
                     activePopup = null;
                   }
-                }, 300);
-              });
-          }).on("mouseleave", function () {
-            isOverIcon = false;
-            setTimeout(() => {
-              if (!isOverIcon && !isOverPopup) {
-                if (activePopup) {
-                  activePopup.remove();
-                  activePopup = null;
                 }
-              }
-            }, 300);
-          });
-        }
+              }, 300);
+            }); //end hover-analysis-icon
+        } //end if
 
-        // Sort functionality with arrow icons
-        th.find(".sort-asc, .sort-desc").on("click", function (e) {
-          e.stopPropagation();
+        // Add toggle sort functionality
+        th.find(".toggle-sort-icon").on(
+          "click",
+          function () {
+            const isAscending = $(this).text() === "⬆️";
+            sortOrder = isAscending ? -1 : 1;
+            $(this).text(isAscending ? "⬇️" : "⬆️");
 
-          const isAscending = $(this).hasClass("sort-asc");
-          sortOrder = isAscending ? 1 : -1;
+            data.sort((a, b) => {
+              const valA = getCellValue(a, index, type);
+              const valB = getCellValue(b, index, type);
 
-          if (currentSortIndex !== index) {
-            currentSortIndex = index;
-          }
+              if (valA == null) return sortOrder;
+              if (valB == null) return -sortOrder;
 
-          data.sort((a, b) => {
-            const valA = getCellValue(a, index, type);
-            const valB = getCellValue(b, index, type);
+              return valA.toString().localeCompare(valB.toString()) * sortOrder;
+            });
 
-            if (valA == null) return sortOrder;
-            if (valB == null) return -sortOrder;
-
-            return valA.toString().localeCompare(valB.toString()) * sortOrder;
-          });
-
-          this.renderTable(data, container, type, searchInput);
-        }.bind(this));
+            this.renderTable(data, container, type, searchInput);
+          }.bind(this)
+        );
 
         // Add checkbox handler
         th.find('input[type="checkbox"]').on("change", function (e) {
