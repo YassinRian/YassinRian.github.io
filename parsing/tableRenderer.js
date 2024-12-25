@@ -89,8 +89,32 @@ define([
           columnSearchFlags[index] = $(this).is(":checked");
         });
 
+                      // Add sort functionality
+                      th.on("click", function () {
+                        if (currentSortIndex === index) {
+                          sortOrder *= -1; // Reverse order if same column is clicked
+                        } else {
+                          sortOrder = 1; // Reset to ascending for a new column
+                          currentSortIndex = index;
+                        }
+              
+                        data.sort((a, b) => {
+                          const valA = getCellValue(a, index, type);
+                          const valB = getCellValue(b, index, type);
+              
+                          // Handle null/undefined gracefully
+                          if (valA == null) return sortOrder;
+                          if (valB == null) return -sortOrder;
+              
+                          return valA.toString().localeCompare(valB.toString()) * sortOrder;
+                        });
+              
+                        this.renderTable(data, container, type, searchInput);
+                      }.bind(this));
+
         headerRow.append(th);
       });
+   
 
       thead.append(headerRow);
       table.append(thead);
@@ -134,6 +158,22 @@ define([
         searchTable($(this).val(), columnSearchFlags);
       });
 
+      function getCellValue(item, colIndex, type) {
+        if (type === "Queries") {
+          return colIndex === 0
+            ? item.name
+            : item.items[0]?.attributes[headers[colIndex].toLowerCase()] || "";
+        } else if (type === "Lists") {
+          return colIndex === 0
+            ? item.name
+            : item.items[0]?.attributes[headers[colIndex].toLowerCase()] || "";
+        } else if (type === "Filters") {
+          return colIndex === 0
+            ? item.name
+            : item.attributes.filterExpression || "";
+        }
+        return "";
+      }
 
 
     }, //end renderTable
