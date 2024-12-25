@@ -2,14 +2,15 @@ define(function () {
   return {
     selectBox: () => {
       return `
-            <div>
-            <label for="select_parse_type">Select Type:</label>
-            <select id="select_parse_type">
-                <option value="Queries">Queries</option>
-                <option value="Lists">Lists</option>
-                <option value="Filters">Detail Filters</option>
-            </select>
-            <button id="button_parse">Parse</button>
+ <div class="control-group">
+    <label for="select_parse_type">Select Type</label>
+    <select id="select_parse_type">
+      <option value="Queries">Queries</option>
+      <option value="Lists">Lists</option>
+      <option value="Filters">Detail Filters</option>
+    </select>
+    <button id="button_parse">Parse</button>
+  </div>
             `;
     },
     modal: () => {
@@ -25,9 +26,9 @@ define(function () {
             </div>
             `;
     },
-        // Add search input
-       searchInput: () => {
-        return `
+    // Add search input
+    searchInput: () => {
+      return `
         <div class="search-container">
             <input id="searchInput" type="text" placeholder="Enter search terms column-by-column using '::' (e.g., 'term1::term2::term3')" />
             <label class="checkbox-container">
@@ -36,6 +37,6 @@ define(function () {
             </label>
         </div>
         `;
-       }
+    },
   };
 });
