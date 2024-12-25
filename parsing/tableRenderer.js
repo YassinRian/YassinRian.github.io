@@ -35,19 +35,33 @@ define([
 
       headers.forEach((header, index) => {
         const th = $(`<th class="table-header">
-                  <div class="header-content" style="display: flex; align-items: center; gap: 8px;">
-                    <span class="sort-icon" style="cursor: pointer;">↕️</span>
-                    ${index === 0 ? '<span class="analysis-icon" style="cursor: help;" title="Hover for analysis">📊</span>' : ''}
+                  <div class="header-content">
+                    ${index === 0 ? '<span class="analysis-icon" title="Hover for analysis">📊</span>' : ''}
                     <span class="header-text">${header}</span>
-                  </div>
-                  <div class="checkbox-container">
-                    <input type="checkbox" data-index="${index}" />
+                    <span class="sort-icon" title="Sort column">↕️</span>
                   </div>
               </th>`);
 
+        // Add header click for search selection
+        th.on('click', function(e) {
+          // Ignore clicks on icons
+          if ($(e.target).hasClass('sort-icon') || $(e.target).hasClass('analysis-icon')) {
+            return;
+          }
+          
+          $(this).toggleClass('selected');
+          columnSearchFlags[index] = $(this).hasClass('selected');
+          
+          // Trigger search update if input has value
+          const searchValue = $('#searchInput').val();
+          if (searchValue) {
+            searchTable(searchValue, columnSearchFlags);
+          }
+        });
+
         // Add sorting functionality
         th.find('.sort-icon').on('click', function(e) {
-          e.stopPropagation(); // Prevent event from triggering header hover
+          e.stopPropagation(); // Prevent header click event
           const tbody = table.find('tbody');
           const rows = tbody.find('tr').toArray();
           
@@ -88,7 +102,7 @@ define([
         });
 
         if (index === 0) {
-          // Setup hover handling for analysis icon only
+          // Setup hover handling for analysis icon
           let isOverIcon = false;
           let isOverPopup = false;
 
@@ -125,12 +139,6 @@ define([
             }, 300);
           });
         }
-
-        // Add checkbox handler
-        th.find('input[type="checkbox"]').on("change", function (e) {
-          e.stopPropagation();
-          columnSearchFlags[index] = $(this).is(":checked");
-        });
 
         headerRow.append(th);
       });
