@@ -15,10 +15,18 @@ define([
 
     if (userName === "951100") {
       const elm = oControlHost.container;
-      $(elm).append(modalMarkup.selectBox());
-      $("body").append(modalMarkup.modal());
     
-      sortedXml.addButton(oControlHost, modalMarkup.selectBox());
+      // Add styles first
+      $('head').append(styles);
+      
+      // Add the control group with both buttons
+      $(elm).append(modalMarkup.selectBox());
+      
+      // Add modal to body
+      $("body").append(modalMarkup.modal());
+      
+      // Initialize the export button functionality
+      sortedXml.initExportButton(oControlHost);
       // Button click event=======================================
 
       $("#button_parse").on("click", () => {
