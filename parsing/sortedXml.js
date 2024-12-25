@@ -56,6 +56,95 @@ define(['jquery'], function($) {
     }
   
     // Rest of the code remains the same...
+     // Ensure styles are added to head
+  if (!$('#xml-export-styles').length) {
+    $('head').append(`
+      <style id="xml-export-styles">
+        .export-button {
+          display: inline-flex;
+          align-items: center;
+          padding: 8px 12px;
+          background-color: #f8f9fa;
+          border: 1px solid #dee2e6;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: all 0.2s;
+          margin: 5px;
+        }
+        .export-button:hover {
+          background-color: #e9ecef;
+        }
+        .export-icon {
+          margin-right: 6px;
+        }
+        .xml-modal {
+          display: none;
+          position: fixed;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+          background-color: rgba(0, 0, 0, 0.5);
+          z-index: 1000;
+        }
+        .xml-modal-content {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          background-color: white;
+          padding: 20px;
+          border-radius: 8px;
+          width: 80%;
+          max-width: 800px;
+          max-height: 80vh;
+          display: flex;
+          flex-direction: column;
+        }
+        .xml-modal-header {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          margin-bottom: 15px;
+        }
+        .xml-modal-close {
+          cursor: pointer;
+          font-size: 20px;
+          color: #666;
+        }
+        .xml-modal-close:hover {
+          color: #333;
+        }
+        .xml-textarea {
+          width: 100%;
+          height: 400px;
+          margin-bottom: 15px;
+          padding: 10px;
+          border: 1px solid #dee2e6;
+          border-radius: 4px;
+          font-family: monospace;
+          resize: vertical;
+        }
+        .copy-button {
+          align-self: flex-end;
+          padding: 8px 16px;
+          background-color: #007bff;
+          color: white;
+          border: none;
+          border-radius: 4px;
+          cursor: pointer;
+          transition: background-color 0.2s;
+        }
+        .copy-button:hover {
+          background-color: #0056b3;
+        }
+        .copy-button.copied {
+          background-color: #28a745;
+        }
+      </style>
+    `);
+  }
+
     
     return {
       addButton: function(oControlHost, targetContainer) {
