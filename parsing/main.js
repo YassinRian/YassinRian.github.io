@@ -18,7 +18,7 @@ define([
       $(elm).append(modalMarkup.selectBox());
       $("body").append(modalMarkup.modal());
     
-      sortedXml.addButton(oControlHost, elm);
+      sortedXml.addButton(oControlHost, modalMarkup.selectBox());
       // Button click event=======================================
 
       $("#button_parse").on("click", () => {
