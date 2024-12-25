@@ -1,9 +1,10 @@
 define([
-"jquery", 
-"https://yassinrian.github.io/parsing/popUp.js", 
+"jquery",  
 "https://yassinrian.github.io/parsing/searchTable.js"], 
+function ($,searchTable) { 
 
-function ($, showPopup, searchTable) { 
+  let activePopup = null;
+  
   return {
     renderTable: function (data, container, type, searchInput) {
       const tableContainer = $(container);
@@ -46,7 +47,11 @@ function ($, showPopup, searchTable) {
               activePopup.remove();
             }
             isOverHeader = true;
-            activePopup = showPopup(index, data, type, $(this));
+            //activePopup = showPopup(index, data, type, $(this));
+            
+            require(["https://yassinrian.github.io/parsing/popUp.js"], async function (showPopup) {
+              activePopup = await showPopup(index, data, type, $(this)); // Ensure showPopup is loaded
+            });
 
             activePopup
               .on("mouseenter", function () {
