@@ -14,7 +14,7 @@ define([
         headers = ["Query Name", "Data Item Name", "Expression", "Label"];
       } else if (type === "Lists") {
         headers = ["Name", "Ref Query", "Data Item", "Expression", "Label"];
-      } else if (type === "Detail Filters") {
+      } else if (type === "Filters") {
         headers = ["Query Name", "Filter Expression"];
       }
 
@@ -48,7 +48,7 @@ define([
             }
             isOverHeader = true;
             const currentElement = $(this);
-            
+
             activePopup = showPopup(data, currentElement);          
               activePopup
               .on("mouseenter", function () {
