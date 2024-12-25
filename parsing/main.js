@@ -3,9 +3,8 @@ define([
   "https://yassinrian.github.io/parsing/xmlParser.js",
   "https://yassinrian.github.io/parsing/tableRenderer.js",
   "https://yassinrian.github.io/parsing/tableStyles.js",
-  "https://yassinrian.github.io/parsing/modalMarkup.js",
-  "https://yassinrian.github.io/parsing/popUp.js"
-], function ($, xmlParser, tableRenderer,_, modalMarkup, showPopup) {
+  "https://yassinrian.github.io/parsing/modalMarkup.js"
+], function ($, xmlParser, tableRenderer,_, modalMarkup) {
   function App() {}
 
  // =======================================================================================================
@@ -33,7 +32,7 @@ define([
         const parsedData = parseAndCache(button, xmlData);
 
         // Render the table
-        tableRenderer.renderTable(parsedData, "#table_container", selectedType, searchInput, showPopup);
+        tableRenderer.renderTable(parsedData, "#table_container", selectedType, searchInput);
         $("#table_modal").fadeIn(150);
         $(".modal-content").show();
       });
