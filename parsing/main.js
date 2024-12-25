@@ -3,8 +3,9 @@ define([
   "https://yassinrian.github.io/parsing/xmlParser.js",
   "https://yassinrian.github.io/parsing/tableRenderer.js",
   "https://yassinrian.github.io/parsing/tableStyles.js",
-  "https://yassinrian.github.io/parsing/modalMarkup.js"
-], function ($, xmlParser, tableRenderer,_, modalMarkup) {
+  "https://yassinrian.github.io/parsing/modalMarkup.js",
+  "https://yassinrian.github.io/parsing/sortedXml.js",
+], function ($, xmlParser, tableRenderer,_, modalMarkup, addXmlExportButton) {
   function App() {}
 
  // =======================================================================================================
@@ -16,7 +17,8 @@ define([
       const elm = oControlHost.container;
       $(elm).append(modalMarkup.selectBox());
       $("body").append(modalMarkup.modal());
-
+    
+      addXmlExportButton(oControlHost, elm);
       // Button click event=======================================
 
       $("#button_parse").on("click", () => {
