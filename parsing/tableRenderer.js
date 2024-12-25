@@ -23,24 +23,72 @@ define([
       const thead = $("<thead></thead>");
       const headerRow = $("<tr></tr>");
 
-      // Add headers with hover functionality
+      // Add sort state tracking
+      const sortState = {
+        column: null,
+        ascending: true
+      };
+
+      // Add headers with hover and sort functionality
       const columnSearchFlags = Array(headers.length).fill(false);
       let activePopup = null;
 
       headers.forEach((header, index) => {
         const th = $(`<th class="table-header">
-                  <div class="header-content">${header}</div>
+                  <div class="header-content">
+                    ${header}
+                    <span class="sort-icon" style="cursor: pointer; margin-left: 5px;">↕️</span>
+                  </div>
                   <div class="checkbox-container">
-                      <input type="checkbox" data-index="${index}" />
+                    <input type="checkbox" data-index="${index}" />
                   </div>
               </th>`);
+
+        // Add sorting functionality
+        th.find('.sort-icon').on('click', function() {
+          const tbody = table.find('tbody');
+          const rows = tbody.find('tr').toArray();
+          
+          // Update sort state
+          if (sortState.column === index) {
+            sortState.ascending = !sortState.ascending;
+          } else {
+            sortState.column = index;
+            sortState.ascending = true;
+          }
+
+          // Update sort icon
+          table.find('.sort-icon').text('↕️');
+          $(this).text(sortState.ascending ? '↑' : '↓');
+
+          // Sort rows
+          rows.sort((a, b) => {
+            const aValue = $(a).find(`td:eq(${index})`).text();
+            const bValue = $(b).find(`td:eq(${index})`).text();
+            
+            // Try numeric sort first
+            const aNum = parseFloat(aValue);
+            const bNum = parseFloat(bValue);
+            
+            if (!isNaN(aNum) && !isNaN(bNum)) {
+              return sortState.ascending ? aNum - bNum : bNum - aNum;
+            }
+            
+            // Fall back to string sort
+            return sortState.ascending 
+              ? aValue.localeCompare(bValue)
+              : bValue.localeCompare(aValue);
+          });
+
+          // Reattach sorted rows
+          tbody.empty();
+          rows.forEach(row => tbody.append(row));
+        });
 
         if (index === 0) {
           // Setup hover handling
           let isOverHeader = false;
           let isOverPopup = false;
-
-        
 
           th.on("mouseenter", function () {
             if (activePopup) {
@@ -50,7 +98,7 @@ define([
             const currentElement = $(this);
 
             activePopup = showPopup(data, currentElement);          
-              activePopup
+            activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
               })
@@ -63,8 +111,6 @@ define([
                   }
                 }, 300);
               });
-
-
           }).on("mouseleave", function () {
             isOverHeader = false;
             setTimeout(() => {
@@ -74,24 +120,23 @@ define([
                   activePopup = null;
                 }
               }
-            }, 300); // Delay removal to allow mouse to enter popup
+            }, 300);
+          });
 
-          }); //end th.on
-
-          // Add a visual indicator that this column has popup functionality
+          // Add analysis indicator
           th.find(".header-content").append(
             ' <span style="cursor: help; color: #666;" title="Hover for analysis">📊</span>'
           );
         }
+
         // Add checkbox handler
         th.find('input[type="checkbox"]').on("change", function (e) {
-          e.stopPropagation(); // Prevent event from bubbling
+          e.stopPropagation();
           columnSearchFlags[index] = $(this).is(":checked");
         });
 
         headerRow.append(th);
       });
-   
 
       thead.append(headerRow);
       table.append(thead);
@@ -134,8 +179,6 @@ define([
       $("#searchInput").on("input", function () {
         searchTable($(this).val(), columnSearchFlags);
       });
-
-    }, //end renderTable
-  }; //end return
-}); //end define
-
+    },
+  };
+});
