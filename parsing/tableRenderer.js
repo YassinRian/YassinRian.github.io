@@ -35,9 +35,10 @@ define([
 
       headers.forEach((header, index) => {
         const th = $(`<th class="table-header">
-                  <div class="header-content">
-                    ${header}
-                    <span class="sort-icon" style="cursor: pointer; margin-left: 5px;">↕️</span>
+                  <div class="header-content" style="display: flex; align-items: center; gap: 8px;">
+                    <span class="sort-icon" style="cursor: pointer;">↕️</span>
+                    ${index === 0 ? '<span class="analysis-icon" style="cursor: help;" title="Hover for analysis">📊</span>' : ''}
+                    <span class="header-text">${header}</span>
                   </div>
                   <div class="checkbox-container">
                     <input type="checkbox" data-index="${index}" />
@@ -45,7 +46,8 @@ define([
               </th>`);
 
         // Add sorting functionality
-        th.find('.sort-icon').on('click', function() {
+        th.find('.sort-icon').on('click', function(e) {
+          e.stopPropagation(); // Prevent event from triggering header hover
           const tbody = table.find('tbody');
           const rows = tbody.find('tr').toArray();
           
@@ -86,15 +88,15 @@ define([
         });
 
         if (index === 0) {
-          // Setup hover handling
-          let isOverHeader = false;
+          // Setup hover handling for analysis icon only
+          let isOverIcon = false;
           let isOverPopup = false;
 
-          th.on("mouseenter", function () {
+          th.find('.analysis-icon').on("mouseenter", function (e) {
             if (activePopup) {
               activePopup.remove();
             }
-            isOverHeader = true;
+            isOverIcon = true;
             const currentElement = $(this);
 
             activePopup = showPopup(data, currentElement);          
@@ -105,16 +107,16 @@ define([
               .on("mouseleave", function () {
                 isOverPopup = false;
                 setTimeout(() => {
-                  if (!isOverHeader && !isOverPopup) {
+                  if (!isOverIcon && !isOverPopup) {
                     activePopup.remove();
                     activePopup = null;
                   }
                 }, 300);
               });
           }).on("mouseleave", function () {
-            isOverHeader = false;
+            isOverIcon = false;
             setTimeout(() => {
-              if (!isOverHeader && !isOverPopup) {
+              if (!isOverIcon && !isOverPopup) {
                 if (activePopup) {
                   activePopup.remove();
                   activePopup = null;
@@ -122,11 +124,6 @@ define([
               }
             }, 300);
           });
-
-          // Add analysis indicator
-          th.find(".header-content").append(
-            ' <span style="cursor: help; color: #666;" title="Hover for analysis">📊</span>'
-          );
         }
 
         // Add checkbox handler
