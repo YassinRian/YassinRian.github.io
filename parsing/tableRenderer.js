@@ -8,6 +8,7 @@ define([
       const tableContainer = $(container);
       tableContainer.empty();
 
+      // Define headers based on type
       let headers = [];
       if (type === "Queries") {
         headers = ["Query Name", "Data Item Name", "Expression", "Label"];
@@ -17,104 +18,85 @@ define([
         headers = ["Query Name", "Filter Expression"];
       }
 
-      let sortOrder = 1; // 1 for ascending, -1 for descending
-      let currentSortIndex = null;
-
+      // Create table structure
       const table = $('<table id="dataTable"></table>');
       const thead = $("<thead></thead>");
       const headerRow = $("<tr></tr>");
 
+      // Add headers with hover functionality
       const columnSearchFlags = Array(headers.length).fill(false);
       let activePopup = null;
 
       headers.forEach((header, index) => {
-        // Add popup functionality only on "Hover for analysis" icon
-        if (index === 0) {
-          // Add hover-analysis icon only for the first column
-          th = $(`<th class="table-header">
-      <div class="header-content">
-          <span class="hover-analysis-icon" style="cursor: help; color: #666; margin-right: 10px;" title="Hover for analysis">📊</span>
-          ${header}
-          <span class="toggle-sort-icon" style="cursor: pointer; margin-left: 10px;" title="Sort">⬆️</span>
-      </div>
-      <div class="checkbox-container">
-          <input type="checkbox" data-index="${index}" />
-      </div>
-  </th>`);
+        const th = $(`<th class="table-header">
+                  <div class="header-content">${header}</div>
+                  <div class="checkbox-container">
+                      <input type="checkbox" data-index="${index}" />
+                  </div>
+              </th>`);
 
-          let isOverIcon = false;
+        if (index === 0) {
+          // Setup hover handling
+          let isOverHeader = false;
           let isOverPopup = false;
 
-          th.find(".hover-analysis-icon")
-            .on("mouseenter", function () {
-              if (activePopup) {
-                activePopup.remove();
-              }
-              isOverIcon = true;
-              const currentElement = $(this);
+        
 
-              activePopup = showPopup(data, currentElement);
+          th.on("mouseenter", function () {
+            if (activePopup) {
+              activePopup.remove();
+            }
+            isOverHeader = true;
+            const currentElement = $(this);
+
+            activePopup = showPopup(data, currentElement);          
               activePopup
-                .on("mouseenter", function () {
-                  isOverPopup = true;
-                })
-                .on("mouseleave", function () {
-                  isOverPopup = false;
-                  setTimeout(() => {
-                    if (!isOverIcon && !isOverPopup) {
-                      activePopup.remove();
-                      activePopup = null;
-                    }
-                  }, 300);
-                });
-            })
-            .on("mouseleave", function () {
-              isOverIcon = false;
-              setTimeout(() => {
-                if (!isOverIcon && !isOverPopup) {
-                  if (activePopup) {
+              .on("mouseenter", function () {
+                isOverPopup = true;
+              })
+              .on("mouseleave", function () {
+                isOverPopup = false;
+                setTimeout(() => {
+                  if (!isOverHeader && !isOverPopup) {
                     activePopup.remove();
                     activePopup = null;
                   }
+                }, 300);
+              });
+
+
+          }).on("mouseleave", function () {
+            isOverHeader = false;
+            setTimeout(() => {
+              if (!isOverHeader && !isOverPopup) {
+                if (activePopup) {
+                  activePopup.remove();
+                  activePopup = null;
                 }
-              }, 300);
-            }); //end hover-analysis-icon
-        } //end if
+              }
+            }, 300); // Delay removal to allow mouse to enter popup
 
-        // Add toggle sort functionality
-        th.find(".toggle-sort-icon").on(
-          "click",
-          function () {
-            const isAscending = $(this).text() === "⬆️";
-            sortOrder = isAscending ? -1 : 1;
-            $(this).text(isAscending ? "⬇️" : "⬆️");
+          }); //end th.on
 
-            data.sort((a, b) => {
-              const valA = getCellValue(a, index, type);
-              const valB = getCellValue(b, index, type);
-
-              if (valA == null) return sortOrder;
-              if (valB == null) return -sortOrder;
-
-              return valA.toString().localeCompare(valB.toString()) * sortOrder;
-            });
-
-            this.renderTable(data, container, type, searchInput);
-          }.bind(this)
-        );
-
+          // Add a visual indicator that this column has popup functionality
+          th.find(".header-content").append(
+            ' <span style="cursor: help; color: #666;" title="Hover for analysis">📊</span>'
+          );
+        }
         // Add checkbox handler
         th.find('input[type="checkbox"]').on("change", function (e) {
-          e.stopPropagation();
+          e.stopPropagation(); // Prevent event from bubbling
           columnSearchFlags[index] = $(this).is(":checked");
         });
 
         headerRow.append(th);
       });
+   
 
       thead.append(headerRow);
       table.append(thead);
 
+      // Add tbody and populate data
       const tbody = $("<tbody></tbody>");
       data.forEach((item) => {
         if (type === "Queries") {
@@ -148,26 +130,12 @@ define([
       tableContainer.append(table);
       tableContainer.prepend(searchInput);
 
+      // Add search handler
       $("#searchInput").on("input", function () {
         searchTable($(this).val(), columnSearchFlags);
       });
 
-      function getCellValue(item, colIndex, type) {
-        if (type === "Queries") {
-          return colIndex === 0
-            ? item.name
-            : item.items[0]?.attributes[headers[colIndex].toLowerCase()] || "";
-        } else if (type === "Lists") {
-          return colIndex === 0
-            ? item.name
-            : item.items[0]?.attributes[headers[colIndex].toLowerCase()] || "";
-        } else if (type === "Filters") {
-          return colIndex === 0
-            ? item.name
-            : item.attributes.filterExpression || "";
-        }
-        return "";
-      }
     }, //end renderTable
   }; //end return
 }); //end define
+
