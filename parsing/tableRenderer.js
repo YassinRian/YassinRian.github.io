@@ -49,8 +49,8 @@ function ($,searchTable) {
             isOverHeader = true;
             //activePopup = showPopup(index, data, type, $(this));
             
-            require(["https://yassinrian.github.io/parsing/popUp.js"], async function (showPopup) {
-              activePopup = await showPopup(index, data, type, $(this)); // Ensure showPopup is loaded
+            require(["https://yassinrian.github.io/parsing/popUp.js"], function (showPopup) {
+              activePopup = showPopup(index, data, type, $(this)); // Ensure showPopup is loaded
               activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
