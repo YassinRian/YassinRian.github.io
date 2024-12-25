@@ -79,7 +79,5 @@ define(["jquery"], function ($) {
             $("body").append(popup);
             return popup;
           } //end showPopup
-          
-          return showPopup; // Correctly export the function
     });
   
