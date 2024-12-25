@@ -30,6 +30,7 @@ define([
       headers.forEach((header, index) => {
         const th = $(`<th class="table-header">
                   <div class="header-content">
+                      <span class="hover-analysis-icon" style="cursor: help; color: #666; margin-right: 10px;" title="Hover for analysis">📊</span>
                       ${header}
                       <span class="sort-icons">
                           <span class="sort-asc" style="cursor: pointer;">▲</span>
@@ -41,16 +42,16 @@ define([
                   </div>
               </th>`);
 
+        // Add popup functionality only on "Hover for analysis" icon
         if (index === 0) {
-          // Restore popup functionality for the first column
-          let isOverHeader = false;
+          let isOverIcon = false;
           let isOverPopup = false;
 
-          th.on("mouseenter", function () {
+          th.find(".hover-analysis-icon").on("mouseenter", function () {
             if (activePopup) {
               activePopup.remove();
             }
-            isOverHeader = true;
+            isOverIcon = true;
             const currentElement = $(this);
 
             activePopup = showPopup(data, currentElement);
@@ -61,16 +62,16 @@ define([
               .on("mouseleave", function () {
                 isOverPopup = false;
                 setTimeout(() => {
-                  if (!isOverHeader && !isOverPopup) {
+                  if (!isOverIcon && !isOverPopup) {
                     activePopup.remove();
                     activePopup = null;
                   }
                 }, 300);
               });
           }).on("mouseleave", function () {
-            isOverHeader = false;
+            isOverIcon = false;
             setTimeout(() => {
-              if (!isOverHeader && !isOverPopup) {
+              if (!isOverIcon && !isOverPopup) {
                 if (activePopup) {
                   activePopup.remove();
                   activePopup = null;
@@ -78,10 +79,6 @@ define([
               }
             }, 300);
           });
-
-          th.find(".header-content").append(
-            ' <span style="cursor: help; color: #666;" title="Hover for analysis">📊</span>'
-          );
         }
 
         // Sort functionality with arrow icons

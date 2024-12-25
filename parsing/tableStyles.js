@@ -178,7 +178,25 @@ body.modal-active {
                   background-color: #f5f5f5;
               }
 
+.hover-analysis-icon {
+  cursor: help;
+  color: #666;
+  margin-right: 10px;
+}
 
+.sort-icons {
+  margin-left: 10px;
+  display: inline-block;
+}
+
+.sort-asc, .sort-desc {
+  font-size: 0.8em;
+  opacity: 0.5;
+}
+
+.sort-asc:hover, .sort-desc:hover {
+  opacity: 1;
+}
 
 
 
