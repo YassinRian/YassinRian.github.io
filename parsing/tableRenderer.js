@@ -255,7 +255,7 @@ define(["jquery"], function ($) {
         headers = ["Query Name", "Data Item Name", "Expression", "Label"];
       } else if (type === "Lists") {
         headers = ["Name", "Ref Query", "Data Item", "Expression", "Label"];
-      } else if (type === "Detail Filters") {
+      } else if (type === "Filters") {
         headers = ["Query Name", "Filter Expression"];
       }
 
