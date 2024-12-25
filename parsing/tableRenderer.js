@@ -4,7 +4,7 @@ define([
 ],function ($, searchTable) {
   
 
-  requirejs(["https://yassinrian.github.io/parsing/popUp.js"], function ($) {
+  requirejs(["https://yassinrian.github.io/parsing/popUp.js"], function (showPopup) {
     activePopup_async = showPopup(data, $(this));
   });
 //======================================================================================================================
