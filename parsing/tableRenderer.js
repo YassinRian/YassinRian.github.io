@@ -129,7 +129,7 @@ define([
             }
             isOverHeader = true;
             //activePopup = showPopup(data, $(this));           
-            activePopup = requirejs(["https://yassinrian.github.io/parsing/showPopup.js"]).then(function (showPopup) {return showPopup(data, $(this))});
+            activePopup = requirejs(["https://yassinrian.github.io/parsing/showPopup.js"])
               activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
