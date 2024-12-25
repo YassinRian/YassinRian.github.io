@@ -168,7 +168,7 @@ define([
             row.append(`<td>${subItem.attributes.label || ""}</td>`);
             tbody.append(row);
           });
-        } else if (type === "Detail Filters") {
+        } else if (type === "Filters") {
           const row = $("<tr></tr>");
           row.append(`<td>${item.name}</td>`);
           row.append(`<td>${item.attributes.filterExpression || ""}</td>`);

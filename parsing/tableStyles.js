@@ -172,6 +172,7 @@ body.modal-active {
           .analysis-icon {
             cursor: help;
             opacity: 0.6;
+            margin-right: 10px;
           }
           .analysis-icon:hover {
             opacity: 1;
