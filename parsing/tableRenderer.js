@@ -166,7 +166,7 @@ function showPopup(index, data, type, th) {
 // =====================renderTable function================================
 
   return {
-    renderTable: function (data, container, type) {
+    renderTable: function (data, container, type, searchInput) {
       const tableContainer = $(container);
       tableContainer.empty();
 
