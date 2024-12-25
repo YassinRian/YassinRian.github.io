@@ -2,8 +2,6 @@ define([
 "jquery",  
 "https://yassinrian.github.io/parsing/searchTable.js"], 
 function ($,searchTable) { 
-
-  let activePopup = null;
   
   return {
     renderTable: function (data, container, type, searchInput) {
