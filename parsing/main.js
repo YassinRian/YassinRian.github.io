@@ -2,9 +2,10 @@ define([
   "jquery",
   "https://yassinrian.github.io/parsing/xmlParser.js",
   "https://yassinrian.github.io/parsing/tableRenderer.js",
+  "https://yassinrian.github.io/parsing/analysis.js",
   "https://yassinrian.github.io/parsing/tableStyles.js",
   "https://yassinrian.github.io/parsing/modalMarkup.js",
-], function ($, xmlParser, tableRenderer, tableStyles, modalMarkup) {
+], function ($, xmlParser, tableRenderer, analysis, tableStyles, modalMarkup) {
   function App() {}
 
  // =======================================================================================================
