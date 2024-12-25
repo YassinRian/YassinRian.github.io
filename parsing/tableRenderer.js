@@ -3,6 +3,75 @@ define([
   "https://yassinrian.github.io/parsing/searchTable.js",
   "https://yassinrian.github.io/parsing/showPopup.js",
 ], function ($, searchTable, showPopup) {
+
+// Separate popup management into its own class
+class PopupManager {
+  constructor() {
+    this.isOverIcon = false;
+    this.isOverPopup = false;
+    this.activePopup = null;
+    this.hideDelay = 300;
+  }
+
+  shouldHidePopup() {
+    return !this.isOverIcon && !this.isOverPopup;
+  }
+
+  hidePopupWithDelay() {
+    if (this.shouldHidePopup() && this.activePopup) {
+      setTimeout(() => {
+        if (this.shouldHidePopup()) {
+          this.hidePopup();
+        }
+      }, this.hideDelay);
+    }
+  }
+
+  hidePopup() {
+    if (this.activePopup) {
+      this.activePopup.remove();
+      this.activePopup = null;
+    }
+  }
+
+  showPopup(data, element) {
+    this.hidePopup();
+    this.isOverIcon = true;
+    this.activePopup = showPopup(data, element);
+    
+    this.setupPopupEvents();
+    return this.activePopup;
+  }
+
+  setupPopupEvents() {
+    if (!this.activePopup) return;
+
+    this.activePopup
+      .on("mouseenter", () => {
+        this.isOverPopup = true;
+      })
+      .on("mouseleave", () => {
+        this.isOverPopup = false;
+        this.hidePopupWithDelay();
+      });
+  }
+}
+
+// Usage in the header creation code
+function setupAnalysisIcon(th, data) {
+  if (!th.find('.analysis-icon').length) return;
+
+  const popupManager = new PopupManager();
+
+  th.find('.analysis-icon').on("mouseenter", function(e) {
+    popupManager.showPopup(data, $(this));
+  }).on("mouseleave", function() {
+    popupManager.isOverIcon = false;
+    popupManager.hidePopupWithDelay();
+  });
+}
+
+
   return {
     renderTable: function (data, container, type, searchInput) {
       const tableContainer = $(container);
@@ -102,42 +171,7 @@ define([
         });
 
         if (index === 0) {
-          // Setup hover handling for analysis icon
-          let isOverIcon = false;
-          let isOverPopup = false;
-
-          th.find('.analysis-icon').on("mouseenter", function (e) {
-            if (activePopup) {
-              activePopup.remove();
-            }
-            isOverIcon = true;
-            const currentElement = $(this);
-
-            activePopup = showPopup(data, currentElement);          
-            activePopup
-              .on("mouseenter", function () {
-                isOverPopup = true;
-              })
-              .on("mouseleave", function () {
-                isOverPopup = false;
-                setTimeout(() => {
-                  if (!isOverIcon && !isOverPopup) {
-                    activePopup.remove();
-                    activePopup = null;
-                  }
-                }, 300);
-              });
-          }).on("mouseleave", function () {
-            isOverIcon = false;
-            setTimeout(() => {
-              if (!isOverIcon && !isOverPopup) {
-                if (activePopup) {
-                  activePopup.remove();
-                  activePopup = null;
-                }
-              }
-            }, 300);
-          });
+          setupAnalysisIcon(th, data);
         }
 
         headerRow.append(th);
