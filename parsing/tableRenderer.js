@@ -51,9 +51,7 @@ function ($,searchTable) {
             
             require(["https://yassinrian.github.io/parsing/popUp.js"], async function (showPopup) {
               activePopup = await showPopup(index, data, type, $(this)); // Ensure showPopup is loaded
-            });
-
-            activePopup
+              activePopup
               .on("mouseenter", function () {
                 isOverPopup = true;
               })
@@ -66,6 +64,9 @@ function ($,searchTable) {
                   }
                 }, 300);
               });
+            });
+
+
           }).on("mouseleave", function () {
             isOverHeader = false;
             setTimeout(() => {
@@ -75,8 +76,9 @@ function ($,searchTable) {
                   activePopup = null;
                 }
               }
-            }, 300);
-          });
+            }, 300); // Delay removal to allow mouse to enter popup
+
+          }); //end th.on
 
           // Add a visual indicator that this column has popup functionality
           th.find(".header-content").append(
