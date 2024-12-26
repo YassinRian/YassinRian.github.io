@@ -11,8 +11,7 @@ define(["jquery"], function ($) {
       if (!$("#modal-manager-styles").length) {
         const styles = `
             <style id="modal-manager-styles">
-
-          .data-modal {
+    .data-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -21,7 +20,6 @@ define(["jquery"], function ($) {
             height: 100%;
             background-color: rgba(0, 0, 0, 0.5);
             z-index: 1000;
-            overflow: hidden;
           }
 
           .modal-content {
@@ -70,50 +68,43 @@ define(["jquery"], function ($) {
 
           .modal-body {
             flex: 1;
-            overflow-y: auto;
-            padding-right: 8px;
-            /* Hide scrollbar but keep functionality */
-            scrollbar-width: none; /* Firefox */
-            -ms-overflow-style: none; /* IE and Edge */
+            display: flex;
+            flex-direction: column;
+            min-height: 0; /* Important for nested scrolling */
           }
 
-          /* Hide scrollbar for Chrome, Safari and Opera */
-          .modal-body::-webkit-scrollbar {
-            display: none;
+          /* Search Container */
+          .search-container {
+              display: flex;
+              align-items: center;
+              gap: 10px; /* Space between elements */
+              margin-bottom: 15px; /* Add some spacing below the input */
+              padding: 10px;
+              background-color: #f9f9f9; /* Light background for input container */
+              border: 1px solid #ddd; /* Border for the container */
+              border-radius: 8px; /* Rounded corners */
+              box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
           }
 
-/* Search Container */
-.search-container {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* Space between elements */
-    margin-bottom: 15px; /* Add some spacing below the input */
-    padding: 10px;
-    background-color: #f9f9f9; /* Light background for input container */
-    border: 1px solid #ddd; /* Border for the container */
-    border-radius: 8px; /* Rounded corners */
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1); /* Subtle shadow */
-}
+          /* Search Input */
+          #searchInput {
+              flex: 1; /* Make input take up available space */
+              padding: 10px 15px;
+              font-size: 16px;
+              border: 1px solid #ccc;
+              border-radius: 5px;
+              outline: none;
+              transition: all 0.3s ease;
+          }
 
-/* Search Input */
-#searchInput {
-    flex: 1; /* Make input take up available space */
-    padding: 10px 15px;
-    font-size: 16px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    outline: none;
-    transition: all 0.3s ease;
-}
-
- /* Focus State for Input */
-#searchInput:focus {
-    border-color: #007bff; /* Blue border on focus */
-    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Glow effect */
-}
+          /* Focus State for Input */
+          #searchInput:focus {
+              border-color: #007bff; /* Blue border on focus */
+              box-shadow: 0 0 5px rgba(0, 123, 255, 0.5); /* Glow effect */
+          }
 
           #searchInput::placeholder {
-            color:rgb(112, 177, 241);
+            color:rgb(185, 213, 240);
             font-size: 13px;
           }
 
@@ -129,18 +120,38 @@ define(["jquery"], function ($) {
           .checkbox-container input[type="checkbox"] {
             margin-right: 8px;
             cursor: pointer;
-          }
-
-          /* Improve checkbox appearance */
-          .checkbox-container input[type="checkbox"] {
             width: 16px;
             height: 16px;
             accent-color: #007bff;
           }
 
-          /* Add hover effect for the entire checkbox label */
-          .checkbox-container:hover {
-            color: #000;
+          #tableContainer {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: auto;
+            min-height: 0; /* Important for scrolling */
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+          }
+
+          /* Scrollbar styling */
+          #tableContainer::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+          }
+
+          #tableContainer::-webkit-scrollbar-track {
+            background: #f1f1f1;
+            border-radius: 4px;
+          }
+
+          #tableContainer::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+          }
+
+          #tableContainer::-webkit-scrollbar-thumb:hover {
+            background: #a8a8a8;
           }
             </style>
           `;
