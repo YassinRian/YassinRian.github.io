@@ -16,7 +16,7 @@ define(["jquery"], function ($) {
       if (!$("#modal-manager-styles").length) {
         const styles = `
             <style id="modal-manager-styles">
-    .data-modal {
+          .data-modal {
             display: none;
             position: fixed;
             top: 0;
@@ -27,7 +27,7 @@ define(["jquery"], function ($) {
             z-index: 1000;
           }
 
-        .modal-content {
+          .modal-content {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -37,12 +37,27 @@ define(["jquery"], function ($) {
             border-radius: 8px;
             width: 90%;
             max-width: 1200px;
+            min-width: 600px;  /* Add minimum width */
             height: 90vh;
+            min-height: 400px; /* Add minimum height */
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
             resize: both;
             overflow: auto;
+          }
+
+          /* Ensure modal stays within viewport */
+          @media screen and (max-width: 1400px) {
+            .modal-content {
+              max-width: 95vw;
+            }
+          }
+
+          @media screen and (max-width: 640px) {
+            .modal-content {
+              min-width: 95vw;
+            }
           }
 
           .modal-header {
