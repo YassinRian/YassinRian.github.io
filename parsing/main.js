@@ -6,7 +6,7 @@ define([
   "https://yassinrian.github.io/parsing/modalMarkup.js",
   "https://yassinrian.github.io/parsing/sortedXml.js",
   "https://yassinrian.github.io/parsing/modalManager.js",
-], function ($, xmlParser, tableRenderer, _, modalMarkup, sortedXml, ModalManager) {
+], function ($, xmlParser, tableRenderer, _, modalMarkup, sortedXml, moduleModalManager) {
   class App {
     constructor() {
       this.modal = null;
@@ -27,7 +27,7 @@ define([
 
     initializeUI(container) {
       // Initialize Modal Manager
-      this.modal = new ModalManager({
+      this.modal = new moduleModalManager.ModalManager({
         draggable: true,
         resizable: true,
         tableRenderer: tableRenderer
