@@ -69,6 +69,8 @@ define(["jquery"], function ($) {
           .modal-header {
             cursor: move;
             user-select: none;
+            display: flex;
+            justify-content: space-between;
           }
 
           /* Resize handle styles */
@@ -93,7 +95,7 @@ define(["jquery"], function ($) {
 
           .modal-close {
             cursor: pointer;
-            font-size: 24px;
+            font-size: 28px;
             color: #666;
             transition: color 0.2s;
             padding: 4px;
@@ -141,7 +143,7 @@ define(["jquery"], function ($) {
           }
 
           #searchInput::placeholder {
-            color:rgb(185, 213, 240);
+            color:rgba(146, 152, 158, 0.85);
             font-size: 13px;
           }
 
