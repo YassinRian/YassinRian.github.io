@@ -104,12 +104,17 @@ define(["jquery"], function ($) {
       });
     }
 
-    show() {
+    show(callback) {
       if (!this.modal) {
         this.createModal();
       }
-      this.modal.fadeIn(200);
-      this.isVisible = true;
+      
+      this.modal.fadeIn(200, () => {
+        this.isVisible = true;
+        if (callback && typeof callback === 'function') {
+          callback();
+        }
+      });
     }
 
     hide() {
@@ -135,30 +140,28 @@ define(["jquery"], function ($) {
       this.setTitle(`${type} View`);
       const tableContainer = $('<div id="tableContainer"></div>');
       const searchInput = $(`
-          <div style="margin-bottom: 15px;">
-            <input type="text" 
-                   id="searchInput" 
-                   placeholder="Search..." 
-                   style="padding: 8px; width: 200px; border: 1px solid #ddd; border-radius: 4px;">
-          </div>
-        `);
-
+        <div style="margin-bottom: 15px;">
+          <input type="text" 
+                 id="searchInput" 
+                 placeholder="Search..." 
+                 style="padding: 8px; width: 200px; border: 1px solid #ddd; border-radius: 4px;">
+        </div>
+      `);
+   
+      // Set content before showing the modal
       this.setContent(tableContainer);
-      this.show();
-
-      // Render table after a brief delay to ensure DOM is ready
-      setTimeout(() => {
-        if (this.tableRenderer && $("#tableContainer").length) {
-          this.tableRenderer.renderTable(
-            data,
-            "#tableContainer",
-            type,
-            searchInput
-          );
+      
+      this.show(() => {
+        if (this.tableRenderer) {
+          this.tableRenderer.renderTable(data, '#tableContainer', type, searchInput);
         }
-      }, 50);
-    } // renderTable
-  }
+      });
+      
+      this.isVisible = true;
+    }
+  
+  
+  } // ModalManager
 
   return {
     ModalManager,

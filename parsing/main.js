@@ -41,7 +41,7 @@ define([
     }
 
     initializeEventHandlers() {
-      $("#button_parse").on("click", async () => {
+      $("#button_parse").on("click", () => {
         const selectedType = $("#select_parse_type").val();
         const xmlData = this.oControlHost.page.application.document.GetReportXml();
   
@@ -53,7 +53,7 @@ define([
           );
           
           // Just call renderTable with the parsed data and type
-          await this.modal.renderTable(parsedData, selectedType);
+          this.modal.renderTable(parsedData, selectedType);
         } catch (error) {
           console.error('Error parsing data:', error);
         }
