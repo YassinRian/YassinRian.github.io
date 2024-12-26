@@ -1,76 +1,8 @@
 define([
   "jquery",
   "https://yassinrian.github.io/parsing/searchTable.js",
-  "https://yassinrian.github.io/parsing/showPopup.js",
-], function ($, searchTable, showPopup) {
-
-// Separate popup management into its own class
-class PopupManager {
-  constructor() {
-    this.isOverIcon = false;
-    this.isOverPopup = false;
-    this.activePopup = null;
-    this.hideDelay = 300;
-  }
-
-  shouldHidePopup() {
-    return !this.isOverIcon && !this.isOverPopup;
-  }
-
-  hidePopupWithDelay() {
-    if (this.shouldHidePopup() && this.activePopup) {
-      setTimeout(() => {
-        if (this.shouldHidePopup()) {
-          this.hidePopup();
-        }
-      }, this.hideDelay);
-    }
-  }
-
-  hidePopup() {
-    if (this.activePopup) {
-      this.activePopup.remove();
-      this.activePopup = null;
-    }
-  }
-
-  showPopup(data, element) {
-    this.hidePopup();
-    this.isOverIcon = true;
-    this.activePopup = showPopup(data, element);
-    
-    this.setupPopupEvents();
-    return this.activePopup;
-  }
-
-  setupPopupEvents() {
-    if (!this.activePopup) return;
-
-    this.activePopup
-      .on("mouseenter", () => {
-        this.isOverPopup = true;
-      })
-      .on("mouseleave", () => {
-        this.isOverPopup = false;
-        this.hidePopupWithDelay();
-      });
-  }
-}
-
-// Usage in the header creation code
-function setupAnalysisIcon(th, data) {
-  if (!th.find('.analysis-icon').length) return;
-
-  const popupManager = new PopupManager();
-
-  th.find('.analysis-icon').on("mouseenter", function(e) {
-    popupManager.showPopup(data, $(this));
-  }).on("mouseleave", function() {
-    popupManager.isOverIcon = false;
-    popupManager.hidePopupWithDelay();
-  });
-}
-
+  "https://yassinrian.github.io/parsing/popUpManager.js",
+], function ($, searchTable, PopupManager) {
 
   return {
     renderTable: function (data, container, type, searchInput) {
@@ -171,7 +103,7 @@ function setupAnalysisIcon(th, data) {
         });
 
         if (index === 0) {
-          setupAnalysisIcon(th, data);
+          PopupManager.setupAnalysisIcon(th, data);
         }
 
         headerRow.append(th);
