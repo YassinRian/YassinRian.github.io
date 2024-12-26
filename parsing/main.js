@@ -5,176 +5,114 @@ define([
   "https://yassinrian.github.io/parsing/tableStyles.js",
   "https://yassinrian.github.io/parsing/modalMarkup.js",
   "https://yassinrian.github.io/parsing/sortedXml.js",
-], function ($, xmlParser, tableRenderer,_, modalMarkup, sortedXml) {
-  function App() {}
+  "https://yassinrian.github.io/parsing/modalManager.js",
+], function ($, xmlParser, tableRenderer, _, modalMarkup, sortedXml, ModalManager) {
+  class App {
+    constructor() {
+      this.modal = null;
+      this.cache = new CacheManager();
+      this.oControlHost = null;
+    }
 
- // =======================================================================================================
+    draw(oControlHost) {
+      const { userName } = oControlHost.configuration || "";
+      if (userName === "951100") {
+        this.oControlHost = oControlHost;
+        const elm = oControlHost.container;
+        
+        this.initializeUI(elm);
+        this.initializeEventHandlers();
+      }
+    }
 
-  App.prototype.draw = function (oControlHost) {
-    const { userName } = oControlHost.configuration || ""; // Add fallback empty string
-
-    if (userName === "951100") {
-      const elm = oControlHost.container;
-      
-      // Add the control group with both buttons
-      $(elm).append(modalMarkup.selectBox());
-      
-      // Add modal to body
-      $("body").append(modalMarkup.modal());
-      
-      // Initialize the export button functionality
-      sortedXml.initExportButton(oControlHost);
-      // Button click event=======================================
-
-      $("#button_parse").on("click", () => {
-        const button = this; // reference to the button
-        const selectedType = $("#select_parse_type").val(); // Get selected type
-        const xmlData = oControlHost.page.application.document.GetReportXml(); // reference to the xml_data
-        const searchInput = modalMarkup.searchInput(); // Add search input
-
-        console.log(xmlData);
-  
-        // Ensure the button has a valid type set
-        $(button).data("type", selectedType);
-
-        // Parse or retrieve cached data
-        const parsedData = parseAndCache(button, xmlData);
-
-        // Render the table
-        tableRenderer.renderTable(parsedData, "#table_container", selectedType, searchInput);
-        $("#table_modal").fadeIn(150);
-        $(".modal-content").show();
+    initializeUI(container) {
+      // Initialize Modal Manager
+      this.modal = new ModalManager({
+        draggable: true,
+        resizable: true,
+        tableRenderer: tableRenderer
       });
-      // cache functions=======================================
 
-      function parseAndCache(button, xmlString) {
-        // Get attributes from the button
-        const type = $(button).data("type");
-        let uniqueId = $(button).data("id");
-        const cacheKey = `cache_${type}_${uniqueId || "new"}`;
+      // Add UI elements
+      $(container).append(modalMarkup.selectBox());
+      
+      // Initialize XML export functionality
+      sortedXml.initExportButton(this.oControlHost);
+    }
 
-        // Clear irrelevant caches
-        clearIrrelevantCaches(type, uniqueId);
+    initializeEventHandlers() {
+      $("#button_parse").on("click", () => this.handleParse());
+    }
 
-        // Check if data exists in cache
-        const cachedData = localStorage.getItem(cacheKey);
-        if (cachedData) {
-          console.log(`Using cached data for ${type} with ID ${uniqueId}`);
-          return JSON.parse(cachedData);
-        }
+    handleParse() {
+      const selectedType = $("#select_parse_type").val();
+      const xmlData = this.oControlHost.page.application.document.GetReportXml();
+      const searchInput = modalMarkup.searchInput();
 
-        // Parse based on type
-        console.log(`Parsing and caching data for ${type}`);
-        let parsedData;
-        switch (type) {
-          case "Queries":
-            parsedData = xmlParser.getQueries(xmlString);
-            break;
-          case "Lists":
-            const queryData = xmlParser.getQueries(xmlString);
-            const listData = xmlParser.getLists(xmlString);
-            parsedData = xmlParser.addLabelsToList(queryData, listData);
-            break;
-          case "Filters":
-            parsedData = xmlParser.getDetailFilters(xmlString);
-            break;
-          default:
-            throw new Error("Unknown type selected");
-        }
+      try {
+        const parsedData = this.cache.getOrParse(selectedType, xmlData, this.parseData.bind(this));
+        this.modal.renderTable(parsedData, selectedType, searchInput);
+      } catch (error) {
+        console.error('Error parsing data:', error);
+        // You might want to show an error message to the user here
+      }
+    }
 
-        // Generate unique ID if not present
-        if (!uniqueId) {
-          uniqueId = Math.random().toString(36).substr(2, 9); // Generate unique ID
-          $(button).data("id", uniqueId); // Set unique ID using .data()
-        }
-        // Store in localStorage
-        const newCacheKey = `cache_${type}_${uniqueId}`;
-        localStorage.setItem(newCacheKey, JSON.stringify(parsedData));
-        return parsedData;
+    parseData(type, xmlString) {
+      switch (type) {
+        case "Queries":
+          return xmlParser.getQueries(xmlString);
+        case "Lists":
+          const queryData = xmlParser.getQueries(xmlString);
+          const listData = xmlParser.getLists(xmlString);
+          return xmlParser.addLabelsToList(queryData, listData);
+        case "Filters":
+          return xmlParser.getDetailFilters(xmlString);
+        default:
+          throw new Error("Unknown type selected");
+      }
+    }
+  }
+
+  // Cache Manager Class
+  class CacheManager {
+    constructor() {
+      this.currentId = null;
+    }
+
+    generateCacheKey(type, id) {
+      return `cache_${type}_${id || 'new'}`;
+    }
+
+    getOrParse(type, xmlString, parseFunction) {
+      const uniqueId = this.currentId || Math.random().toString(36).substr(2, 9);
+      const cacheKey = this.generateCacheKey(type, uniqueId);
+
+      this.clearIrrelevantCaches(type, uniqueId);
+
+      const cachedData = localStorage.getItem(cacheKey);
+      if (cachedData) {
+        console.log(`Using cached data for ${type} with ID ${uniqueId}`);
+        return JSON.parse(cachedData);
       }
 
-      function clearIrrelevantCaches(type, currentUniqueId) {
-        Object.keys(localStorage).forEach((key) => {
-          if (
-            key.startsWith(`cache_${type}_`) &&
-            !key.endsWith(`_${currentUniqueId}`)
-          ) {
-            localStorage.removeItem(key);
-            console.log(`Cleared irrelevant cache: ${key}`);
-          }
-        });
-      }
+      console.log(`Parsing and caching data for ${type}`);
+      const parsedData = parseFunction(type, xmlString);
+      
+      this.currentId = uniqueId;
+      localStorage.setItem(cacheKey, JSON.stringify(parsedData));
+      return parsedData;
+    }
 
-
-// Modal logic=======================================================================================================
-
-      const $modal = $(".modal-content");
-      const $closeModal = $modal.find(".close-modal");
-      let isDragging = false;
-      let startX, startY, initialLeft, initialTop;
-
-       // Close Modal=======================================     
-      $closeModal.on("click", function () {
-        $modal.hide();
-        $("#table_modal").fadeOut(150);
+    clearIrrelevantCaches(type, currentId) {
+      Object.keys(localStorage).forEach(key => {
+        if (key.startsWith(`cache_${type}_`) && !key.endsWith(`_${currentId}`)) {
+          localStorage.removeItem(key);
+          console.log(`Cleared irrelevant cache: ${key}`);
+        }
       });
+    }
+  }
 
-      // Close modal when clicking outside
-      // $(window).on("click", function (event) {
-      //   if ($(event.target).is("#table_modal")) {
-      //     $("#table_modal").fadeOut(150);
-      //   }
-      // });
-
-      // minimize and drag modal=======================================
-  
-      $modal.on("mousedown", function (e) {
-          // Prevent dragging if the target is an input box or any interactive element
-          if ($(e.target).is("input, textarea, select, button")) {
-              return;
-          }
-  
-          // Check if the click is in the resize area
-          const rect = this.getBoundingClientRect();
-          const isInResizeZone = 
-              e.clientX > rect.right - 15 && e.clientY > rect.bottom - 15;
-  
-          if (isInResizeZone) {
-              // Allow native resizing
-              return;
-          }
-  
-          isDragging = true;
-          startX = e.clientX;
-          startY = e.clientY;
-          initialLeft = $modal.offset().left;
-          initialTop = $modal.offset().top;
-  
-          $("body").css("user-select", "none"); // Prevent text selection while dragging
-      });
-  
-      $(document).on("mousemove", function (e) {
-          if (!isDragging) return;
-  
-          const dx = e.clientX - startX;
-          const dy = e.clientY - startY;
-  
-          $modal.css({
-              left: initialLeft + dx + "px",
-              top: initialTop + dy + "px",
-              position: "absolute", // Ensure it's absolutely positioned
-          });
-      });
-  
-      $(document).on("mouseup", function () {
-          if (isDragging) {
-              isDragging = false;
-              $("body").css("user-select", ""); // Restore text selection
-          }
-      });
-
-      //=======================================================================================================
-    } // End if statement
-  }; // End draw function
   return App;
-}); // End define function
+});
