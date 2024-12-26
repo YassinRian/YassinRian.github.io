@@ -36,8 +36,8 @@ define(["jquery"], function ($) {
             padding: 24px;
             border-radius: 8px;
             width: 90%;
-            max-width: 1200px;
-            min-width: 600px;  /* Add minimum width */
+            max-width: 1200px !important;
+            min-width: 800px;  /* Add minimum width */
             height: 90vh;
             min-height: 400px; /* Add minimum height */
             display: flex;
