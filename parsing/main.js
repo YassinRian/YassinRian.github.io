@@ -3,10 +3,10 @@ define([
   "https://yassinrian.github.io/parsing/xmlParser.js",
   "https://yassinrian.github.io/parsing/tableRenderer.js",
   "https://yassinrian.github.io/parsing/tableStyles.js",
-  "https://yassinrian.github.io/parsing/modalMarkup.js",
+  "https://yassinrian.github.io/parsing/buttonMarkup.js",
   "https://yassinrian.github.io/parsing/sortedXml.js",
   "https://yassinrian.github.io/parsing/modalManager.js",
-], function ($, xmlParser, tableRenderer, _, modalMarkup, sortedXml, moduleModalManager) {
+], function ($, xmlParser, tableRenderer, _, buttons, sortedXml, moduleModalManager) {
   class App {
     constructor() {
       this.modal = null;
@@ -34,7 +34,7 @@ define([
       });
 
       // Add UI elements
-      $(container).append(modalMarkup.selectBox()); // markup for the buttons and select box
+      $(container).append(buttons.selectBox()); // markup for the buttons and select box
       
       // Initialize XML export functionality
       sortedXml.initExportButton(this.oControlHost);
