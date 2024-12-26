@@ -79,7 +79,6 @@ define(["jquery"], function ($) {
             right: 0;
             width: 15px;
             height: 15px;
-            cursor: se-resize;
             background: 
               linear-gradient(45deg, transparent 50%, #ccc 50%),
               linear-gradient(45deg, transparent 52%, #fff 52%);
