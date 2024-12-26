@@ -11,57 +11,129 @@ define(["jquery"], function ($) {
       if (!$("#modal-manager-styles").length) {
         const styles = `
             <style id="modal-manager-styles">
-              .data-modal {
-                display: none;
-                position: fixed;
-                top: 0;
-                left: 0;
-                width: 100%;
-                height: 100%;
-                background-color: rgba(0, 0, 0, 0.5);
-                z-index: 1000;
-              }
-              .modal-content {
-                position: absolute;
-                top: 50%;
-                left: 50%;
-                transform: translate(-50%, -50%);
-                background-color: white;
-                padding: 20px;
-                border-radius: 8px;
-                width: 90%;
-                max-width: 1200px;
-                max-height: 90vh;
-                overflow-y: auto;
-              }
-              .modal-header {
-                display: flex;
-                justify-content: space-between;
-                align-items: center;
-                margin-bottom: 15px;
-                padding-bottom: 10px;
-                border-bottom: 1px solid #dee2e6;
-              }
-              .modal-title {
-                font-size: 1.25rem;
-                font-weight: 600;
-                color: #333;
-                margin: 0;
-              }
-              .modal-close {
-                cursor: pointer;
-                font-size: 24px;
-                color: #666;
-                transition: color 0.2s;
-                padding: 5px;
-              }
-              .modal-close:hover {
-                color: #333;
-              }
-              .modal-body {
-                max-height: calc(90vh - 100px);
-                overflow-y: auto;
-              }
+              <style id="modal-manager-styles">
+          .data-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            overflow: hidden;
+          }
+
+          .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            width: 90%;
+            max-width: 1200px;
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          }
+
+          .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid #e9ecef;
+          }
+
+          .modal-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #333;
+            margin: 0;
+          }
+
+          .modal-close {
+            cursor: pointer;
+            font-size: 24px;
+            color: #666;
+            transition: color 0.2s;
+            padding: 4px;
+          }
+
+          .modal-close:hover {
+            color: #333;
+          }
+
+          .modal-body {
+            flex: 1;
+            overflow-y: auto;
+            padding-right: 8px;
+            /* Hide scrollbar but keep functionality */
+            scrollbar-width: none; /* Firefox */
+            -ms-overflow-style: none; /* IE and Edge */
+          }
+
+          /* Hide scrollbar for Chrome, Safari and Opera */
+          .modal-body::-webkit-scrollbar {
+            display: none;
+          }
+
+           .search-container {
+            margin-bottom: 20px;
+            width: 100%;
+          }
+
+          #searchInput {
+            width: 100%;
+            padding: 12px 16px;
+            font-size: 14px;
+            border: 1px solid #ddd;
+            border-radius: 6px;
+            transition: border-color 0.2s, box-shadow 0.2s;
+            box-sizing: border-box;
+            margin-bottom: 8px;
+          }
+
+          #searchInput:focus {
+            outline: none;
+            border-color: #80bdff;
+            box-shadow: 0 0 0 3px rgba(0,123,255,.25);
+          }
+
+          #searchInput::placeholder {
+            color: #adb5bd;
+            font-size: 13px;
+          }
+
+          .checkbox-container {
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            color: #495057;
+            cursor: pointer;
+            padding: 4px 0;
+          }
+
+          .checkbox-container input[type="checkbox"] {
+            margin-right: 8px;
+            cursor: pointer;
+          }
+
+          /* Improve checkbox appearance */
+          .checkbox-container input[type="checkbox"] {
+            width: 16px;
+            height: 16px;
+            accent-color: #007bff;
+          }
+
+          /* Add hover effect for the entire checkbox label */
+          .checkbox-container:hover {
+            color: #000;
+          }
             </style>
           `;
         $("head").append(styles);
