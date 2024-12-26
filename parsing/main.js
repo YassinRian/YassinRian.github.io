@@ -41,22 +41,25 @@ define([
     }
 
     initializeEventHandlers() {
-      $("#button_parse").on("click", () => this.handleParse());
+      $("#button_parse").on("click", () => {
+        const selectedType = $("#select_parse_type").val();
+        const xmlData = this.oControlHost.page.application.document.GetReportXml();
+  
+        try {
+          const parsedData = this.cache.getOrParse(
+            selectedType, 
+            xmlData, 
+            this.parseData.bind(this)
+          );
+          
+          // Just call renderTable with the parsed data and type
+          this.modal.renderTable(parsedData, selectedType);
+        } catch (error) {
+          console.error('Error parsing data:', error);
+        }
+      });
     }
 
-    handleParse() {
-      const selectedType = $("#select_parse_type").val();
-      const xmlData = this.oControlHost.page.application.document.GetReportXml();
-      const searchInput = modalMarkup.searchInput();
-
-      try {
-        const parsedData = this.cache.getOrParse(selectedType, xmlData, this.parseData.bind(this));
-        this.modal.renderTable(parsedData, selectedType, searchInput);
-      } catch (error) {
-        console.error('Error parsing data:', error);
-        // You might want to show an error message to the user here
-      }
-    }
 
     parseData(type, xmlString) {
       switch (type) {

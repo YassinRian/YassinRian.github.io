@@ -1,9 +1,9 @@
 define(["jquery"], function ($) {
     class ModalManager {
-      constructor() {
+      constructor(options = {}) {
         this.modal = null;
         this.isVisible = false;
-        this.tableRenderer = null;
+        this.tableRenderer = options.tableRenderer;
         this.setupStyles();
       }
   
@@ -152,23 +152,6 @@ define(["jquery"], function ($) {
         }
       }
     }
-  
-    // Helper function to initialize modal functionality
-    function initializeModal(tableRenderer) {
-      const modalManager = new ModalManager();
-      modalManager.tableRenderer = tableRenderer; // set table renderer for modal manager
-  
-      // Handle parse button click
-      $('#button_parse').on('click', function() {
-        const selectedType = $('#select_parse_type').val();
-        const data = getDataForType(selectedType); // You'll need to implement this
-        modalManager.renderTable(data, selectedType);
-      });
-  
-      return modalManager;
-    }
-
-    console.log('Modal Manager loaded');
   
     return {
       ModalManager,
