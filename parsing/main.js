@@ -7,6 +7,7 @@ define([
   "https://yassinrian.github.io/parsing/sortedXml.js",
   "https://yassinrian.github.io/parsing/modalManager.js",
 ], function ($, xmlParser, tableRenderer, _, buttons, sortedXml, moduleModalManager) {
+ 
   class App {
     constructor() {
       this.modal = null;

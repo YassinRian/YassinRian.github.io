@@ -35,23 +35,23 @@ define(["jquery"], function ($) {
             z-index: 1000;
           }
 
-.modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background-color: white;
-    padding: 24px;
-    border-radius: 8px;
-    width: 70%;    /* Initial width */
-    max-width: none; /* Remove any max-width constraints */
-    height: 90vh;
-    display: flex;
-    flex-direction: column;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-    resize: both;
-    overflow: auto;
-}
+        .modal-content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background-color: white;
+            padding: 24px;
+            border-radius: 8px;
+            width: 70%;    /* Initial width */
+            max-width: none; /* Remove any max-width constraints */
+            height: 90vh;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            resize: both;
+            overflow: auto;
+        }
 
           /* Ensure modal stays within viewport */
           @media screen and (max-width: 1400px) {
@@ -73,22 +73,22 @@ define(["jquery"], function ($) {
             justify-content: space-between;
           }
 
- .modal-content::after {
-    content: '';
-    position: absolute;
-    bottom: 3px;
-    right: 3px;
-    width: 12px;
-    height: 12px;
-    background-image: radial-gradient(circle, #666 2px, transparent 2px);
-    background-size: 4px 4px;
-    opacity: 0.7;
-    transition: opacity 0.2s;
-}
+          .modal-content::after {
+              content: '';
+              position: absolute;
+              bottom: 3px;
+              right: 3px;
+              width: 12px;
+              height: 12px;
+              background-image: radial-gradient(circle, #666 2px, transparent 2px);
+              background-size: 4px 4px;
+              opacity: 0.7;
+              transition: opacity 0.2s;
+          }
 
-.modal-content:hover::after {
-    opacity: 1;
-}
+          .modal-content:hover::after {
+              opacity: 1;
+          }
 
           .modal-title {
             font-size: 1.25rem;
