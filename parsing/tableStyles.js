@@ -45,7 +45,7 @@ define([], function () {
             background-color: #f1f1f1;
         }
 
-/* Modal Styling */
+/* /* Modal Styling */
 .modal {
     display: none;
     position: fixed;
@@ -102,7 +102,7 @@ define([], function () {
 body.modal-active {
     overflow: hidden; /* Prevent scrolling */
 }
-
+ */
 /* Search Container */
 .search-container {
     display: flex;
