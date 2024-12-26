@@ -11,7 +11,7 @@ define(["jquery"], function ($) {
       if (!$("#modal-manager-styles").length) {
         const styles = `
             <style id="modal-manager-styles">
-              <style id="modal-manager-styles">
+            
           .data-modal {
             display: none;
             position: fixed;
