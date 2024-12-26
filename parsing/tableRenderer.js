@@ -6,7 +6,23 @@ define([
 
   return {
     renderTable: function (data, container, type, searchInput) {
+      console.log('tableRenderer.renderTable called with:', {
+        dataExists: !!data,
+        containerSelector: container,
+        type,
+        searchInputExists: !!searchInput
+      });
       const tableContainer = $(container);
+
+      console.log('Found container:', tableContainer.length > 0);
+  
+      if (!tableContainer.length) {
+        console.error('Container not found:', container);
+        return;
+      }
+      
+
+
       tableContainer.empty();
 
       // Define headers based on type

@@ -156,7 +156,7 @@ define(["jquery"], function ($) {
     // Helper function to initialize modal functionality
     function initializeModal(tableRenderer) {
       const modalManager = new ModalManager();
-      modalManager.tableRenderer = tableRenderer;
+      modalManager.tableRenderer = tableRenderer; // set table renderer for modal manager
   
       // Handle parse button click
       $('#button_parse').on('click', function() {
