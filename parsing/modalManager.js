@@ -1,15 +1,15 @@
 define(["jquery"], function ($) {
-    class ModalManager {
-      constructor(options = {}) {
-        this.modal = null;
-        this.isVisible = false;
-        this.tableRenderer = options.tableRenderer;
-        this.setupStyles();
-      }
-  
-      setupStyles() {
-        if (!$('#modal-manager-styles').length) {
-          const styles = `
+  class ModalManager {
+    constructor(options = {}) {
+      this.modal = null;
+      this.isVisible = false;
+      this.tableRenderer = options.tableRenderer;
+      this.setupStyles();
+    }
+
+    setupStyles() {
+      if (!$("#modal-manager-styles").length) {
+        const styles = `
             <style id="modal-manager-styles">
               .data-modal {
                 display: none;
@@ -64,12 +64,12 @@ define(["jquery"], function ($) {
               }
             </style>
           `;
-          $('head').append(styles);
-        }
+        $("head").append(styles);
       }
-  
-      createModal() {
-        this.modal = $(`
+    }
+
+    createModal() {
+      this.modal = $(`
           <div class="data-modal">
             <div class="modal-content">
               <div class="modal-header">
@@ -80,61 +80,61 @@ define(["jquery"], function ($) {
             </div>
           </div>
         `);
-  
-        this.setupEventHandlers();
-        $('body').append(this.modal);
-      }
-  
-      setupEventHandlers() {
-        // Close button handler
-        this.modal.find('.modal-close').on('click', () => this.hide());
-  
-        // Click outside modal handler
-        this.modal.on('click', (e) => {
-          if ($(e.target).hasClass('data-modal')) {
-            this.hide();
-          }
-        });
-  
-        // Escape key handler
-        $(document).on('keydown', (e) => {
-          if (e.key === 'Escape' && this.isVisible) {
-            this.hide();
-          }
-        });
-      }
-  
-      show() {
-        if (!this.modal) {
-          this.createModal();
+
+      this.setupEventHandlers();
+      $("body").append(this.modal);
+    }
+
+    setupEventHandlers() {
+      // Close button handler
+      this.modal.find(".modal-close").on("click", () => this.hide());
+
+      // Click outside modal handler
+      this.modal.on("click", (e) => {
+        if ($(e.target).hasClass("data-modal")) {
+          this.hide();
         }
-        this.modal.fadeIn(200);
-        this.isVisible = true;
-      }
-  
-      hide() {
-        if (this.modal) {
-          this.modal.fadeOut(200);
-          this.isVisible = false;
+      });
+
+      // Escape key handler
+      $(document).on("keydown", (e) => {
+        if (e.key === "Escape" && this.isVisible) {
+          this.hide();
         }
+      });
+    }
+
+    show() {
+      if (!this.modal) {
+        this.createModal();
       }
-  
-      setTitle(title) {
-        if (this.modal) {
-          this.modal.find('.modal-title').text(title);
-        }
+      this.modal.fadeIn(200);
+      this.isVisible = true;
+    }
+
+    hide() {
+      if (this.modal) {
+        this.modal.fadeOut(200);
+        this.isVisible = false;
       }
-  
-      setContent(content) {
-        if (this.modal) {
-          this.modal.find('.modal-body').html(content);
-        }
+    }
+
+    setTitle(title) {
+      if (this.modal) {
+        this.modal.find(".modal-title").text(title);
       }
-  
-      renderTable(data, type) {
-        this.setTitle(`${type} View`);
-        const tableContainer = $('<div id="tableContainer"></div>');
-        const searchInput = $(`
+    }
+
+    setContent(content) {
+      if (this.modal) {
+        this.modal.find(".modal-body").html(content);
+      }
+    }
+
+    renderTable(data, type) {
+      this.setTitle(`${type} View`);
+      const tableContainer = $('<div id="tableContainer"></div>');
+      const searchInput = $(`
           <div style="margin-bottom: 15px;">
             <input type="text" 
                    id="searchInput" 
@@ -142,18 +142,25 @@ define(["jquery"], function ($) {
                    style="padding: 8px; width: 200px; border: 1px solid #ddd; border-radius: 4px;">
           </div>
         `);
-        
-        this.setContent(tableContainer);
-        this.show();
-        
-        // Initialize table renderer with the container
-        if (this.tableRenderer) {
-          this.tableRenderer.renderTable(data, '#tableContainer', type, searchInput);
+
+      this.setContent(tableContainer);
+      this.show();
+
+      // Render table after a brief delay to ensure DOM is ready
+      setTimeout(() => {
+        if (this.tableRenderer && $("#tableContainer").length) {
+          this.tableRenderer.renderTable(
+            data,
+            "#tableContainer",
+            type,
+            searchInput
+          );
         }
-      }
-    }
-  
-    return {
-      ModalManager
-    };
-  });
+      }, 50);
+    } // renderTable
+  }
+
+  return {
+    ModalManager,
+  };
+});
