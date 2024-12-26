@@ -43,7 +43,7 @@ define(["jquery"], function ($) {
     background-color: white;
     padding: 24px;
     border-radius: 8px;
-    width: 90%;    /* Initial width */
+    width: 70%;    /* Initial width */
     max-width: none; /* Remove any max-width constraints */
     height: 90vh;
     display: flex;
