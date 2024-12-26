@@ -28,25 +28,23 @@ define(["jquery"], function ($) {
             z-index: 1000;
           }
 
-          .modal-content {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            background-color: white;
-            padding: 24px;
-            border-radius: 8px;
-            width: 90%;
-            max-width: 1200px;
-            min-width: 800px;  /* Add minimum width */
-            height: 90vh;
-            min-height: 400px; /* Add minimum height */
-            display: flex;
-            flex-direction: column;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-            resize: both;
-            overflow: auto;
-          }
+.modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background-color: white;
+    padding: 24px;
+    border-radius: 8px;
+    width: 90%;    /* Initial width */
+    max-width: none; /* Remove any max-width constraints */
+    height: 90vh;
+    display: flex;
+    flex-direction: column;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    resize: both;
+    overflow: auto;
+}
 
           /* Ensure modal stays within viewport */
           @media screen and (max-width: 1400px) {
