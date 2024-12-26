@@ -135,14 +135,15 @@ define(["jquery"], function ($) {
       this.setTitle(`${type} View`);
       const tableContainer = $('<div id="tableContainer"></div>');
       const searchInput = $(`
-        <div style="margin-bottom: 15px;">
-          <input type="text" 
-                 id="searchInput" 
-                 placeholder="Search..." 
-                 style="padding: 8px; width: 200px; border: 1px solid #ddd; border-radius: 4px;">
+        <div class="search-container">
+            <input id="searchInput" type="text" placeholder="Enter search terms column-by-column using '::' (e.g., 'term1::term2::term3')" />
+            <label class="checkbox-container">
+                <input type="checkbox" id="regexToggle" />
+                Use Regular Expression
+            </label>
         </div>
       `);
-      
+
       this.show();
       this.setContent(tableContainer);
       
