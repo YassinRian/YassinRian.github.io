@@ -149,7 +149,6 @@ define(["jquery"], function ($) {
         // Initialize table renderer with the container
         if (this.tableRenderer) {
           this.tableRenderer.renderTable(data, '#tableContainer', type, searchInput);
-          console.log("Table renderer functie moet nu uitgevoerd worden");
         }
       }
     }
@@ -168,6 +167,8 @@ define(["jquery"], function ($) {
   
       return modalManager;
     }
+
+    console.log('Modal Manager loaded');
   
     return {
       ModalManager,

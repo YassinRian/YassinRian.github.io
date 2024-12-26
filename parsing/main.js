@@ -34,7 +34,7 @@ define([
       });
 
       // Add UI elements
-      $(container).append(modalMarkup.selectBox());
+      $(container).append(modalMarkup.selectBox()); // markup for the buttons and select box
       
       // Initialize XML export functionality
       sortedXml.initExportButton(this.oControlHost);
