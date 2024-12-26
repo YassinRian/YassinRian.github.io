@@ -73,18 +73,22 @@ define(["jquery"], function ($) {
             justify-content: space-between;
           }
 
-          /* Resize handle styles */
-          .modal-content::after {
-            content: '';
-            position: absolute;
-            bottom: 0;
-            right: 0;
-            width: 15px;
-            height: 15px;
-            background: 
-              linear-gradient(45deg, transparent 50%, #ccc 50%),
-              linear-gradient(45deg, transparent 52%, #fff 52%);
-          }
+ .modal-content::after {
+    content: '';
+    position: absolute;
+    bottom: 3px;
+    right: 3px;
+    width: 12px;
+    height: 12px;
+    background-image: radial-gradient(circle, #666 2px, transparent 2px);
+    background-size: 4px 4px;
+    opacity: 0.7;
+    transition: opacity 0.2s;
+}
+
+.modal-content:hover::after {
+    opacity: 1;
+}
 
           .modal-title {
             font-size: 1.25rem;
