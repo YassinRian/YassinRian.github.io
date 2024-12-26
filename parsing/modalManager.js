@@ -188,13 +188,13 @@ define(["jquery"], function ($) {
       if (!this.modal) {
         this.createModal();
       }
-      this.modal.fadeIn(200);
+      this.modal.fadeIn(100);
       this.isVisible = true;
     }
 
     hide() {
       if (this.modal) {
-        this.modal.fadeOut(200);
+        this.modal.fadeOut(100);
         this.isVisible = false;
       }
     }
