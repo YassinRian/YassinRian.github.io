@@ -104,17 +104,12 @@ define(["jquery"], function ($) {
       });
     }
 
-    show(callback) {
+    show() {
       if (!this.modal) {
         this.createModal();
       }
-      
-      this.modal.fadeIn(200, () => {
-        this.isVisible = true;
-        if (callback && typeof callback === 'function') {
-          callback();
-        }
-      });
+      this.modal.fadeIn(200);
+      this.isVisible = true;
     }
 
     hide() {
@@ -147,17 +142,13 @@ define(["jquery"], function ($) {
                  style="padding: 8px; width: 200px; border: 1px solid #ddd; border-radius: 4px;">
         </div>
       `);
-   
-      // Set content before showing the modal
+      
+      this.show();
       this.setContent(tableContainer);
       
-      this.show(() => {
-        if (this.tableRenderer) {
-          this.tableRenderer.renderTable(data, '#tableContainer', type, searchInput);
-        }
-      });
-      
-      this.isVisible = true;
+      if (this.tableRenderer) {
+        this.tableRenderer.renderTable(data, '#tableContainer', type, searchInput);
+      }
     }
   
   
