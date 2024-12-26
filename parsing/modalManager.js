@@ -9,6 +9,7 @@ define(["jquery"], function ($) {
       this.dragStartY = 0;
       this.initialX = 0;
       this.initialY = 0;
+      this.maxWidth = 1200; // Maximum width constraint
       this.setupStyles();
     }
 
@@ -36,7 +37,7 @@ define(["jquery"], function ($) {
             padding: 24px;
             border-radius: 8px;
             width: 90%;
-            max-width: 1200px !important;
+            max-width: 1200px;
             min-width: 800px;  /* Add minimum width */
             height: 90vh;
             min-height: 400px; /* Add minimum height */
@@ -192,47 +193,47 @@ define(["jquery"], function ($) {
     }
 
     setupDragHandlers() {
-      const modalContent = this.modal.find('.modal-content');
-      const header = modalContent.find('.modal-header');
-  
-      header.on('mousedown', (e) => {
+      const modalContent = this.modal.find(".modal-content");
+      const header = modalContent.find(".modal-header");
+
+      header.on("mousedown", (e) => {
         // Prevent dragging on close button click
-        if ($(e.target).hasClass('modal-close')) return;
-  
+        if ($(e.target).hasClass("modal-close")) return;
+
         this.isDragging = true;
         this.dragStartX = e.clientX;
         this.dragStartY = e.clientY;
-        
+
         const rect = modalContent[0].getBoundingClientRect();
         this.initialX = rect.left;
         this.initialY = rect.top;
-  
+
         // Remove transform to work with absolute positioning
         modalContent.css({
-          transform: 'none',
-          top: this.initialY + 'px',
-          left: this.initialX + 'px'
+          transform: "none",
+          top: this.initialY + "px",
+          left: this.initialX + "px",
         });
       });
-  
-      $(document).on('mousemove', (e) => {
+
+      $(document).on("mousemove", (e) => {
         if (!this.isDragging) return;
-  
+
         const dx = e.clientX - this.dragStartX;
         const dy = e.clientY - this.dragStartY;
-  
+
         modalContent.css({
-          left: (this.initialX + dx) + 'px',
-          top: (this.initialY + dy) + 'px'
+          left: this.initialX + dx + "px",
+          top: this.initialY + dy + "px",
         });
       });
-  
-      $(document).on('mouseup', () => {
+
+      $(document).on("mouseup", () => {
         this.isDragging = false;
       });
-  
+
       // Prevent text selection while dragging
-      header.on('selectstart', (e) => {
+      header.on("selectstart", (e) => {
         if (this.isDragging) e.preventDefault();
       });
     }
@@ -256,15 +257,9 @@ define(["jquery"], function ($) {
     }
 
     setupEventHandlers() {
+      const modalContent = this.modal.find(".modal-content");
       // Close button handler
       this.modal.find(".modal-close").on("click", () => this.hide());
-
-      // Click outside modal handler
-      this.modal.on("click", (e) => {
-        if ($(e.target).hasClass("data-modal")) {
-          this.hide();
-        }
-      });
 
       // Escape key handler
       $(document).on("keydown", (e) => {
@@ -273,17 +268,50 @@ define(["jquery"], function ($) {
         }
       });
 
-      $(window).on('resize', () => {
+      const resizeObserver = new ResizeObserver((entries) => {
+        for (let entry of entries) {
+          if (entry.target === modalContent[0]) {
+            const width = entry.contentRect.width;
+            if (width > this.maxWidth) {
+              modalContent.css("width", this.maxWidth + "px");
+            }
+          }
+        }
+      });
+
+      resizeObserver.observe(modalContent[0]);
+
+      // Handle close button
+      this.modal.find(".modal-close").on("click", () => {
+        this.modal.fadeOut(200);
+        this.isVisible = false;
+      });
+
+      // Handle click outside
+      this.modal.on("click", (e) => {
+        if ($(e.target).is(this.modal)) {
+          this.modal.fadeOut(200);
+          this.isVisible = false;
+        }
+      });
+
+      // Handle window resize
+      $(window).on("resize", () => {
         if (this.isVisible) {
-          const modalContent = this.modal.find('.modal-content');
           const rect = modalContent[0].getBoundingClientRect();
-          
+
           // Keep modal within viewport
           if (rect.right > window.innerWidth) {
-            modalContent.css('left', (window.innerWidth - rect.width - 20) + 'px');
+            modalContent.css(
+              "left",
+              window.innerWidth - rect.width - 20 + "px"
+            );
           }
           if (rect.bottom > window.innerHeight) {
-            modalContent.css('top', (window.innerHeight - rect.height - 20) + 'px');
+            modalContent.css(
+              "top",
+              window.innerHeight - rect.height - 20 + "px"
+            );
           }
         }
       });
@@ -293,16 +321,16 @@ define(["jquery"], function ($) {
       if (!this.modal) {
         this.createModal();
       }
-      
-      const modalContent = this.modal.find('.modal-content');
-      
+
+      const modalContent = this.modal.find(".modal-content");
+
       // Only set initial position if not already positioned
-      if (!modalContent.attr('style')) {
+      if (!modalContent.attr("style")) {
         modalContent.css({
-          transform: 'translate(-50%, -50%)'
+          transform: "translate(-50%, -50%)",
         });
       }
-      
+
       this.modal.fadeIn(200);
       this.isVisible = true;
     }
