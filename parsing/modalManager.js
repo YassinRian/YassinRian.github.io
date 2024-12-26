@@ -154,7 +154,6 @@ define(["jquery"], function ($) {
     }
   
     return {
-      ModalManager,
-      initializeModal
+      ModalManager
     };
   });
