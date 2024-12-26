@@ -1,15 +1,22 @@
 define(["jquery"], function ($) {
   class ModalManager {
+    
     constructor(options = {}) {
+      // Core modal properties
       this.modal = null;
       this.isVisible = false;
       this.tableRenderer = options.tableRenderer;
-      this.isDragging = false;
-      this.dragStartX = 0;
-      this.dragStartY = 0;
-      this.initialX = 0;
-      this.initialY = 0;
-      this.maxWidth = 1200; // Maximum width constraint
+      
+      // Drag state properties
+      this.dragState = {
+        isDragging: false,
+        startX: 0,
+        startY: 0,
+        initialX: 0,
+        initialY: 0
+      };
+
+      // Initialize styles
       this.setupStyles();
     }
 
@@ -254,66 +261,56 @@ define(["jquery"], function ($) {
       $("body").append(this.modal);
     }
 
-    setupEventHandlers() {
+  setupEventHandlers() {
       const modalContent = this.modal.find(".modal-content");
-      // Close button handler
+      
+      // Setup all closing-related handlers
+      this.setupCloseHandlers();
+      
+      // Setup viewport constraints
+      this.setupViewportConstraints(modalContent);
+    }
+  
+    setupCloseHandlers() {
+      // Close button click
       this.modal.find(".modal-close").on("click", () => this.hide());
-
-      // Escape key handler
+  
+      // Click outside modal
+      this.modal.on("click", (e) => {
+        if ($(e.target).is(this.modal)) {
+          this.hide();
+        }
+      });
+  
+      // Escape key
       $(document).on("keydown", (e) => {
         if (e.key === "Escape" && this.isVisible) {
           this.hide();
         }
       });
-
-      const resizeObserver = new ResizeObserver((entries) => {
-        for (let entry of entries) {
-          if (entry.target === modalContent[0]) {
-            const width = entry.contentRect.width;
-            if (width > this.maxWidth) {
-              modalContent.css("width", this.maxWidth + "px");
-            }
-          }
-        }
-      });
-
-      resizeObserver.observe(modalContent[0]);
-
-      // Handle close button
-      this.modal.find(".modal-close").on("click", () => {
-        this.modal.fadeOut(200);
-        this.isVisible = false;
-      });
-
-      // Handle click outside
-      this.modal.on("click", (e) => {
-        if ($(e.target).is(this.modal)) {
-          this.modal.fadeOut(200);
-          this.isVisible = false;
-        }
-      });
-
-      // Handle window resize
+    }
+  
+    setupViewportConstraints(modalContent) {
       $(window).on("resize", () => {
-        if (this.isVisible) {
-          const rect = modalContent[0].getBoundingClientRect();
-
-          // Keep modal within viewport
-          if (rect.right > window.innerWidth) {
-            modalContent.css(
-              "left",
-              window.innerWidth - rect.width - 20 + "px"
-            );
-          }
-          if (rect.bottom > window.innerHeight) {
-            modalContent.css(
-              "top",
-              window.innerHeight - rect.height - 20 + "px"
-            );
-          }
+        if (!this.isVisible) return;
+  
+        const rect = modalContent[0].getBoundingClientRect();
+        
+        // Keep modal within viewport bounds
+        if (rect.right > window.innerWidth) {
+          modalContent.css("left", `${window.innerWidth - rect.width - 20}px`);
+        }
+        if (rect.bottom > window.innerHeight) {
+          modalContent.css("top", `${window.innerHeight - rect.height - 20}px`);
         }
       });
     }
+  
+    hide() {
+      this.modal.fadeOut(200);
+      this.isVisible = false;
+    }
+
 
     show() {
       if (!this.modal) {
