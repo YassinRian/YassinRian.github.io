@@ -4,6 +4,11 @@ define(["jquery"], function ($) {
       this.modal = null;
       this.isVisible = false;
       this.tableRenderer = options.tableRenderer;
+      this.isDragging = false;
+      this.dragStartX = 0;
+      this.dragStartY = 0;
+      this.initialX = 0;
+      this.initialY = 0;
       this.setupStyles();
     }
 
@@ -22,7 +27,7 @@ define(["jquery"], function ($) {
             z-index: 1000;
           }
 
-          .modal-content {
+        .modal-content {
             position: absolute;
             top: 50%;
             left: 50%;
@@ -36,15 +41,27 @@ define(["jquery"], function ($) {
             display: flex;
             flex-direction: column;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            resize: both;
+            overflow: auto;
           }
 
           .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding-bottom: 16px;
-            border-bottom: 1px solid #e9ecef;
+            cursor: move;
+            user-select: none;
+          }
+
+          /* Resize handle styles */
+          .modal-content::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            width: 15px;
+            height: 15px;
+            cursor: se-resize;
+            background: 
+              linear-gradient(45deg, transparent 50%, #ccc 50%),
+              linear-gradient(45deg, transparent 52%, #fff 52%);
           }
 
           .modal-title {
@@ -159,6 +176,52 @@ define(["jquery"], function ($) {
       }
     }
 
+    setupDragHandlers() {
+      const modalContent = this.modal.find('.modal-content');
+      const header = modalContent.find('.modal-header');
+  
+      header.on('mousedown', (e) => {
+        // Prevent dragging on close button click
+        if ($(e.target).hasClass('modal-close')) return;
+  
+        this.isDragging = true;
+        this.dragStartX = e.clientX;
+        this.dragStartY = e.clientY;
+        
+        const rect = modalContent[0].getBoundingClientRect();
+        this.initialX = rect.left;
+        this.initialY = rect.top;
+  
+        // Remove transform to work with absolute positioning
+        modalContent.css({
+          transform: 'none',
+          top: this.initialY + 'px',
+          left: this.initialX + 'px'
+        });
+      });
+  
+      $(document).on('mousemove', (e) => {
+        if (!this.isDragging) return;
+  
+        const dx = e.clientX - this.dragStartX;
+        const dy = e.clientY - this.dragStartY;
+  
+        modalContent.css({
+          left: (this.initialX + dx) + 'px',
+          top: (this.initialY + dy) + 'px'
+        });
+      });
+  
+      $(document).on('mouseup', () => {
+        this.isDragging = false;
+      });
+  
+      // Prevent text selection while dragging
+      header.on('selectstart', (e) => {
+        if (this.isDragging) e.preventDefault();
+      });
+    }
+
     createModal() {
       this.modal = $(`
           <div class="data-modal">
@@ -173,6 +236,7 @@ define(["jquery"], function ($) {
         `);
 
       this.setupEventHandlers();
+      this.setupDragHandlers();
       $("body").append(this.modal);
     }
 
@@ -193,13 +257,38 @@ define(["jquery"], function ($) {
           this.hide();
         }
       });
+
+      $(window).on('resize', () => {
+        if (this.isVisible) {
+          const modalContent = this.modal.find('.modal-content');
+          const rect = modalContent[0].getBoundingClientRect();
+          
+          // Keep modal within viewport
+          if (rect.right > window.innerWidth) {
+            modalContent.css('left', (window.innerWidth - rect.width - 20) + 'px');
+          }
+          if (rect.bottom > window.innerHeight) {
+            modalContent.css('top', (window.innerHeight - rect.height - 20) + 'px');
+          }
+        }
+      });
     }
 
     show() {
       if (!this.modal) {
         this.createModal();
       }
-      this.modal.fadeIn(100);
+      
+      const modalContent = this.modal.find('.modal-content');
+      
+      // Only set initial position if not already positioned
+      if (!modalContent.attr('style')) {
+        modalContent.css({
+          transform: 'translate(-50%, -50%)'
+        });
+      }
+      
+      this.modal.fadeIn(200);
       this.isVisible = true;
     }
 
