@@ -103,8 +103,9 @@ define([
             user-select: none;
           }
 
-          .table-header.selected {
-            background-color:rgb(146, 192, 238);
+          .table-header.selected,
+          .table-header.selected .header-content {
+            background-color:rgb(199, 221, 244) !important;
           }
 
           .header-content {
