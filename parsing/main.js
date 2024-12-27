@@ -31,7 +31,7 @@ define([
       this.modal = new moduleModalManager.ModalManager({
         draggable: true,
         resizable: true,
-        tableRenderer: tableRenderer
+        tableRenderer
       });
 
       // Add UI elements
