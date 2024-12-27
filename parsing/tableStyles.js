@@ -34,7 +34,7 @@ define([], function () {
             background-color: #f9f9f9;
         }
         #dataTable tbody td {
-            padding: 12px 15px;
+            padding: 10px 15px;
         }
         #dataTable tbody tr:hover {
             background-color: #f1f1f1;
@@ -70,6 +70,17 @@ define([], function () {
             opacity: 1;
           }
 
+            .sort-icon {
+            margin-left: auto;
+            cursor: pointer;
+            opacity: 0.5;
+            font-size: 0.85em;
+            transition: opacity 0.15s ease;
+          }
+
+          .sort-icon:hover {
+            opacity: 0.9;
+          }
 
           
           /* Popup styles */
