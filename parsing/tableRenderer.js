@@ -84,6 +84,7 @@ define([
             padding: 12px 16px;
             line-height: 1.4;
             vertical-align: middle;
+            color:rgb(21, 23, 25);
           }
 
           #dataTable tbody tr:hover {
