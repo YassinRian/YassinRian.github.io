@@ -376,9 +376,6 @@ define([
     }
   }
 
-  return {
-    TableRenderer: TableRenderer,
-    // For backward compatibility, also provide a default instance
-    default: new TableRenderer()
-  };
+  return new TableRenderer();
+
 });
