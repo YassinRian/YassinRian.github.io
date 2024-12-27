@@ -242,16 +242,52 @@ define([
           <span class="header-text">${header}</span>
           <span class="sort-icon" title="Sort column">↕️</span>
         </div>
+        <div class="resizer" title="Drag to resize"></div>
       </th>`);
 
       this.setupHeaderClickHandler(th, index, columnSearchFlags);
       this.setupSortHandler(th, index, table);
+      this.setupColumnResizer(th);
       
       if (index === 0) {
         PopupManager.setupAnalysisIcon(th, data);
       }
 
       return th;
+    }
+
+    setupColumnResizer(th) {
+      const resizer = th.find('.resizer');
+      let startX, startWidth;
+
+      const startResize = (e) => {
+        startX = e.pageX;
+        startWidth = th.width();
+        resizer.addClass('resizing');
+        
+        $(document).on('mousemove', resize);
+        $(document).on('mouseup', stopResize);
+        
+        $('body').css('cursor', 'col-resize');
+      };
+
+      const resize = (e) => {
+        if (resizer.hasClass('resizing')) {
+          const width = startWidth + (e.pageX - startX);
+          if (width >= 100) { // Minimum width
+            th.width(width);
+          }
+        }
+      };
+
+      const stopResize = () => {
+        resizer.removeClass('resizing');
+        $(document).off('mousemove', resize);
+        $(document).off('mouseup', stopResize);
+        $('body').css('cursor', '');
+      };
+
+      resizer.on('mousedown', startResize);
     }
 
     setupHeaderClickHandler(th, index, columnSearchFlags) {
@@ -315,7 +351,7 @@ define([
       const cell = $(`<td class="expression-cell">
         <div class="expression-content">
           <span class="expression-text">${expression || ""}</span>
-          <span class="copy-icon" style="display: none; cursor: pointer; margin-left: 5px;" title="Copy expression">📋</span>
+          <span class="copy-icon" style="display: none;" title="Copy expression">📋</span>
         </div>
       </td>`);
 
@@ -328,7 +364,6 @@ define([
         e.stopPropagation();
         const expressionText = $(this).siblings('.expression-text').text();
         navigator.clipboard.writeText(expressionText).then(() => {
-          // Show a temporary "Copied!" message
           const copyIcon = $(this);
           const originalText = copyIcon.text();
           copyIcon.text('✓');
@@ -407,6 +442,5 @@ define([
     }
   }
 
-  return new TableRenderer()
-
+  return new TableRenderer();
 });
