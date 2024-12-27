@@ -11,176 +11,48 @@ define([
         ascending: true
       };
       
-      $('head').append(`
+      // Remove any existing styles
+      const existingStyles = document.getElementById('table-renderer-styles');
+      if (existingStyles) {
+        existingStyles.remove();
+      }
 
-     .table-wrapper {
-            overflow-x: auto;
-          }
-
-    /* Column controls styling */
-          .column-controls {
-            display: flex;
-            padding: 8px 16px;
-            background: #f5f5f5;
-            border-top: 1px solid rgba(0, 0, 0, 0.12);
-          }
-
-          .column-control {
-            flex: 1;
-            padding: 0 8px;
-            min-width: 100px;
-          }
-
-          .column-slider {
-            width: 100%;
-            height: 4px;
-            background: #ddd;
-            outline: none;
-            opacity: 0.7;
-            transition: opacity 0.2s;
-            border-radius: 2px;
-          }
-
-          .column-slider:hover {
-            opacity: 1;
-          }
-
-          .column-slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #2196F3;
-            cursor: pointer;
-            transition: transform 0.2s;
-          }
-
-          .column-slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-          }
-
-          .column-slider::-moz-range-thumb {
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            background: #2196F3;
-            cursor: pointer;
-            transition: transform 0.2s;
-            border: none;
-          }
-
-          .column-slider::-moz-range-thumb:hover {
-            transform: scale(1.2);
-          }
-
-
-
-
-
-        <style>
-          .table-container {
-            width: 80%;
-            margin: 20px auto;
-            overflow-x: auto;
-            background: white;
-            border-radius: 8px;
-            border: 1px solid #e2e8f0;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                       0 2px 4px -1px rgba(0, 0, 0, 0.06);
-          }
-
-  
-          /* Ensure smooth scrolling on mobile */
-          .table-container::-webkit-scrollbar {
-            height: 8px;
-          }
-
-          .table-container::-webkit-scrollbar-track {
-            background: #f7fafc;
-            border-radius: 4px;
-          }
-
-          .table-container::-webkit-scrollbar-thumb {
-            background: #e2e8f0;
-            border-radius: 4px;
-          }
-
-          .table-container::-webkit-scrollbar-thumb:hover {
-            background: #cbd5e0;
-          }
-
+      // Add styles
+      const styleElement = document.createElement('style');
+      styleElement.id = 'table-renderer-styles';
+      styleElement.textContent = `
           #dataTable {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-            font-size: 14px;
-            color: #2c3e50;
-            text-align: left;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            font-size: 16px;
+            color: #333;
           }
 
           #dataTable thead {
-            background-color: #f8fafc;
+            background-color: #2196F3;
             position: sticky;
             top: 0;
             z-index: 10;
           }
 
-          #dataTable thead th {
-            padding: 14px 16px;
-            border-bottom: 2px solid #e2e8f0;
-            font-weight: 600;
-            color: #4a5568;
-            white-space: nowrap;
-            background: inherit; /* Ensures sticky header maintains background */
+          #dataTable th {
+            position: relative;
+            padding: 16px 20px;
+            color: white;
+            font-weight: 500;
+            border-bottom: 2px solid rgba(0,0,0,0.1);
+            min-width: 100px;
           }
 
-          #dataTable tbody tr {
-            border-bottom: 1px solid #edf2f7;
-            transition: background-color 0.15s ease;
-          }
-
-          #dataTable tbody tr:nth-child(even) {
-            background-color: #fafafa;
-          }
-
-          #dataTable tbody td {
-            padding: 12px 16px;
-            line-height: 1.4;
-            vertical-align: middle;
-          }
-
-          #dataTable tbody tr:hover {
-            background-color: #f7fafc;
-          }
-
-          /* Make last row's bottom border match container */
-          #dataTable tbody tr:last-child {
-            border-bottom: none;
-          }
-
-          /* Header styles */
           .table-header {
             position: relative;
-            transition: background-color 0.2s ease;
             user-select: none;
           }
 
-          .table-header.selected,
-          .table-header.selected .header-content {
-            background-color:rgb(204, 229, 254) !important;
-          }
-          
-          /* Ensure the selected state is visible */
-          .table-header {
-            background-color: transparent;
-          }
-          
-          .table-header .header-content {
-            background-color: inherit;
-            height: 100%;
-            width: 100%;
+          .table-header.selected {
+            background-color: #1976D2;
           }
 
           .header-content {
@@ -189,39 +61,48 @@ define([
             gap: 8px;
           }
 
+          .resize-handle {
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 5px;
+            height: 100%;
+            cursor: col-resize;
+            opacity: 0;
+            background-color: rgba(255, 255, 255, 0.5);
+            transition: opacity 0.2s;
+          }
+
+          .table-header:hover .resize-handle,
+          .resize-handle:hover {
+            opacity: 1;
+          }
+
+          #dataTable tbody tr {
+            border-bottom: 1px solid #ddd;
+          }
+
+          #dataTable tbody td {
+            padding: 16px 20px;
+            line-height: 1.5;
+          }
+
+          .sort-icon, .analysis-icon {
+            cursor: pointer;
+            opacity: 0.8;
+          }
+
           .sort-icon {
             margin-left: auto;
-            cursor: pointer;
-            opacity: 0.5;
-            font-size: 0.85em;
-            transition: opacity 0.15s ease;
           }
-
-          .sort-icon:hover {
-            opacity: 0.9;
-          }
-
-          .analysis-icon {
-            cursor: help;
-            opacity: 0.5;
-            font-size: 0.85em;
-            transition: opacity 0.15s ease;
-          }
-
-          .analysis-icon:hover {
-            opacity: 0.9;
-          }
-
 
           .expression-cell {
             position: relative;
-            min-width: 200px;
           }
 
-         .expression-content {
+          .expression-content {
             display: flex;
             align-items: center;
-            justify-content: space-between;
             gap: 8px;
             word-break: break-all;
           }
@@ -233,64 +114,26 @@ define([
 
           .copy-icon {
             opacity: 0;
-            transition: opacity 0.15s ease;
-            font-size: 0.85em;
-            color: #718096;
-            padding: 4px;
-            border-radius: 4px;
             cursor: pointer;
-            flex-shrink: 0;
+            padding: 4px;
+            transition: opacity 0.2s;
           }
 
           .expression-cell:hover .copy-icon {
-            opacity: 0.5;
+            opacity: 0.8;
           }
 
-          .copy-icon:hover {
-            opacity: 1 !important;
-            background-color: #f7fafc;
-          }
-
-          /* Search input styles */
           #searchInput {
-            width: calc(100% - 24px);
-            padding: 8px 12px;
-            margin: 12px;
-            border: 1px solid #e2e8f0;
-            border-radius: 6px;
-            font-size: 14px;
-            transition: border-color 0.15s ease;
+            width: calc(100% - 40px);
+            padding: 12px;
+            margin: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            font-size: 15px;
           }
-
-          #searchInput:focus {
-            outline: none;
-            border-color: #90cdf4;
-            box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
-          }
-
-          /* Column resize styles */
-          .table-header {
-            position: relative;
-          }
-          
-          .resizer {
-            position: absolute;
-            right: 0;
-            top: 0;
-            height: 100%;
-            width: 5px;
-            background: rgba(33, 150, 243, 0.1);
-            cursor: col-resize;
-            user-select: none;
-            touch-action: none;
-            transition: background-color 0.2s ease;
-          }
-
-          .resizer:hover, .resizing {
-            background: rgba(33, 150, 243, 0.4);
-          }
-        </style>
-      `);
+      `;
+      
+      document.head.appendChild(styleElement);
     }
 
     getHeadersForType(type) {
@@ -303,16 +146,18 @@ define([
     }
 
     createHeaderCell(header, index, table, columnSearchFlags, data) {
-      const th = $(`<th class="table-header" data-column-index="${index}">
+      const th = $(`<th class="table-header">
         <div class="header-content">
           ${index === 0 ? '<span class="analysis-icon" title="Hover for analysis">📊</span>' : ''}
           <span class="header-text">${header}</span>
           <span class="sort-icon" title="Sort column">↕️</span>
         </div>
+        <div class="resize-handle"></div>
       </th>`);
 
       this.setupHeaderClickHandler(th, index, columnSearchFlags);
       this.setupSortHandler(th, index, table);
+      this.setupResizeHandler(th);
       
       if (index === 0) {
         PopupManager.setupAnalysisIcon(th, data);
@@ -321,71 +166,33 @@ define([
       return th;
     }
 
-    createColumnControls(headers, table) {
-      const controlsRow = $('<div class="column-controls"></div>');
-      
-      headers.forEach((header, index) => {
-        const control = $(`
-          <div class="column-control">
-            <input type="range" 
-                   min="100" 
-                   max="800" 
-                   value="200"
-                   title="Drag to resize ${header}"
-                   data-column-index="${index}"
-                   class="column-slider" />
-          </div>
-        `);
-
-        control.find('input').on('input', (e) => {
-          const width = $(e.target).val();
-          table.find(`th[data-column-index="${index}"]`).width(width);
-          table.find(`td:nth-child(${index + 1})`).width(width);
-        });
-
-        controlsRow.append(control);
-      });
-
-      return controlsRow;
-    }
-
-    setupColumnResizer(th) {
-      const resizer = th.find('.resizer');
+    setupResizeHandler(th) {
+      const handle = th.find('.resize-handle');
       let startX, startWidth;
 
-      const startResize = (e) => {
+      handle.on('mousedown', (e) => {
         startX = e.pageX;
         startWidth = th.width();
-        resizer.addClass('resizing');
-        
-        $(document).on('mousemove', resize);
-        $(document).on('mouseup', stopResize);
-        
-        $('body').css('cursor', 'col-resize');
-      };
-
-      const resize = (e) => {
-        if (resizer.hasClass('resizing')) {
+        const mouseMoveHandler = (e) => {
           const width = startWidth + (e.pageX - startX);
-          if (width >= 100) { // Minimum width
+          if (width >= 100) {
             th.width(width);
           }
-        }
-      };
-
-      const stopResize = () => {
-        resizer.removeClass('resizing');
-        $(document).off('mousemove', resize);
-        $(document).off('mouseup', stopResize);
-        $('body').css('cursor', '');
-      };
-
-      resizer.on('mousedown', startResize);
+        };
+        
+        $(document).on('mousemove', mouseMoveHandler);
+        $(document).one('mouseup', () => {
+          $(document).off('mousemove', mouseMoveHandler);
+        });
+        
+        e.preventDefault();
+        e.stopPropagation();
+      });
     }
 
     setupHeaderClickHandler(th, index, columnSearchFlags) {
       th.on('click', function(e) {
-        if ($(e.target).hasClass('sort-icon') || $(e.target).hasClass('analysis-icon')) {
+        if ($(e.target).hasClass('sort-icon') || $(e.target).hasClass('analysis-icon') || $(e.target).hasClass('resize-handle')) {
           return;
         }
         
@@ -440,35 +247,6 @@ define([
       rows.forEach(row => tbody.append(row));
     }
 
-    createExpressionCell(expression) {
-      const cell = $(`<td class="expression-cell">
-        <div class="expression-content">
-          <span class="expression-text">${expression || ""}</span>
-          <span class="copy-icon" style="display: none;" title="Copy expression">📋</span>
-        </div>
-      </td>`);
-
-      cell.hover(
-        function() { $(this).find('.copy-icon').show(); },
-        function() { $(this).find('.copy-icon').hide(); }
-      );
-
-      cell.find('.copy-icon').on('click', function(e) {
-        e.stopPropagation();
-        const expressionText = $(this).siblings('.expression-text').text();
-        navigator.clipboard.writeText(expressionText).then(() => {
-          const copyIcon = $(this);
-          const originalText = copyIcon.text();
-          copyIcon.text('✓');
-          setTimeout(() => {
-            copyIcon.text(originalText);
-          }, 1000);
-        });
-      });
-
-      return cell;
-    }
-
     createTableRow(item, type, subItem = null) {
       const row = $("<tr></tr>");
       
@@ -491,28 +269,35 @@ define([
       return row;
     }
 
-    populateTableBody(table, data, type) {
-      const tbody = $("<tbody></tbody>");
-      
-      data.forEach((item) => {
-        if (type === "Filters") {
-          tbody.append(this.createTableRow(item, type));
-        } else {
-          item.items.forEach((subItem) => {
-            tbody.append(this.createTableRow(item, type, subItem));
-          });
-        }
+    createExpressionCell(expression) {
+      const cell = $(`<td class="expression-cell">
+        <div class="expression-content">
+          <span class="expression-text">${expression || ""}</span>
+          <span class="copy-icon" style="display: none;">📋</span>
+        </div>
+      </td>`);
+
+      cell.hover(
+        function() { $(this).find('.copy-icon').show(); },
+        function() { $(this).find('.copy-icon').hide(); }
+      );
+
+      cell.find('.copy-icon').on('click', function(e) {
+        e.stopPropagation();
+        const expressionText = $(this).siblings('.expression-text').text();
+        navigator.clipboard.writeText(expressionText).then(() => {
+          const copyIcon = $(this);
+          copyIcon.text('✓');
+          setTimeout(() => copyIcon.text('📋'), 1000);
+        });
       });
 
-      table.append(tbody);
+      return cell;
     }
 
     renderTable(data, container, type, searchInput) {
       const tableContainer = $(container);
       tableContainer.empty();
-      
-      // Create wrapper for table and controls
-      const wrapper = $('<div class="table-wrapper"></div>');
 
       const headers = this.getHeadersForType(type);
       const table = $('<table id="dataTable"></table>');
@@ -527,16 +312,20 @@ define([
       thead.append(headerRow);
       table.append(thead);
 
-      this.populateTableBody(table, data, type);
-     
-      wrapper.append(table);
-      
-      // Create and add column controls
-      const columnControls = this.createColumnControls(headers, table);
-      wrapper.append(columnControls);
-      
-      tableContainer.append(wrapper);
-      tableContainer.prepend(searchInput);
+      const tbody = $("<tbody></tbody>");
+      data.forEach((item) => {
+        if (type === "Filters") {
+          tbody.append(this.createTableRow(item, type));
+        } else {
+          item.items.forEach((subItem) => {
+            tbody.append(this.createTableRow(item, type, subItem));
+          });
+        }
+      });
+
+      table.append(tbody);
+      tableContainer.append(searchInput);
+      tableContainer.append(table);
 
       $("#searchInput").on("input", function () {
         searchTable($(this).val(), columnSearchFlags);
