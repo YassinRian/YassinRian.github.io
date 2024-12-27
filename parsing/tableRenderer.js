@@ -104,7 +104,7 @@ define([
           }
 
           .table-header.selected {
-            background-color: #ebf5ff;
+            background-color:rgb(146, 192, 238);
           }
 
           .header-content {
