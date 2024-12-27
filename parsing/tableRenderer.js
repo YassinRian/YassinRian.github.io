@@ -11,200 +11,199 @@ define([
         ascending: true
       };
       
-        // Add enhanced CSS styles
-     // Add enhanced CSS styles
-     $('head').append(`
-      <style>
-        .table-container {
-          width: 80%;
-          margin: 20px auto;
-          overflow-x: auto;
-          background: white;
-          border-radius: 8px;
-          border: 1px solid #e2e8f0;
-          box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
-                     0 2px 4px -1px rgba(0, 0, 0, 0.06);
-        }
+ // Add enhanced CSS styles
+ $('head').append(`
+  <style>
+    .table-container {
+      width: 80%;
+      margin: 20px auto;
+      overflow-x: auto;
+      background: white;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 
+                 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+    }
 
-        /* Ensure smooth scrolling on mobile */
-        .table-container::-webkit-scrollbar {
-          height: 8px;
-        }
+    /* Ensure smooth scrolling on mobile */
+    .table-container::-webkit-scrollbar {
+      height: 8px;
+    }
 
-        .table-container::-webkit-scrollbar-track {
-          background: #f7fafc;
-          border-radius: 4px;
-        }
+    .table-container::-webkit-scrollbar-track {
+      background: #f7fafc;
+      border-radius: 4px;
+    }
 
-        .table-container::-webkit-scrollbar-thumb {
-          background: #e2e8f0;
-          border-radius: 4px;
-        }
+    .table-container::-webkit-scrollbar-thumb {
+      background: #e2e8f0;
+      border-radius: 4px;
+    }
 
-        .table-container::-webkit-scrollbar-thumb:hover {
-          background: #cbd5e0;
-        }
+    .table-container::-webkit-scrollbar-thumb:hover {
+      background: #cbd5e0;
+    }
 
-        #dataTable {
-          width: 100%;
-          border-collapse: separate;
-          border-spacing: 0;
-          font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
-          font-size: 14px;
-          color: #2c3e50;
-          text-align: left;
-        }
+    #dataTable {
+      width: 100%;
+      border-collapse: separate;
+      border-spacing: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
+      font-size: 14px;
+      color: #2c3e50;
+      text-align: left;
+    }
 
-        #dataTable thead {
-          background-color: #f8fafc;
-          position: sticky;
-          top: 0;
-          z-index: 10;
-        }
+    #dataTable thead {
+      background-color: #f8fafc;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
 
-        #dataTable thead th {
-          padding: 14px 16px;
-          border-bottom: 2px solid #e2e8f0;
-          font-weight: 600;
-          color: #4a5568;
-          white-space: nowrap;
-          background: inherit; /* Ensures sticky header maintains background */
-        }
+    #dataTable thead th {
+      padding: 14px 16px;
+      border-bottom: 2px solid #e2e8f0;
+      font-weight: 600;
+      color: #4a5568;
+      white-space: nowrap;
+      background: inherit; /* Ensures sticky header maintains background */
+    }
 
-        #dataTable tbody tr {
-          border-bottom: 1px solid #edf2f7;
-          transition: background-color 0.15s ease;
-        }
+    #dataTable tbody tr {
+      border-bottom: 1px solid #edf2f7;
+      transition: background-color 0.15s ease;
+    }
 
-        #dataTable tbody tr:nth-child(even) {
-          background-color: #fafafa;
-        }
+    #dataTable tbody tr:nth-child(even) {
+      background-color: #fafafa;
+    }
 
-        #dataTable tbody td {
-          padding: 12px 16px;
-          line-height: 1.4;
-          vertical-align: middle;
-        }
+    #dataTable tbody td {
+      padding: 12px 16px;
+      line-height: 1.4;
+      vertical-align: middle;
+    }
 
-        #dataTable tbody tr:hover {
-          background-color: #f7fafc;
-        }
+    #dataTable tbody tr:hover {
+      background-color: #f7fafc;
+    }
 
-        /* Make last row's bottom border match container */
-        #dataTable tbody tr:last-child {
-          border-bottom: none;
-        }
+    /* Make last row's bottom border match container */
+    #dataTable tbody tr:last-child {
+      border-bottom: none;
+    }
 
-        /* Header styles */
-        .table-header {
-          position: relative;
-          transition: background-color 0.2s ease;
-          user-select: none;
-        }
+    /* Header styles */
+    .table-header {
+      position: relative;
+      transition: background-color 0.2s ease;
+      user-select: none;
+    }
 
-        .table-header.selected,
-        .table-header.selected .header-content {
-          background-color: #ebf5ff !important;
-        }
-        
-        /* Ensure the selected state is visible */
-        .table-header {
-          background-color: transparent;
-        }
-        
-        .table-header .header-content {
-          background-color: inherit;
-          height: 100%;
-          width: 100%;
-        }
+    .table-header.selected,
+    .table-header.selected .header-content {
+      background-color: #ebf5ff !important;
+    }
+    
+    /* Ensure the selected state is visible */
+    .table-header {
+      background-color: transparent;
+    }
+    
+    .table-header .header-content {
+      background-color: inherit;
+      height: 100%;
+      width: 100%;
+    }
 
-        .header-content {
-          display: flex;
-          align-items: center;
-          gap: 8px;
-        }
+    .header-content {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
 
-        .sort-icon {
-          margin-left: auto;
-          cursor: pointer;
-          opacity: 0.5;
-          font-size: 0.85em;
-          transition: opacity 0.15s ease;
-        }
+    .sort-icon {
+      margin-left: auto;
+      cursor: pointer;
+      opacity: 0.5;
+      font-size: 0.85em;
+      transition: opacity 0.15s ease;
+    }
 
-        .sort-icon:hover {
-          opacity: 0.9;
-        }
+    .sort-icon:hover {
+      opacity: 0.9;
+    }
 
-        .analysis-icon {
-          cursor: help;
-          opacity: 0.5;
-          font-size: 0.85em;
-          transition: opacity 0.15s ease;
-        }
+    .analysis-icon {
+      cursor: help;
+      opacity: 0.5;
+      font-size: 0.85em;
+      transition: opacity 0.15s ease;
+    }
 
-        .analysis-icon:hover {
-          opacity: 0.9;
-        }
+    .analysis-icon:hover {
+      opacity: 0.9;
+    }
 
-        /* Expression cell styles */
-        .expression-cell {
-          position: relative;
-          max-width: 300px; /* Prevent cells from getting too wide */
-        }
+    /* Expression cell styles */
+    .expression-cell {
+      position: relative;
+      max-width: 300px; /* Prevent cells from getting too wide */
+    }
 
-        .expression-content {
-          display: flex;
-          align-items: center;
-          justify-content: space-between;
-          gap: 8px;
-        }
+    .expression-content {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 8px;
+    }
 
-        .expression-text {
-          flex: 1;
-          overflow: hidden;
-          text-overflow: ellipsis;
-          white-space: nowrap;
-        }
+    .expression-text {
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
 
-        .copy-icon {
-          opacity: 0;
-          transition: opacity 0.15s ease;
-          font-size: 0.85em;
-          color: #718096;
-          padding: 4px;
-          border-radius: 4px;
-          cursor: pointer;
-          flex-shrink: 0;
-        }
+    .copy-icon {
+      opacity: 0;
+      transition: opacity 0.15s ease;
+      font-size: 0.85em;
+      color: #718096;
+      padding: 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      flex-shrink: 0;
+    }
 
-        .expression-cell:hover .copy-icon {
-          opacity: 0.5;
-        }
+    .expression-cell:hover .copy-icon {
+      opacity: 0.5;
+    }
 
-        .copy-icon:hover {
-          opacity: 1 !important;
-          background-color: #f7fafc;
-        }
+    .copy-icon:hover {
+      opacity: 1 !important;
+      background-color: #f7fafc;
+    }
 
-        /* Search input styles */
-        #searchInput {
-          width: calc(100% - 24px);
-          padding: 8px 12px;
-          margin: 12px;
-          border: 1px solid #e2e8f0;
-          border-radius: 6px;
-          font-size: 14px;
-          transition: border-color 0.15s ease;
-        }
+    /* Search input styles */
+    #searchInput {
+      width: calc(100% - 24px);
+      padding: 8px 12px;
+      margin: 12px;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      font-size: 14px;
+      transition: border-color 0.15s ease;
+    }
 
-        #searchInput:focus {
-          outline: none;
-          border-color: #90cdf4;
-          box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
-        }
-      </style>
-    `);
+    #searchInput:focus {
+      outline: none;
+      border-color: #90cdf4;
+      box-shadow: 0 0 0 3px rgba(66, 153, 225, 0.15);
+    }
+  </style>
+`);
       } // end of constructor
 
     getHeadersForType(type) {
