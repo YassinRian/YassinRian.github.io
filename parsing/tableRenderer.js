@@ -510,6 +510,9 @@ define([
     renderTable(data, container, type, searchInput) {
       const tableContainer = $(container);
       tableContainer.empty();
+      
+      // Create wrapper for table and controls
+      const wrapper = $('<div class="table-wrapper"></div>');
 
       const headers = this.getHeadersForType(type);
       const table = $('<table id="dataTable"></table>');
@@ -525,8 +528,7 @@ define([
       table.append(thead);
 
       this.populateTableBody(table, data, type);
-      
-      const wrapper = $('<div class="table-wrapper"></div>');
+     
       wrapper.append(table);
       
       // Create and add column controls
