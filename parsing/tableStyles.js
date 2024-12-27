@@ -1,7 +1,7 @@
 define([], function () {
   const styles = `
 
-          .table-container {
+       .table-container {
             width: 80%;
             margin: 20px auto;
             overflow-x: auto;
@@ -35,7 +35,7 @@ define([], function () {
             width: 100%;
             border-collapse: separate;
             border-spacing: 0;
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, Arial,"Segoe UI", Roboto, Oxygen, Ubuntu, sans-serif;
             font-size: 14px;
             color: #2c3e50;
             text-align: left;
