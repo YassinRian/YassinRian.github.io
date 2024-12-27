@@ -65,10 +65,11 @@ define([
                 #dataTable thead th {
                   padding: 14px 16px;
                   border-bottom: 2px solid #e2e8f0;
-                  font-weight: 600;
-                  color: #4a5568;
+                  font-weight: 800;
+                  color:rgb(28, 33, 42);
                   white-space: nowrap;
                   background: inherit; /* Ensures sticky header maintains background */
+                  font-size: 1.5rem;
                 }
       
                 #dataTable tbody tr {
@@ -84,6 +85,8 @@ define([
                   padding: 12px 16px;
                   line-height: 1.4;
                   vertical-align: middle;
+                  color:rgb(16, 22, 28);
+                  font-size: 1rem;
                 }
       
                 #dataTable tbody tr:hover {
