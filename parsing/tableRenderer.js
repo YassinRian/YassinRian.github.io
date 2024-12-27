@@ -12,6 +12,72 @@ define([
       };
       
       $('head').append(`
+
+     .table-wrapper {
+            overflow-x: auto;
+          }
+
+    /* Column controls styling */
+          .column-controls {
+            display: flex;
+            padding: 8px 16px;
+            background: #f5f5f5;
+            border-top: 1px solid rgba(0, 0, 0, 0.12);
+          }
+
+          .column-control {
+            flex: 1;
+            padding: 0 8px;
+            min-width: 100px;
+          }
+
+          .column-slider {
+            width: 100%;
+            height: 4px;
+            background: #ddd;
+            outline: none;
+            opacity: 0.7;
+            transition: opacity 0.2s;
+            border-radius: 2px;
+          }
+
+          .column-slider:hover {
+            opacity: 1;
+          }
+
+          .column-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+            transition: transform 0.2s;
+          }
+
+          .column-slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+          }
+
+          .column-slider::-moz-range-thumb {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: #2196F3;
+            cursor: pointer;
+            transition: transform 0.2s;
+            border: none;
+          }
+
+          .column-slider::-moz-range-thumb:hover {
+            transform: scale(1.2);
+          }
+
+
+
+
+
         <style>
           .table-container {
             width: 80%;
@@ -24,6 +90,7 @@ define([
                        0 2px 4px -1px rgba(0, 0, 0, 0.06);
           }
 
+  
           /* Ensure smooth scrolling on mobile */
           .table-container::-webkit-scrollbar {
             height: 8px;
@@ -236,24 +303,50 @@ define([
     }
 
     createHeaderCell(header, index, table, columnSearchFlags, data) {
-      const th = $(`<th class="table-header">
+      const th = $(`<th class="table-header" data-column-index="${index}">
         <div class="header-content">
           ${index === 0 ? '<span class="analysis-icon" title="Hover for analysis">📊</span>' : ''}
           <span class="header-text">${header}</span>
           <span class="sort-icon" title="Sort column">↕️</span>
         </div>
-        <div class="resizer" title="Drag to resize"></div>
       </th>`);
 
       this.setupHeaderClickHandler(th, index, columnSearchFlags);
       this.setupSortHandler(th, index, table);
-      this.setupColumnResizer(th);
       
       if (index === 0) {
         PopupManager.setupAnalysisIcon(th, data);
       }
 
       return th;
+    }
+
+    createColumnControls(headers, table) {
+      const controlsRow = $('<div class="column-controls"></div>');
+      
+      headers.forEach((header, index) => {
+        const control = $(`
+          <div class="column-control">
+            <input type="range" 
+                   min="100" 
+                   max="800" 
+                   value="200"
+                   title="Drag to resize ${header}"
+                   data-column-index="${index}"
+                   class="column-slider" />
+          </div>
+        `);
+
+        control.find('input').on('input', (e) => {
+          const width = $(e.target).val();
+          table.find(`th[data-column-index="${index}"]`).width(width);
+          table.find(`td:nth-child(${index + 1})`).width(width);
+        });
+
+        controlsRow.append(control);
+      });
+
+      return controlsRow;
     }
 
     setupColumnResizer(th) {
@@ -433,7 +526,14 @@ define([
 
       this.populateTableBody(table, data, type);
       
-      tableContainer.append(table);
+      const wrapper = $('<div class="table-wrapper"></div>');
+      wrapper.append(table);
+      
+      // Create and add column controls
+      const columnControls = this.createColumnControls(headers, table);
+      wrapper.append(columnControls);
+      
+      tableContainer.append(wrapper);
       tableContainer.prepend(searchInput);
 
       $("#searchInput").on("input", function () {
