@@ -16,12 +16,12 @@ define([
     }
 
     draw(oControlHost) {
-     // const { userName } = oControlHost.configuration || "";
+      const { userName } = oControlHost.configuration || "";
 
-      const jsonCap = JSON.parse(window[0]._hle);
-      const capability = jsonCap.cmProperties.metadataModelPackage[0].effectiveUserCapabilities.includes('canUseReportStudio') || "";
+      //const jsonCap = JSON.parse(window[0]._hle);
+      //const capability = jsonCap.cmProperties.metadataModelPackage[0].effectiveUserCapabilities.includes('canUseReportStudio') || "";
       
-      if (capability) {
+      if (userName == '951100') {
         this.oControlHost = oControlHost;
         const elm = oControlHost.container;
         
