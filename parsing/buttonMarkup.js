@@ -13,7 +13,7 @@ define(function () {
           <div class="divider"></div>
           <button id="xmlExportBtn" class="export-button">
             <span class="export-icon">📤</span>
-            Export Sorted XML
+            Sorteer velden in Queries
           </button>
         </div>
             `;
