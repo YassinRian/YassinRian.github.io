@@ -100,7 +100,7 @@ define([], function () {
         content: "summarize";
         font-size: 14px;
       }
-      .control-group .xmlExportBtn::before {
+      .control-group .export-button::before {
         font-family: "Material Icons";
         content: "system_update_alt";
         font-size: 14px;

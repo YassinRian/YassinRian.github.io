@@ -12,7 +12,6 @@ define(function () {
           <button id="button_parse" class="parse-button">Overzicht velden</button>
           <div class="divider"></div>
           <button id="xmlExportBtn" class="export-button">
-            <span class="export-icon">📤</span>
             Sorteer velden in Queries
           </button>
         </div>
