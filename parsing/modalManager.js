@@ -359,7 +359,7 @@ define(["jquery"], function ($) {
       const tableContainer = $('<div id="tableContainer"></div>');
       const searchInput = $(`
         <div class="search-container">
-            <input id="searchInput" type="text" placeholder="Enter search terms column-by-column using '::' (e.g., 'term1::term2::term3')" />
+            <input id="searchInput" type="text" placeholder="Gebruik '::' om specifieker op kolommen te zoek (bijv. zoekterm1::zoekterm2::zoekterm3)" />
             <label class="checkbox-container">
                 <input type="checkbox" id="regexToggle" />
                 Use Regular Expression
