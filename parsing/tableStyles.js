@@ -88,16 +88,21 @@ define([], function () {
       }
 
       .control-group button:hover {
-        background-color: #0056b3;
+        background-color:rgb(6, 99, 198);
       }
 
       .control-group button:active {
-        background-color: #004085;
+        background-color:rgb(1, 76, 155);
       }
 
       .control-group .parse-button::before {
         font-family: "Material Icons";
         content: "summarize";
+        font-size: 14px;
+      }
+      .control-group .xmlExportBtn::before {
+        font-family: "Material Icons";
+        content: "system_update_alt";
         font-size: 14px;
       }
 
