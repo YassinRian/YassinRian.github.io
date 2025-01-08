@@ -21,7 +21,7 @@ define([
       //const jsonCap = JSON.parse(window[0]._hle);
       //const capability = jsonCap.cmProperties.metadataModelPackage[0].effectiveUserCapabilities.includes('canUseReportStudio') || "";
       
-      if (userName == '951100') {
+      if (userName) {
         this.oControlHost = oControlHost;
         const elm = oControlHost.container;
         
