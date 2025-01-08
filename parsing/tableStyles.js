@@ -88,11 +88,11 @@ define([], function () {
       }
 
       .control-group button:hover {
-        background-color:rgb(6, 99, 198);
+        background-color: #0056b3;
       }
 
       .control-group button:active {
-        background-color:rgb(1, 76, 155);
+        background-color: #004085;
       }
 
       .control-group .parse-button::before {
