@@ -9,7 +9,7 @@ define(function () {
             <option value="Lists">Lists</option>
             <option value="Filters">Detail Filters</option>
           </select>
-          <button id="button_parse" class="parse-button">Parse</button>
+          <button id="button_parse" class="parse-button">Overzicht velden</button>
           <div class="divider"></div>
           <button id="xmlExportBtn" class="export-button">
             <span class="export-icon">📤</span>
