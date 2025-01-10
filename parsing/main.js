@@ -20,7 +20,7 @@ define([
 
       //const jsonCap = JSON.parse(window[0]._hle);
       //const capability = jsonCap.cmProperties.metadataModelPackage[0].effectiveUserCapabilities.includes('canUseReportStudio') || "";
-      
+      console.log( {userName})
       if (userName) {
         this.oControlHost = oControlHost;
         const elm = oControlHost.container;
