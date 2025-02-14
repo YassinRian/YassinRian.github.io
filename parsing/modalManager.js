@@ -1,4 +1,48 @@
 define(["jquery"], function ($) {
+  
+  
+    // Adding CSV utility functions
+    const csvUtils = {
+      convertToCSV(data) {
+        if (!data.length) return '';
+        
+        const headers = Object.keys(data[0]);
+        const csvRows = [];
+        
+        // Add headers
+        csvRows.push(headers.join(','));
+        
+        // Add data rows
+        data.forEach(row => {
+          const values = headers.map(header => {
+            const value = row[header] || '';
+            // Escape commas and quotes, wrap in quotes if needed
+            return typeof value === 'string' && (value.includes(',') || value.includes('"')) 
+              ? `"${value.replace(/"/g, '""')}"` 
+              : value;
+          });
+          csvRows.push(values.join(','));
+        });
+        
+        return csvRows.join('\n');
+      },
+      
+      downloadCSV(csvContent, filename) {
+        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+        const link = document.createElement('a');
+        const url = URL.createObjectURL(blob);
+        
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      }
+    };
+  
+  
   class ModalManager {
     
     constructor(options = {}) {
@@ -18,6 +62,20 @@ define(["jquery"], function ($) {
 
       // Initialize styles
       this.setupStyles();
+    }
+
+
+    exportToCSV(data, type) {
+      try {
+        const csvContent = csvUtils.convertToCSV(data);
+        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const filename = `${type}_export_${timestamp}.csv`;
+        
+        csvUtils.downloadCSV(csvContent, filename);
+      } catch (error) {
+        console.error('Error exporting to CSV:', error);
+        alert('An error occurred while exporting to CSV. Please try again.');
+      }
     }
 
     setupStyles() {
@@ -359,7 +417,13 @@ define(["jquery"], function ($) {
       const tableContainer = $('<div id="tableContainer"></div>');
       const searchInput = $(`
         <div class="search-container">
-            <input id="searchInput" type="text" placeholder="Gebruik '::' om specifieker op kolommen te zoek (bijv. zoekterm1::zoekterm2::zoekterm3)" />
+            <div style="flex: 1; display: flex; gap: 10px;">
+                <input id="searchInput" type="text" placeholder="Gebruik '::' om specifieker op kolommen te zoek (bijv. zoekterm1::zoekterm2::zoekterm3)" />
+                <button id="exportCSV" class="export-button">
+                    Export CSV
+                </button>
+            </div>
+            
             <label class="checkbox-container">
                 <input type="checkbox" id="regexToggle" />
                 Use Regular Expression
@@ -377,6 +441,9 @@ define(["jquery"], function ($) {
           type,
           searchInput
         );
+
+      // Setup CSV export functionality
+       $('#exportCSV').on('click', () => this.exportToCSV(data, type));
       }
     }
   } // ModalManager
