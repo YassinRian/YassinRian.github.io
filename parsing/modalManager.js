@@ -15,7 +15,19 @@ define(["jquery"], function ($) {
       // Add data rows
       data.forEach(row => {
         const values = headers.map(header => {
-          const value = row[header] ?? ''; // Use nullish coalescing for null/undefined
+          let value = row[header];
+          
+          // Handle different value types
+          if (value === null || value === undefined) {
+            value = '';
+          } else if (typeof value === 'object') {
+            // If it's an object, try to get a meaningful string representation
+            value = value.hasOwnProperty('value') ? value.value : 
+                   value.hasOwnProperty('name') ? value.name :
+                   JSON.stringify(value);
+          }
+          
+          // Convert to string and trim
           const stringValue = String(value).trim();
           
           // Escape commas and quotes, wrap in quotes if needed
@@ -43,6 +55,7 @@ define(["jquery"], function ($) {
       document.body.removeChild(link);
     }
   };
+
 
   
   class ModalManager {
