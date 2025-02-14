@@ -1,47 +1,49 @@
 define(["jquery"], function ($) {
   
   
-    // Adding CSV utility functions
-    const csvUtils = {
-      convertToCSV(data) {
-        if (!data.length) return '';
-        
-        const headers = Object.keys(data[0]);
-        const csvRows = [];
-        
-        // Add headers
-        csvRows.push(headers.join(','));
-        
-        // Add data rows
-        data.forEach(row => {
-          const values = headers.map(header => {
-            const value = row[header] || '';
-            // Escape commas and quotes, wrap in quotes if needed
-            return typeof value === 'string' && (value.includes(',') || value.includes('"')) 
-              ? `"${value.replace(/"/g, '""')}"` 
-              : value;
-          });
-          csvRows.push(values.join(','));
-        });
-        
-        return csvRows.join('\n');
-      },
+  const csvUtils = {
+    convertToCSV(data) {
+      if (!data.length) return '';
       
-      downloadCSV(csvContent, filename) {
-        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-        const link = document.createElement('a');
-        const url = URL.createObjectURL(blob);
-        
-        link.setAttribute('href', url);
-        link.setAttribute('download', filename);
-        link.style.visibility = 'hidden';
-        
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-      }
-    };
-  
+      // Get headers from the first row
+      const headers = Object.keys(data[0]);
+      const csvRows = [];
+      
+      // Add headers
+      csvRows.push(headers.join(','));
+      
+      // Add data rows
+      data.forEach(row => {
+        const values = headers.map(header => {
+          const value = row[header] ?? ''; // Use nullish coalescing for null/undefined
+          const stringValue = String(value).trim();
+          
+          // Escape commas and quotes, wrap in quotes if needed
+          return stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')
+            ? `"${stringValue.replace(/"/g, '""')}"` 
+            : stringValue;
+        });
+        csvRows.push(values.join(','));
+      });
+      
+      return csvRows.join('\n');
+    },
+    
+    downloadCSV(csvContent, filename) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
+
   
   class ModalManager {
     
