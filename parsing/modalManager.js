@@ -1,61 +1,51 @@
 define(["jquery"], function ($) {
   
   
-  const csvUtils = {
-    convertToCSV(data) {
-      if (!data.length) return '';
-      
-      // Get headers from the first row
-      const headers = Object.keys(data[0]);
-      const csvRows = [];
-      
-      // Add headers
-      csvRows.push(headers.join(','));
-      
-      // Add data rows
-      data.forEach(row => {
-        const values = headers.map(header => {
-          let value = row[header];
-          
-          // Handle different value types
-          if (value === null || value === undefined) {
-            value = '';
-          } else if (typeof value === 'object') {
-            // If it's an object, try to get a meaningful string representation
-            value = value.hasOwnProperty('value') ? value.value : 
-                   value.hasOwnProperty('name') ? value.name :
-                   JSON.stringify(value);
-          }
-          
-          // Convert to string and trim
-          const stringValue = String(value).trim();
-          
-          // Escape commas and quotes, wrap in quotes if needed
-          return stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')
-            ? `"${stringValue.replace(/"/g, '""')}"` 
-            : stringValue;
-        });
-        csvRows.push(values.join(','));
-      });
-      
-      return csvRows.join('\n');
-    },
+ // Adding CSV utility functions
+ const csvUtils = {
+  convertToCSV(data) {
+    if (!data.length) return '';
     
-    downloadCSV(csvContent, filename) {
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
-      const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', filename);
-      link.style.visibility = 'hidden';
-      
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-    }
-  };
-
+    // Specify only the columns we want
+    const selectedHeaders = ['Query Name', 'Data Item Name', 'Expression'];
+    const csvRows = [];
+    
+    // Add headers
+    csvRows.push(selectedHeaders.join(','));
+    
+    // Add data rows with only selected columns
+    data.forEach(row => {
+      const values = selectedHeaders.map(header => {
+        let value = row[header] ?? '';
+        
+        // Convert to string and trim
+        const stringValue = String(value).trim();
+        
+        // Escape commas and quotes, wrap in quotes if needed
+        return stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')
+          ? `"${stringValue.replace(/"/g, '""')}"` 
+          : stringValue;
+      });
+      csvRows.push(values.join(','));
+    });
+    
+    return csvRows.join('\n');
+  },
+  
+  downloadCSV(csvContent, filename) {
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    link.setAttribute('href', url);
+    link.setAttribute('download', filename);
+    link.style.visibility = 'hidden';
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  }
+};
 
   
   class ModalManager {
