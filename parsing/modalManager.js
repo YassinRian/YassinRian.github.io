@@ -1,52 +1,82 @@
 define(["jquery"], function ($) {
   
-  
- // Adding CSV utility functions
- const csvUtils = {
-  convertToCSV(data) {
-    if (!data.length) return '';
-    
-    // Specify only the columns we want
-    const selectedHeaders = ['Query Name', 'Data Item Name', 'Expression'];
-    const csvRows = [];
-    
-    // Add headers
-    csvRows.push(selectedHeaders.join(','));
-    
-    // Add data rows with only selected columns
-    data.forEach(row => {
-      const values = selectedHeaders.map(header => {
-        let value = row[header] ?? '';
-        
-        // Convert to string and trim
-        const stringValue = String(value).trim();
-        
-        // Escape commas and quotes, wrap in quotes if needed
-        return stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')
-          ? `"${stringValue.replace(/"/g, '""')}"` 
-          : stringValue;
-      });
-      csvRows.push(values.join(','));
-    });
-    
-    return csvRows.join('\n');
-  },
-  
-  downloadCSV(csvContent, filename) {
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const link = document.createElement('a');
-    const url = URL.createObjectURL(blob);
-    
-    link.setAttribute('href', url);
-    link.setAttribute('download', filename);
-    link.style.visibility = 'hidden';
-    
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-  }
-};
+  // Adding CSV utility functions
+  const csvUtils = {
+    processData(data) {
+      // Ensure data is an array
+      if (!Array.isArray(data)) {
+        data = [data];
+      }
 
+      // Process each query and its items
+      const processedRows = [];
+      
+      data.forEach(query => {
+        // Skip if no items array
+        if (!query.items || !Array.isArray(query.items)) return;
+        
+        // Process each item in the query
+        query.items.forEach(item => {
+          if (!item) return;
+          
+          processedRows.push({
+            'Query Name': query.name || '',
+            'Item Name': item.name || '',
+            'Expression': (item.attributes && item.attributes.expression) || '',
+            'Label': (item.attributes && item.attributes.label) || ''
+          });
+        });
+      });
+      
+      return processedRows;
+    },
+
+    convertToCSV(data) {
+      // First process the data into the correct format
+      const processedData = this.processData(data);
+      
+      if (!processedData.length) return '';
+      
+      // Define headers
+      const headers = ['Query Name', 'Item Name', 'Expression', 'Label'];
+      const csvRows = [];
+      
+      // Add headers
+      csvRows.push(headers.join(','));
+      
+      // Add data rows
+      processedData.forEach(row => {
+        const values = headers.map(header => {
+          let value = row[header] ?? '';
+          
+          // Convert to string and trim
+          const stringValue = String(value).trim();
+          
+          // Escape commas and quotes, wrap in quotes if needed
+          return stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')
+            ? `"${stringValue.replace(/"/g, '""')}"` 
+            : stringValue;
+        });
+        csvRows.push(values.join(','));
+      });
+      
+      return csvRows.join('\n');
+    },
+    
+    downloadCSV(csvContent, filename) {
+      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+      const link = document.createElement('a');
+      const url = URL.createObjectURL(blob);
+      
+      link.setAttribute('href', url);
+      link.setAttribute('download', filename);
+      link.style.visibility = 'hidden';
+      
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  };
   
   class ModalManager {
     
@@ -82,6 +112,7 @@ define(["jquery"], function ($) {
         alert('An error occurred while exporting to CSV. Please try again.');
       }
     }
+
 
     setupStyles() {
       if (!$("#modal-manager-styles").length) {
