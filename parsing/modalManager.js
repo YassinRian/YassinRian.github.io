@@ -1,5 +1,4 @@
 define(["jquery"], function ($) {
-  
   // Adding CSV utility functions
   const csvUtils = {
     processData(data) {
@@ -10,109 +9,108 @@ define(["jquery"], function ($) {
 
       // Process each query and its items
       const processedRows = [];
-      
-      data.forEach(query => {
+
+      data.forEach((query) => {
         // Skip if no items array
         if (!query.items || !Array.isArray(query.items)) return;
-        
+
         // Process each item in the query
-        query.items.forEach(item => {
+        query.items.forEach((item) => {
           if (!item) return;
-          
+
           processedRows.push({
-            'Query Name': query.name || '',
-            'Item Name': item.name || '',
-            'Expression': (item.attributes && item.attributes.expression) || '',
-            'Label': (item.attributes && item.attributes.label) || ''
+            "Query Name": query.name || "",
+            "Item Name": item.name || "",
+            Expression: (item.attributes && item.attributes.expression) || "",
+            Label: (item.attributes && item.attributes.label) || "",
           });
         });
       });
-      
+
       return processedRows;
     },
 
     convertToCSV(data) {
       // First process the data into the correct format
       const processedData = this.processData(data);
-      
-      if (!processedData.length) return '';
-      
+
+      if (!processedData.length) return "";
+
       // Define headers
-      const headers = ['Query Name', 'Item Name', 'Expression', 'Label'];
+      const headers = ["Query Name", "Item Name", "Expression", "Label"];
       const csvRows = [];
-      
+
       // Add headers
-      csvRows.push(headers.join(','));
-      
+      csvRows.push(headers.join("#*"));
+
       // Add data rows
-      processedData.forEach(row => {
-        const values = headers.map(header => {
-          let value = row[header] ?? '';
-          
+      processedData.forEach((row) => {
+        const values = headers.map((header) => {
+          let value = row[header] ?? "";
+
           // Convert to string and trim
           const stringValue = String(value).trim();
-          
+
           // Escape commas and quotes, wrap in quotes if needed
-          return stringValue.includes(',') || stringValue.includes('"') || stringValue.includes('\n')
-            ? `"${stringValue.replace(/"/g, '""')}"` 
+          return stringValue.includes(",") ||
+            stringValue.includes('"') ||
+            stringValue.includes("\n")
+            ? `"${stringValue.replace(/"/g, '""')}"`
             : stringValue;
         });
-        csvRows.push(values.join(','));
+        csvRows.push(values.join("#*"));
       });
-      
-      return csvRows.join('\n');
+
+      return csvRows.join("\n");
     },
-    
+
     downloadCSV(csvContent, filename) {
-      const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-      const link = document.createElement('a');
+      const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
+      const link = document.createElement("a");
       const url = URL.createObjectURL(blob);
-      
-      link.setAttribute('href', url);
-      link.setAttribute('download', filename);
-      link.style.visibility = 'hidden';
-      
+
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      link.style.visibility = "hidden";
+
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
-    }
+    },
   };
-  
+
   class ModalManager {
-    
     constructor(options = {}) {
       // Core modal properties
       this.modal = null;
       this.isVisible = false;
       this.tableRenderer = options.tableRenderer;
-      
+
       // Drag state properties
       this.dragState = {
         isDragging: false,
         startX: 0,
         startY: 0,
         initialX: 0,
-        initialY: 0
+        initialY: 0,
       };
 
       // Initialize styles
       this.setupStyles();
     }
 
-
     exportToCSV(data, type) {
       try {
         const csvContent = csvUtils.convertToCSV(data);
-        const timestamp = new Date().toISOString().replace(/[:.]/g, '-');
+        const timestamp = new Date().toISOString().replace(/[:.]/g, "-");
         const filename = `${type}_export_${timestamp}.csv`;
-        
+
         csvUtils.downloadCSV(csvContent, filename);
       } catch (error) {
-        console.error('Error exporting to CSV:', error);
-        alert('An error occurred while exporting to CSV. Please try again.');
+        console.error("Error exporting to CSV:", error);
+        alert("An error occurred while exporting to CSV. Please try again.");
       }
     }
-
 
     setupStyles() {
       if (!$("#modal-manager-styles").length) {
@@ -360,27 +358,27 @@ define(["jquery"], function ($) {
       $("body").append(this.modal);
     }
 
-  setupEventHandlers() {
+    setupEventHandlers() {
       const modalContent = this.modal.find(".modal-content");
-      
+
       // Setup all closing-related handlers
       this.setupCloseHandlers();
-      
+
       // Setup viewport constraints
       this.setupViewportConstraints(modalContent);
     }
-  
+
     setupCloseHandlers() {
       // Close button click
       this.modal.find(".modal-close").on("click", () => this.hide());
-  
+
       // Click outside modal
       this.modal.on("click", (e) => {
         if ($(e.target).is(this.modal)) {
           this.hide();
         }
       });
-  
+
       // Escape key
       $(document).on("keydown", (e) => {
         if (e.key === "Escape" && this.isVisible) {
@@ -388,13 +386,13 @@ define(["jquery"], function ($) {
         }
       });
     }
-  
+
     setupViewportConstraints(modalContent) {
       $(window).on("resize", () => {
         if (!this.isVisible) return;
-  
+
         const rect = modalContent[0].getBoundingClientRect();
-        
+
         // Keep modal within viewport bounds
         if (rect.right > window.innerWidth) {
           modalContent.css("left", `${window.innerWidth - rect.width - 20}px`);
@@ -404,12 +402,11 @@ define(["jquery"], function ($) {
         }
       });
     }
-  
+
     hide() {
       this.modal.fadeOut(200);
       this.isVisible = false;
     }
-
 
     show() {
       if (!this.modal) {
@@ -475,11 +472,11 @@ define(["jquery"], function ($) {
           data,
           "#tableContainer",
           type,
-          searchInput
+          searchInput,
         );
 
-      // Setup CSV export functionality
-       $('#exportCSV').on('click', () => this.exportToCSV(data, type));
+        // Setup CSV export functionality
+        $("#exportCSV").on("click", () => this.exportToCSV(data, type));
       }
     }
   } // ModalManager
