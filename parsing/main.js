@@ -2,11 +2,12 @@ define([
   "jquery",
   "https://yassinrian.github.io/parsing/xmlParser.js",
   "https://yassinrian.github.io/parsing/tableRenderer.js",
+  "https://yassinrian.github.io/parsing/csvUtitlity.js",
   "https://yassinrian.github.io/parsing/tableStyles.js",
   "https://yassinrian.github.io/parsing/buttonMarkup.js",
   "https://yassinrian.github.io/parsing/sortedXml.js",
   "https://yassinrian.github.io/parsing/modalManager.js",
-], function ($, xmlParser, tableRenderer, _, buttons, sortedXml, moduleModalManager) {
+], function ($, xmlParser, tableRenderer, csvUtitlity, _, buttons, sortedXml, moduleModalManager) {
  
   class App {
     constructor() {
@@ -35,7 +36,8 @@ define([
       this.modal = new moduleModalManager.ModalManager({
         draggable: true,
         resizable: true,
-        tableRenderer
+        tableRenderer,
+        csvUtitlity
       });
 
       // Add UI elements
