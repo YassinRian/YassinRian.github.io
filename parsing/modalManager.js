@@ -384,7 +384,7 @@ define(["jquery"], function ($) {
         );
 
         // Setup CSV export functionality
-        $("#exportCSV").on("click", () => this.exportToCSV(data, type, this.separator));
+        $("#exportCSV").on("click", () => this.csvUtitlity.exportToCSV(data, type, this.csvUtitlity.separator));
       }
     }
   } // ModalManager
