@@ -1,7 +1,7 @@
 define([
   "jquery",
-  "https://yassinrian.github.io/parsing/searchTable.js",
-  "https://yassinrian.github.io/parsing/popUpManager.js",
+  "https://yassinrian.netlify.app/parsing/searchTable.js",
+  "https://yassinrian.netlify.app/parsing/popUpManager.js",
 ], function ($, searchTable, PopupManager) {
   
   class TableRenderer {

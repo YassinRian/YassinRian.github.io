@@ -1,12 +1,12 @@
 define([
   "jquery",
-  "https://yassinrian.github.io/parsing/xmlParser.js",
-  "https://yassinrian.github.io/parsing/tableRenderer.js",
-  "https://yassinrian.github.io/parsing/csvUtitlity.js",
-  "https://yassinrian.github.io/parsing/tableStyles.js",
-  "https://yassinrian.github.io/parsing/buttonMarkup.js",
-  "https://yassinrian.github.io/parsing/sortedXml.js",
-  "https://yassinrian.github.io/parsing/modalManager.js",
+  "https://yassinrian.netlify.app/parsing/xmlParser.js",
+  "https://yassinrian.netlify.app/parsing/tableRenderer.js",
+  "https://yassinrian.netlify.app/parsing/csvUtitlity.js",
+  "https://yassinrian.netlify.app/parsing/tableStyles.js",
+  "https://yassinrian.netlify.app/parsing/buttonMarkup.js",
+  "https://yassinrian.netlify.app/parsing/sortedXml.js",
+  "https://yassinrian.netlify.app/parsing/modalManager.js",
 ], function ($, xmlParser, tableRenderer, csvUtitlity, _, buttons, sortedXml, moduleModalManager) {
  
   class App {
