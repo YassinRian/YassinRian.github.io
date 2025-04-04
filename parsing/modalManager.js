@@ -41,7 +41,7 @@ define(["jquery"], function ($) {
       const csvRows = [];
 
       // Add headers
-      csvRows.push(headers.join("#*"));
+      csvRows.push(headers.join(","));
 
       // Add data rows
       processedData.forEach((row) => {
@@ -58,7 +58,7 @@ define(["jquery"], function ($) {
             ? `"${stringValue.replace(/"/g, '""')}"`
             : stringValue;
         });
-        csvRows.push(values.join("#*"));
+        csvRows.push(values.join(","));
       });
 
       return csvRows.join("\n");
