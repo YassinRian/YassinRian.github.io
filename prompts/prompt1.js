@@ -5,16 +5,13 @@ define([
   "use strict";
 
   class App {
-    constructor() {
-      this.data = null;
-      this.input_func = html_func_.input_func;
-      this.wis_selecties = html_func_.wis_selecties;
-      this.filter_lijst = html_func_.filter_lijst;
-    }
+    constructor() {}
 
-    setData(oDataStore) {
-      this.data = oDataStore.control.dataStores[0].json;
-      console.log(oDataStore);
+    draw(oControlHost) {
+      let elm = oControlHost.container;
+      $(elm).append(`<h1>Yassin Rian</h1>`);
     }
   }
+
+  return App;
 });
