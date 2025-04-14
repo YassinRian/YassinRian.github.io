@@ -7,6 +7,10 @@ define([
   class App {
     constructor() {}
 
+    setData(oDataStore) {
+      console.log(oDataStore);
+    }
+
     draw(oControlHost) {
       let elm = oControlHost.container;
       $(elm).append(`<h1>Yassin Rian</h1>`);
