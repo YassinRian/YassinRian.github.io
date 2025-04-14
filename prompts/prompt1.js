@@ -17,7 +17,12 @@ define([
     }
 
     getParameters(oControlHost) {
-      console.log(oControlHost);
+      return [
+        {
+          parameter: "p_cluster",
+          values: [{ use: "J10 Veilig" }],
+        },
+      ];
     }
   }
 
