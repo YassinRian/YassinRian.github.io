@@ -8,13 +8,12 @@ define([
     constructor() {}
 
     setData(oDataStore) {
-      // console.log(oDataStore);
+      console.log(oDataStore);
     }
 
     draw(oControlHost) {
       let elm = oControlHost.container;
       $(elm).append(`<h1>Yassin Rian</h1>`);
-      console.log(oPage);
     }
 
     getParameters(oControlHost) {
