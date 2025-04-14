@@ -16,8 +16,8 @@ define([
       $(elm).append(`<h1>Yassin Rian</h1>`);
     }
 
-    getParameter(sParameter) {
-      console.log(sParameter);
+    getParameters(oControlHost) {
+      console.log(oControlHost);
     }
   }
 
