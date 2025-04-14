@@ -15,6 +15,10 @@ define([
       let elm = oControlHost.container;
       $(elm).append(`<h1>Yassin Rian</h1>`);
     }
+
+    getParameter(sParameter) {
+      console.log(sParameter);
+    }
   }
 
   return App;
