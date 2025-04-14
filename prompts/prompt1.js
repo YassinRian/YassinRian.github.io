@@ -8,7 +8,7 @@ define([
     constructor() {}
 
     setData(oDataStore) {
-      console.log(oDataStore);
+      // console.log(oDataStore);
     }
 
     draw(oControlHost) {
