@@ -15,7 +15,7 @@ define([
     draw(oControlHost) {
       let elm = oControlHost.container;
       $(elm).append(`<h1>Yassin Rian</h1>`);
-      let oControl = oControlHost.page.getControlByName("prmt_clusters");
+      let oControl = oControlHost.page.getControlByName("prmt_clusters").element;
       let selectElement = oControl.querySelector("select");
       if (selectElement && selectElement.options.length >=2) {
         selectElement.remove(0);
