@@ -7,8 +7,8 @@ define([
   class App {
     constructor() {}
 
-    setData(oDataStore) {
-      console.log(oDataStore);
+    setData(store) {
+      console.log(store);
     }
 
     draw(oControlHost) {
