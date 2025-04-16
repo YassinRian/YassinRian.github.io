@@ -14,8 +14,9 @@ define([
     draw(oControlHost) {
       let elm = oControlHost.container;
       $(elm).append(`<h1>Yassin Rian</h1>`);
-      console.log(oControlHost)
+      console.log(oControlHost.page.pageModuleInstance)
     }
+
   }
 
   return App;
