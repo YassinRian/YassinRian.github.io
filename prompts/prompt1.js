@@ -14,7 +14,8 @@ define([
     draw(oControlHost) {
       let elm = oControlHost.container;
       $(elm).append(`<h1>Yassin Rian</h1>`);
-      console.log(oControlHost.page.pageModuleInstance)
+      let oControl = oControlHost.page.getControlByName("prmt_clusters");
+      console.log(oControl);
     }
 
   }
