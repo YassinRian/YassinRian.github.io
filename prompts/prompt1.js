@@ -8,7 +8,8 @@ define([
     constructor() {}
 
     setData(store) {
-      console.log(store);
+      let func_ = store.page.application.rsLaunchParameters
+      console.log(func_.GetTemplate());
     }
 
     draw(oControlHost) {
