@@ -6,16 +6,14 @@ define([
   class App {
     constructor() {}
 
-    initialize( oControlHost, fnDoneInitializing )
-    {
-      let oControl = oControlHost.page.getControlByName("prmt_clusters").element;
+
+    draw(yassinsControl) {
+      let oControl = yassinsControl.page.getControlByName("prmt_clusters").element;
       let selectElement = oControl.querySelector("select");
       if (selectElement && selectElement.options.length >=2) {
         selectElement.remove(0);
         selectElement.remove(0);
       }
-
-	    fnDoneInitializing();
     }
 
   }
