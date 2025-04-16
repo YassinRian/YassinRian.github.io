@@ -14,15 +14,7 @@ define([
     draw(oControlHost) {
       let elm = oControlHost.container;
       $(elm).append(`<h1>Yassin Rian</h1>`);
-    }
-
-    getParameters(oControlHost) {
-      return [
-        {
-          parameter: "p_cluster",
-          values: [{ use: "J10 Veilig" }],
-        },
-      ];
+      console.log(oControlHost)
     }
   }
 
