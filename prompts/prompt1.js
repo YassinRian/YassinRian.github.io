@@ -6,53 +6,24 @@ define([
   class App {
     constructor() {
       this.promptElement = null;
+      this.container = null;
     }
 
     initialize(oControlHost, fnDoneInitializing) {
-      try {
-        const control = oControlHost.page.getControlByName("prmt_clusters");
-        if (!control) {
-          console.error("Control 'prmt_clusters' not found");
-          this.promptElement = null;
-        } else {
+      const control = oControlHost.page.getControlByName("prmt_clusters");
+      if (control && control.element) {
+        if (control.element.tagName === 'SELECT') {
           this.promptElement = control.element;
-          
-          // Check if this.promptElement is a select element or contains one
-          if (this.promptElement) {
-            if (this.promptElement.tagName !== 'SELECT') {
-              // Try to find a select element inside
-              const selectEl = this.promptElement.querySelector('select');
-              if (selectEl) {
-                this.promptElement = selectEl;
-              } else {
-                console.error("No SELECT element found within control");
-              }
-            }
-          } else {
-            console.error("Control element is null or undefined");
-          }
+        } else {
+          this.promptElement = control.element.querySelector('select');
         }
-        
-        this.container = oControlHost.container;
-      } catch (error) {
-        console.error("Error during initialization:", error);
-        this.promptElement = null;
       }
-      
+      this.container = oControlHost.container;
       fnDoneInitializing();
     }
 
     draw(oControlHost) {
-      // Make sure we have the prompt element and it has options
-      if (!this.promptElement) {
-        console.error("Prompt element was not initialized properly");
-        return;
-      }
-      
-      if (!this.promptElement.options) {
-        console.error("Prompt element does not have options property. Element:", this.promptElement);
-        return;
-      }
+      if (!this.promptElement) return;
       
       // Remove first two options if needed
       if (this.promptElement.options.length >= 2) {
@@ -60,27 +31,10 @@ define([
         this.promptElement.remove(0);
       }
       
-      // Store the original select element's options safely
-      let originalOptions = [];
-      try {
-        originalOptions = Array.from(this.promptElement.options || []);
-      } catch (error) {
-        console.error("Error converting options to array:", error);
-        originalOptions = [];
-        
-        // Fallback: try to manually extract options
-        if (this.promptElement.options) {
-          for (let i = 0; i < this.promptElement.options.length; i++) {
-            originalOptions.push(this.promptElement.options[i]);
-          }
-        }
-      }
+      // Store options
+      const originalOptions = Array.from(this.promptElement.options || []);
       
-      if (originalOptions.length === 0) {
-        console.warn("No options found in the select element");
-      }
-      
-      // Create a container for our custom dropdown
+      // Create container for custom dropdown
       const customDropdownContainer = document.createElement('div');
       customDropdownContainer.className = 'custom-select-container';
       customDropdownContainer.style.position = 'relative';
@@ -112,18 +66,16 @@ define([
       dropdownList.style.borderRadius = '0 0 4px 4px';
       dropdownList.style.boxShadow = '0 2px 5px rgba(0,0,0,0.1)';
       
-      // Add elements to the custom container
+      // Add elements to container
       customDropdownContainer.appendChild(searchInput);
       customDropdownContainer.appendChild(dropdownList);
-      
-      // Append to container
       this.container.appendChild(customDropdownContainer);
       
-      // Populate dropdown with options from select
+      // Populate dropdown
       this.populateDropdown(dropdownList, this.promptElement, '', originalOptions);
       
       // Set initial input value if an option is selected
-      if (this.promptElement.selectedIndex > -1 && this.promptElement.options.length > 0) {
+      if (this.promptElement.selectedIndex > -1) {
         searchInput.value = this.promptElement.options[this.promptElement.selectedIndex].text;
       }
       
@@ -133,7 +85,6 @@ define([
       });
       
       searchInput.addEventListener('blur', () => {
-        // Delay hiding to allow for option clicking
         setTimeout(() => {
           dropdownList.style.display = 'none';
         }, 200);
@@ -148,33 +99,19 @@ define([
       // Clear current options
       dropdownList.innerHTML = '';
       
-      if (!options || options.length === 0) {
-        const noOptions = document.createElement('div');
-        noOptions.className = 'select-no-options';
-        noOptions.textContent = 'No options available';
-        noOptions.style.padding = '8px';
-        noOptions.style.color = '#999';
-        noOptions.style.fontStyle = 'italic';
-        dropdownList.appendChild(noOptions);
-        return;
-      }
-      
       // Filter options based on search text
       const filteredOptions = options.filter(option => 
-        option && option.text && option.text.toLowerCase().includes(searchText.toLowerCase())
+        option.text.toLowerCase().includes(searchText.toLowerCase())
       );
       
       // Add filtered options to dropdown
       filteredOptions.forEach(option => {
         const item = document.createElement('div');
         item.className = 'select-item';
-        item.textContent = option.text || '';
+        item.textContent = option.text;
         item.style.padding = '8px';
         item.style.cursor = 'pointer';
-        
-        if (option.value) {
-          item.setAttribute('data-value', option.value);
-        }
+        item.setAttribute('data-value', option.value);
         
         // Highlight selected option
         if (option.selected) {
@@ -195,24 +132,16 @@ define([
         });
         
         item.addEventListener('click', () => {
-          // Update original select (safely)
-          if (selectElement && selectElement.value !== undefined) {
-            selectElement.value = option.value;
-            
-            // Trigger change event on select
-            try {
-              const event = new Event('change', { bubbles: true });
-              selectElement.dispatchEvent(event);
-            } catch (error) {
-              console.error("Error dispatching change event:", error);
-            }
-          }
+          // Update original select
+          selectElement.value = option.value;
+          
+          // Trigger change event
+          const event = new Event('change', { bubbles: true });
+          selectElement.dispatchEvent(event);
           
           // Update input value
           const input = dropdownList.previousSibling;
-          if (input) {
-            input.value = option.text || '';
-          }
+          input.value = option.text;
           
           // Close dropdown
           dropdownList.style.display = 'none';
