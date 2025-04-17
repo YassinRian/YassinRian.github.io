@@ -22,6 +22,10 @@ define([
       fnDoneInitializing();
     }
 
+    getParaMeters(parameters) {
+      console.log(parameters)
+    }
+
     draw(oControlHost) {
       if (!this.promptElement) return;
       
