@@ -11,6 +11,7 @@ define([
 
     initialize(oControlHost, fnDoneInitializing) {
       const control = oControlHost.page.getControlByName("prmt_clusters");
+      console.log(control)
       if (control && control.element) {
         if (control.element.tagName === 'SELECT') {
           this.promptElement = control.element;
@@ -22,13 +23,8 @@ define([
       fnDoneInitializing();
     }
 
-    getParaMeters(parameters) {
-      console.log(parameters)
-    }
-
 
     draw(oControlHost) {
-      console.log(oControlHost)
       if (!this.promptElement) return;
       
       // Remove first two options if needed
