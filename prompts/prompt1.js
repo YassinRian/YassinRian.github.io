@@ -10,17 +10,21 @@ define([
 
     initialize(oControlHost, fnDoneInitializing) {
       this.promptElement = oControlHost.page.getControlByName("prmt_clusters").element;
+      this.container = oControlHost.container;
       fnDoneInitializing();
     }
 
     draw(oControlHost) {
-      let promptElement = this.promptElement;
-      let container = oControlHost.container; // this is the div container
+      // Make sure we have the prompt element
+      if (!this.promptElement) {
+        console.error("Prompt element was not initialized properly");
+        return;
+      }
       
-      // First remove the first two options from the original select if needed
-      if (promptElement && promptElement.options && promptElement.options.length >= 2) {
-        promptElement.remove(0);
-        promptElement.remove(0);
+      // Remove first two options if needed
+      if (this.promptElement.options && this.promptElement.options.length >= 2) {
+        this.promptElement.remove(0);
+        this.promptElement.remove(0);
       }
       
       // Create a container for our custom dropdown
@@ -59,18 +63,18 @@ define([
       customDropdownContainer.appendChild(searchInput);
       customDropdownContainer.appendChild(dropdownList);
       
-      // Append to oControlHost.container
-      container.appendChild(customDropdownContainer);
+      // Append to container
+      this.container.appendChild(customDropdownContainer);
       
       // Store the original select element's options
-      const originalOptions = Array.from(promptElement.options);
+      const originalOptions = Array.from(this.promptElement.options);
       
       // Populate dropdown with options from select
-      this.populateDropdown(dropdownList, promptElement, '', originalOptions);
+      this.populateDropdown(dropdownList, this.promptElement, '', originalOptions);
       
       // Set initial input value if an option is selected
-      if (promptElement.selectedIndex > -1) {
-        searchInput.value = promptElement.options[promptElement.selectedIndex].text;
+      if (this.promptElement.selectedIndex > -1) {
+        searchInput.value = this.promptElement.options[this.promptElement.selectedIndex].text;
       }
       
       // Event handlers
@@ -86,7 +90,7 @@ define([
       });
       
       searchInput.addEventListener('input', () => {
-        this.populateDropdown(dropdownList, promptElement, searchInput.value, originalOptions);
+        this.populateDropdown(dropdownList, this.promptElement, searchInput.value, originalOptions);
       });
     }
     
