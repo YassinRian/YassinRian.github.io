@@ -9,22 +9,75 @@ define([
     }
 
     initialize(oControlHost, fnDoneInitializing) {
-      this.promptElement = oControlHost.page.getControlByName("prmt_clusters").element;
-      this.container = oControlHost.container;
+      try {
+        const control = oControlHost.page.getControlByName("prmt_clusters");
+        if (!control) {
+          console.error("Control 'prmt_clusters' not found");
+          this.promptElement = null;
+        } else {
+          this.promptElement = control.element;
+          
+          // Check if this.promptElement is a select element or contains one
+          if (this.promptElement) {
+            if (this.promptElement.tagName !== 'SELECT') {
+              // Try to find a select element inside
+              const selectEl = this.promptElement.querySelector('select');
+              if (selectEl) {
+                this.promptElement = selectEl;
+              } else {
+                console.error("No SELECT element found within control");
+              }
+            }
+          } else {
+            console.error("Control element is null or undefined");
+          }
+        }
+        
+        this.container = oControlHost.container;
+      } catch (error) {
+        console.error("Error during initialization:", error);
+        this.promptElement = null;
+      }
+      
       fnDoneInitializing();
     }
 
     draw(oControlHost) {
-      // Make sure we have the prompt element
+      // Make sure we have the prompt element and it has options
       if (!this.promptElement) {
         console.error("Prompt element was not initialized properly");
         return;
       }
       
+      if (!this.promptElement.options) {
+        console.error("Prompt element does not have options property. Element:", this.promptElement);
+        return;
+      }
+      
       // Remove first two options if needed
-      if (this.promptElement.options && this.promptElement.options.length >= 2) {
+      if (this.promptElement.options.length >= 2) {
         this.promptElement.remove(0);
         this.promptElement.remove(0);
+      }
+      
+      // Store the original select element's options safely
+      let originalOptions = [];
+      try {
+        originalOptions = Array.from(this.promptElement.options || []);
+      } catch (error) {
+        console.error("Error converting options to array:", error);
+        originalOptions = [];
+        
+        // Fallback: try to manually extract options
+        if (this.promptElement.options) {
+          for (let i = 0; i < this.promptElement.options.length; i++) {
+            originalOptions.push(this.promptElement.options[i]);
+          }
+        }
+      }
+      
+      if (originalOptions.length === 0) {
+        console.warn("No options found in the select element");
       }
       
       // Create a container for our custom dropdown
@@ -66,14 +119,11 @@ define([
       // Append to container
       this.container.appendChild(customDropdownContainer);
       
-      // Store the original select element's options
-      const originalOptions = Array.from(this.promptElement.options);
-      
       // Populate dropdown with options from select
       this.populateDropdown(dropdownList, this.promptElement, '', originalOptions);
       
       // Set initial input value if an option is selected
-      if (this.promptElement.selectedIndex > -1) {
+      if (this.promptElement.selectedIndex > -1 && this.promptElement.options.length > 0) {
         searchInput.value = this.promptElement.options[this.promptElement.selectedIndex].text;
       }
       
@@ -98,19 +148,33 @@ define([
       // Clear current options
       dropdownList.innerHTML = '';
       
+      if (!options || options.length === 0) {
+        const noOptions = document.createElement('div');
+        noOptions.className = 'select-no-options';
+        noOptions.textContent = 'No options available';
+        noOptions.style.padding = '8px';
+        noOptions.style.color = '#999';
+        noOptions.style.fontStyle = 'italic';
+        dropdownList.appendChild(noOptions);
+        return;
+      }
+      
       // Filter options based on search text
       const filteredOptions = options.filter(option => 
-        option.text.toLowerCase().includes(searchText.toLowerCase())
+        option && option.text && option.text.toLowerCase().includes(searchText.toLowerCase())
       );
       
       // Add filtered options to dropdown
       filteredOptions.forEach(option => {
         const item = document.createElement('div');
         item.className = 'select-item';
-        item.textContent = option.text;
+        item.textContent = option.text || '';
         item.style.padding = '8px';
         item.style.cursor = 'pointer';
-        item.setAttribute('data-value', option.value);
+        
+        if (option.value) {
+          item.setAttribute('data-value', option.value);
+        }
         
         // Highlight selected option
         if (option.selected) {
@@ -131,16 +195,24 @@ define([
         });
         
         item.addEventListener('click', () => {
-          // Update original select
-          selectElement.value = option.value;
-          
-          // Trigger change event on select
-          const event = new Event('change', { bubbles: true });
-          selectElement.dispatchEvent(event);
+          // Update original select (safely)
+          if (selectElement && selectElement.value !== undefined) {
+            selectElement.value = option.value;
+            
+            // Trigger change event on select
+            try {
+              const event = new Event('change', { bubbles: true });
+              selectElement.dispatchEvent(event);
+            } catch (error) {
+              console.error("Error dispatching change event:", error);
+            }
+          }
           
           // Update input value
           const input = dropdownList.previousSibling;
-          input.value = option.text;
+          if (input) {
+            input.value = option.text || '';
+          }
           
           // Close dropdown
           dropdownList.style.display = 'none';
