@@ -4,10 +4,17 @@ define([
   "use strict";
 
   class App {
-    constructor() {}
+    constructor() {
+      this.promptElement = null;
+    }
+
+    initialize(oControlHost, fnDoneInitializing) {
+      this.promptElement = oControlHost.page.getControlByName("prmt_clusters").element;
+      fnDoneInitializing();
+    }
 
     draw(oControlHost) {
-      let promptElement = oControlHost.page.getControlByName("prmt_clusters").element; // this is the select element
+      let promptElement = this.promptElement;
       let container = oControlHost.container; // this is the div container
       
       // First remove the first two options from the original select if needed
