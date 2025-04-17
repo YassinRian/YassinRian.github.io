@@ -7,7 +7,7 @@ define([
     constructor() {}
 
     draw(oControlHost) {
-      let promptElement = oControlHost.page.getControlByName("prmt_cluster").element; // this is the select element
+      let promptElement = oControlHost.page.getControlByName("prmt_clusters").element; // this is the select element
       let container = oControlHost.container; // this is the div container
       
       // First remove the first two options from the original select if needed
