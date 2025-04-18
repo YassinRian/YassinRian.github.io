@@ -28,6 +28,8 @@ define([
 
       console.log(oControlHost.page.application.GetParameterValues());
 
+      console.log(oControlHost.page.application.SetParameterValues({use: 'C10 Stadsbeheer', type: 'simpleParmValueItem', inclusive: true, display: 'C10 Stadsbeheer'}))
+
     }
 
   }
