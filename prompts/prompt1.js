@@ -25,6 +25,7 @@ define([
 
 
     draw(oControlHost) {
+      console.log(oControlHost)
       if (!this.promptElement) return;
       
       // Remove first two options if needed
