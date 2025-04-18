@@ -26,7 +26,7 @@ define([
 
     draw(oControlHost) {
 
-      console.log(oControlHost.page.application.GetParameterValues());
+      console.log(oControlHost.page.application.rsLaunchParameters);
 
     }
 
