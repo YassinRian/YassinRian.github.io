@@ -26,8 +26,6 @@ define([
 
     draw(oControlHost) {
 
-      console.log(oControlHost.page.application.SetParameterValues("bla"));
-
       console.log(oControlHost.page.application.GetParameterValues());
 
     }
