@@ -1,4 +1,9 @@
-define(["jquery", "./UI", "./Extractor", "./Styles"], function ($, UI, Extractor, Styles) {
+define([
+"jquery",
+"https://yassinrian.netlify.app/framework_xml_extractie/js/UI.js",
+"https://yassinrian.netlify.app/framework_xml_extractie/js/Extractor.js",
+"https://yassinrian.netlify.app/framework_xml_extractie/js/Styles.js"
+], function ($, UI, Extractor, Styles) {
         "use strict";
 
         class App {
