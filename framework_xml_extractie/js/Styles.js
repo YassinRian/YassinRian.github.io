@@ -1,7 +1,7 @@
 define([], function () {
-    "use strict";
+  "use strict";
 
-    const css = `
+  const css = `
 
     .cognos-extractor-wrapper {
         font-family: 'Segoe UI', Tahoma, sans-serif;
@@ -72,18 +72,112 @@ define([], function () {
 .match-4 { background-color: #e2e3e5; color: #383d41; border: 1px solid #d6d8db; } /* Grey */
 
 
-    `;                          /*einde CSS*/
+.card {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    margin-bottom: 25px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    overflow: hidden;
+}
+
+.card-header {
+    background: #f8f9fa;
+    padding: 10px 15px;
+    border-bottom: 1px solid #eee;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.column-badge {
+    display: inline-block;
+    background: #e9ecef;
+    color: #495057;
+    padding: 4px 10px;
+    margin: 3px;
+    border-radius: 4px;
+    font-size: 11px;
+    font-family: sans-serif;
+    border: 1px solid #dee2e6;
+}
+
+.sql-block {
+    background: #1e1e1e;
+    color: #d4d4d4;
+    padding: 15px;
+    margin: 0;
+    font-family: 'Consolas', monospace;
+    font-size: 12px;
+    white-space: pre-wrap;
+    overflow-x: auto;
+    tab-size: 4;
+    line-height: 1.5;
+
+}
+
+.toggle-view {
+    padding: 4px 10px;
+    font-size: 11px;
+    cursor: pointer;
+    border: 1px solid #ccc;
+    background: white;
+}
+
+.toggle-view.active {
+    background: #005fb8;
+    color: white;
+    border-color: #005fb8;
+}
 
 
-    return {
-        inject: function () {
-            const id = "cognos-extractor-styles";
-            if (!document.getElementById(id)) { /*als die niet bestaat dan maken we het aan in de Head van de pagina*/
-                const style = document.createElement('style');
-                style.id = id;
-                style.innerHTML = css;
-                document.head.appendChild(style);
-            }
-        }
-    };
+.sql-container {
+    position: relative;
+    width: 100%;
+}
+
+.copy-sql-btn {
+    position: absolute;
+    top: 10px;
+    right: 15px;
+    padding: 6px 12px;
+    background: #444;
+    color: #efefef;
+    border: 1px solid #666;
+    border-radius: 4px;
+    font-size: 11px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    z-index: 10;
+}
+
+.copy-sql-btn:hover {
+    background: #555;
+    border-color: #888;
+}
+
+.copy-sql-btn.success {
+    background: #28a745;
+    border-color: #28a745;
+    color: white;
+}
+
+
+
+
+    `; /*einde CSS*/
+
+  return {
+    inject: function () {
+      const id = "cognos-extractor-styles";
+      if (!document.getElementById(id)) {
+        /*als die niet bestaat dan maken we het aan in de Head van de pagina*/
+        const style = document.createElement("style");
+        style.id = id;
+        style.innerHTML = css;
+        document.head.appendChild(style);
+      }
+    },
+  };
 });

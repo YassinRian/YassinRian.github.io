@@ -22,7 +22,13 @@ define([], function() {
 
                 // Generic query method for snapshots
                 query(xpath, context = this.xmlDoc) {
-                        const res = this.xmlDoc.evaluate(xpath, context, null, XPathResult.ORDERED_NODE_SNAPSHOT_TYPE, null);
+                        const res = this.xmlDoc.evaluate(
+                                xpath,
+                                context,
+                                null,
+                                XPathResult.ORDERED_NODE_SNAPSHOT_TYPE,
+                                null,
+                        );
                         let nodes = [];
                         for (let i = 0; i < res.snapshotLength; i++) {
                                 nodes.push(res.snapshotItem(i));
@@ -35,44 +41,71 @@ define([], function() {
                  * @param {string} layerName - e.g., 'Datalaag', 'Modellaag'
                  */
 
-                getLayerData(layerName) {
-                        const ln = this.ln;
-                        const scopePath = `//*[local-name()='namespace'][${ln('name')}='${layerName}']`;
-                        const scopeNode = this.xmlDoc.evaluate(scopePath, this.xmlDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 
-                        if (!scopeNode) return [];
+getLayerData(layerName) {
+    const ln = this.ln;
+    // 1. Zoek de namespace (bijv. 'Modellaag')
+    const scopePath = `//*[local-name()='namespace'][${ln('name')}='${layerName}']`;
+    const scopeNode = this.xmlDoc.evaluate(scopePath, this.xmlDoc, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
 
-                        // We gebruiken weer de 'descendant' search (//) want die vindt ALTIJD de subjects
-                        return this.query(`.//${ln('querySubject')}`, scopeNode).map(qs => {
-                                const nameNode = this.xmlDoc.evaluate(`./${ln('name')}`, qs, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                                const sqlNode = this.xmlDoc.evaluate(`.//${ln('sql')}`, qs, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                                const columnNodes = this.query(`.//${ln('queryItem')}/${ln('name')}`, qs);
+    if (!scopeNode) {
+        console.error("Namespace niet gevonden:", layerName);
+        return [];
+    }
 
-                                // --- DE NIEUWE CLIMB LOGIC ---
-                                let folderName = "";
-                                let parent = qs.parentNode;
+    // 2. Vind alle querySubjects binnen deze namespace, hoe diep ze ook zitten
+    const subjects = this.query(`.//${ln('querySubject')}`, scopeNode);
+    console.log(`Found ${subjects.length} subjects in ${layerName}`);
 
-                                // Klim omhoog vanaf de tabel naar de laag-root
-                                while (parent && parent !== scopeNode) {
-                                        if (parent.localName === 'folder') {
-                                                const fNameNode = this.xmlDoc.evaluate(`./${ln('name')}`, parent, null, XPathResult.FIRST_ORDERED_NODE_TYPE, null).singleNodeValue;
-                                                if (fNameNode) {
-                                                        folderName = fNameNode.textContent.trim();
-                                                        break; // Pak de dichtstbijzijnde folder
-                                                }
-                                        }
-                                        parent = parent.parentNode;
-                                }
+    return subjects.map(qs => {
+        // Naam van de tabel/subject
+        const name = this.xmlDoc.evaluate(`./${ln('name')}`, qs, null, XPathResult.STRING_TYPE, null).stringValue;
 
-                                return {
-                                        name: nameNode ? nameNode.textContent : "Onbekend",
-                                        folder: folderName,
-                                        sql: sqlNode ? sqlNode.textContent.trim() : "Geen SQL gevonden",
-                                        columns: columnNodes.map(n => n.textContent),
-                                        layer: (layerName === 'Datalaag' ? 'Data' : 'Model')
-                                };
-                        });
+        // 3. Lineage/Kolom extractie
+        const columnNodes = this.query(`.//${ln('queryItem')}`, qs);
+        const columns = columnNodes.map(item => {
+            const colName = this.xmlDoc.evaluate(`./${ln('name')}`, item, null, XPathResult.STRING_TYPE, null).stringValue;
+            // Haal alle refobj paden op voor de lineage
+            const refObjs = this.query(`.//${ln('refobj')}`, item).map(r => r.textContent);
+
+            return {
+                name: colName,
+                lineage: refObjs
+            };
+        });
+
+        // 4. Folder Zoeken (Klim omhoog)
+        let folderName = "Root";
+        let parent = qs.parentNode;
+        while (parent && parent !== scopeNode) {
+            if (parent.localName === 'folder') {
+                const fName = this.xmlDoc.evaluate(`./${ln('name')}`, parent, null, XPathResult.STRING_TYPE, null).stringValue;
+                if (fName) {
+                    folderName = fName;
+                    break;
                 }
+            }
+            parent = parent.parentNode;
+        }
+
+        // 5. SQL Extractie (Bestand alleen in de Datalaag)
+        const sql = this.xmlDoc.evaluate(`.//${ln('sql')}`, qs, null, XPathResult.STRING_TYPE, null).stringValue.trim();
+
+        return {
+            name,
+            folder: folderName,
+            sql,
+            columns,
+            layer: layerName // Wordt later in App.js overschreven naar 'Data'/'Model'
+        };
+    });
+}
+
+
+
+
+
+        // eind class
 
         }
 
