@@ -1,9 +1,9 @@
-define([
-  "jquery",
-  "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.js",
-  "https://yassinrian.netlify.app/framework_xml_extractie/js/Extractor.js",
-  "https://yassinrian.netlify.app/framework_xml_extractie/js/Styles.js",
-], function ($, UI, Extractor, Styles) {
+define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.js", "https://yassinrian.netlify.app/framework_xml_extractie/js/Extractor.js", "https://yassinrian.netlify.app/framework_xml_extractie/js/Styles.js"], function (
+  $,
+  UI,
+  Extractor,
+  Styles,
+) {
   "use strict";
 
   class App {
@@ -46,8 +46,6 @@ define([
         const $clickedTab = $(e.currentTarget);
         const newLayer = $clickedTab.attr("data-layer");
 
-        console.log("Tab clicked! Target layer:", newLayer); // Dit MOET nu verschijnen
-
         // UI Update
         $container.find(".layer-tab").removeClass("active");
         $clickedTab.addClass("active");
@@ -74,30 +72,50 @@ define([
         }
       });
 
-      // Add this inside your draw method or wherever you bind events
-      $(oControlHost.container).on("click", ".copy-sql-btn", function () {
-        const $btn = $(this);
-        // Pak de tekst van de 'pre' tag die direct na de button komt
-        const $sqlBlock = $btn.siblings(".sql-block");
-        const textToCopy = $sqlBlock.text();
+      $(oControlHost.container).on("click", ".copy-sql-btn", function(e) {
+        // Voorkom dat de toggle (click op de container) ook afgaat!
+        e.stopPropagation(); 
 
-        navigator.clipboard
-          .writeText(textToCopy)
-          .then(() => {
-            // Visuele feedback
+        const $btn = $(this);
+        
+        // We zoeken nu de .clean-version binnen de .sql-container die naast de button staat
+        const $container = $btn.siblings(".sql-container");
+        const textToCopy = $container.find(".clean-version").text();
+
+        navigator.clipboard.writeText(textToCopy).then(() => {
             const originalText = $btn.text();
             $btn.addClass("success").text("Copied!");
-
-            // Na 2 seconden terug naar normaal
+            
             setTimeout(() => {
-              $btn.removeClass("success").text(originalText);
+                $btn.removeClass("success").text(originalText);
             }, 2000);
-          })
-          .catch((err) => {
+        }).catch(err => {
             console.error("Copy failed", err);
             $btn.text("Error!");
-          });
+        });
+    });
+
+
+      $(oControlHost.container).on("click", ".clickable-sql", function() {
+          const $container = $(this);
+          const state = $container.attr("data-highlight");
+
+          if (state === "on") {
+              // Schakel highlight UIT
+              $container.find(".highlighted-version").hide();
+              $container.find(".clean-version").show();
+              $container.attr("data-highlight", "off");
+              $container.css("opacity", "0.9"); // Subtiele visuele hint
+          } else {
+              // Schakel highlight AAN
+              $container.find(".clean-version").hide();
+              $container.find(".highlighted-version").show();
+              $container.attr("data-highlight", "on");
+              $container.css("opacity", "1");
+          }
       });
+
+
     }
 
     handleSearch(term = "") {
@@ -188,7 +206,6 @@ define([
             layer: "Model",
           }));
 
-        console.log("Model Layer found:", modelLayer); // Check je browser console (F12)
 
         // Store for later use in search
         this.allData = [...dataLayer, ...modelLayer];

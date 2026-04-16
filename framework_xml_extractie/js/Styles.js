@@ -165,6 +165,45 @@ define([], function () {
 
 
 
+.clickable-sql {
+    cursor: pointer;
+    transition: opacity 0.2s;
+}
+
+.clickable-sql:hover {
+    border: 1px solid #444; /* Kleine highlight bij hover */
+}
+
+/* Zorg dat de clean-version wel de SQL-kleuren (syntax highlighting) behoudt, 
+   maar niet de gele/blauwe zoek-matches! */
+.clean-version .search-match {
+    background: transparent !important;
+    border: none !important;
+    color: inherit !important;
+}
+
+
+.breadcrumb-container {
+    display: flex;
+    align-items: center;
+    overflow: hidden; /* Zorgt dat ellips werkt */
+    white-space: nowrap;
+    max-width: 70%; /* Voorkomt dat het de knoppen raakt */
+}
+
+.folder-path {
+    font-size: 11px; 
+    color: #888; 
+    text-transform: uppercase; 
+    letter-spacing: 0.5px;
+    overflow: hidden;
+    text-overflow: ellipsis; /* Voegt '...' toe als het te lang is */
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+}
+
+
 
     `; /*einde CSS*/
 

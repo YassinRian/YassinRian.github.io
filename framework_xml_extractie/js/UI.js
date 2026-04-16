@@ -61,6 +61,8 @@ define(["jquery"], function ($) {
         }
 
         const highlightedSQL = this.highlightSQL(sqlContent);
+        // We highlighten de SQL nu apart van de tekst-zoekterm
+        const searchHighlightedSQL = this.highlightText(highlightedSQL, searchTerm);
         // -------------------
 
         const columnList = table.columns
@@ -73,24 +75,35 @@ define(["jquery"], function ($) {
         const html = `
                             <div class="card">
                                 <div class="card-header">
-                                    <div>
-                                        <span style="color: #ffc107;">📂</span>
-                                        <span style="font-size: 12px; color: #666;">${table.folder} /</span>
-                                        <strong>${this.highlightText(table.name, searchTerm)}</strong>
-                                    </div>
-                                    <div class="btn-group">
-                                        <button class="toggle-view active" data-view="grid">📊 Grid</button>
-                                        <button class="toggle-view" data-view="sql">⌨️ SQL</button>
-                                    </div>
+                                  <div class="breadcrumb-container">
+                                      <span style="color: #ffc107; margin-right: 5px; flex-shrink: 0;">📂</span> 
+                                      <span class="folder-path" title="${table.folder}">
+                                          ${this.highlightText(table.folder, searchTerm)}
+                                      </span>
+                                      <span style="color: #ccc; margin: 0 5px; flex-shrink: 0;">/</span>
+                                      <strong class="table-name" style="color: #333; flex-shrink: 0;">
+                                          ${this.highlightText(table.name, searchTerm)}
+                                      </strong>
+                                  </div>
+
+                                  <div class="btn-group">
+                                      <button class="toggle-view active" data-view="grid">📊 Grid</button>
+                                      <button class="toggle-view" data-view="sql">⌨️ SQL</button>
+                                  </div>
                                 </div>
                                 <div class="view-content grid-view" style="padding: 15px;">
                                     ${columnList}
                                 </div>
                                 <div class="view-content sql-view" style="padding: 0; display: none;">
-                                <div class="sql-container">
-                                                <button class="copy-sql-btn">Copy SQL</button>
-                                                <pre class="sql-block">${this.highlightText(highlightedSQL, searchTerm)}</pre>
-                                            </div>
+                                  <div class="sql-container">
+                                      <button class="copy-sql-btn">Copy SQL</button>
+                                      <div class="sql-container clickable-sql" title="Click to toggle highlighting" data-highlight="on">
+                
+                                          <pre class="sql-block highlighted-version">${searchHighlightedSQL}</pre>
+                                          <pre class="sql-block clean-version" style="display:none;">${highlightedSQL}</pre>
+                
+                                      </div>
+                                  </div>
                                 </div>
                             </div>
                         `;

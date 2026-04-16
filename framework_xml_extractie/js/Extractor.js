@@ -74,26 +74,30 @@ getLayerData(layerName) {
             };
         });
 
-        // 4. Folder Zoeken (Klim omhoog)
-        let folderName = "Root";
+       // 4. Full Path / Breadcrumb Extractie (Klim omhoog tot de namespace)
+
+        let pathParts = [];
         let parent = qs.parentNode;
-        while (parent && parent !== scopeNode) {
+
+        while (parent && parent.localName !== 'namespace') {
             if (parent.localName === 'folder') {
-                const fName = this.xmlDoc.evaluate(`./${ln('name')}`, parent, null, XPathResult.STRING_TYPE, null).stringValue;
-                if (fName) {
-                    folderName = fName;
-                    break;
+                const folderName = this.xmlDoc.evaluate(`./${ln('name')}`, parent, null, XPathResult.STRING_TYPE, null).stringValue;
+                if (folderName) {
+                    pathParts.unshift(folderName); // Voeg vooraan toe om de juiste volgorde te houden
                 }
             }
             parent = parent.parentNode;
         }
+
+        // Combineer de folders met een separator
+        const fullFolderPath = pathParts.length > 0 ? pathParts.join(' / ') : "Root";
 
         // 5. SQL Extractie (Bestand alleen in de Datalaag)
         const sql = this.xmlDoc.evaluate(`.//${ln('sql')}`, qs, null, XPathResult.STRING_TYPE, null).stringValue.trim();
 
         return {
             name,
-            folder: folderName,
+            folder: fullFolderPath,
             sql,
             columns,
             layer: layerName // Wordt later in App.js overschreven naar 'Data'/'Model'
