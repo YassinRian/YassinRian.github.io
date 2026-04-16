@@ -116,6 +116,21 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
       });
 
 
+      $(oControlHost.container).on("click", ".breadcrumb-wrapper", function() {
+        const $wrapper = $(this);
+        const $collapsed = $wrapper.find(".path-collapsed");
+        const $expanded = $wrapper.find(".path-expanded");
+
+        if ($collapsed.is(":visible")) {
+            $collapsed.hide();
+            $expanded.fadeIn(100);
+        } else {
+            $expanded.hide();
+            $collapsed.fadeIn(100);
+        }
+    });
+
+
     }
 
     handleSearch(term = "") {

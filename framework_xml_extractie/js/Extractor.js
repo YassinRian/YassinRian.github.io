@@ -79,25 +79,30 @@ getLayerData(layerName) {
         let pathParts = [];
         let parent = qs.parentNode;
 
-        while (parent && parent.localName !== 'namespace') {
-            if (parent.localName === 'folder') {
-                const folderName = this.xmlDoc.evaluate(`./${ln('name')}`, parent, null, XPathResult.STRING_TYPE, null).stringValue;
-                if (folderName) {
-                    pathParts.unshift(folderName); // Voeg vooraan toe om de juiste volgorde te houden
+        while (parent) {
+            // We pakken alles wat een 'name' heeft: folders, namespaces, en het project (root)
+            if (parent.localName === 'folder' || parent.localName === 'namespace' || parent.localName === 'project') {
+                const partName = this.xmlDoc.evaluate(`./${ln('name')}`, parent, null, XPathResult.STRING_TYPE, null).stringValue;
+                if (partName) {
+                    // unshift voegt het item aan het BEGIN van de array toe
+                    // Dus: [Algemeen] -> [Datalaag, Algemeen] -> [CRN_OBC, Datalaag, Algemeen]
+                    pathParts.unshift(partName); 
                 }
             }
             parent = parent.parentNode;
         }
 
-        // Combineer de folders met een separator
-        const fullFolderPath = pathParts.length > 0 ? pathParts.join(' / ') : "Root";
-
+        const fullPath = pathParts.join(' / ');
+        // De 'Parent Folder' is de laatste in de lijst (bijv. Algemeen)
+        const parentFolder = pathParts.length > 0 ? pathParts[pathParts.length - 1] : "Root";
+                
         // 5. SQL Extractie (Bestand alleen in de Datalaag)
         const sql = this.xmlDoc.evaluate(`.//${ln('sql')}`, qs, null, XPathResult.STRING_TYPE, null).stringValue.trim();
 
         return {
             name,
-            folder: fullFolderPath,
+            fullPath: fullPath,
+            parentFolder: parentFolder,
             sql,
             columns,
             layer: layerName // Wordt later in App.js overschreven naar 'Data'/'Model'

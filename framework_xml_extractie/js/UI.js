@@ -72,41 +72,46 @@ define(["jquery"], function ($) {
           })
           .join("");
 
-        const html = `
-                            <div class="card">
-                                <div class="card-header">
-                                  <div class="breadcrumb-container">
-                                      <span style="color: #ffc107; margin-right: 5px; flex-shrink: 0;">📂</span> 
-                                      <span class="folder-path" title="${table.folder}">
-                                          ${this.highlightText(table.folder, searchTerm)}
-                                      </span>
-                                      <span style="color: #ccc; margin: 0 5px; flex-shrink: 0;">/</span>
-                                      <strong class="table-name" style="color: #333; flex-shrink: 0;">
-                                          ${this.highlightText(table.name, searchTerm)}
-                                      </strong>
-                                  </div>
+   const html = `
+    <div class="card">
+        <div class="card-header">
+            <div class="breadcrumb-wrapper" title="Klik om het volledige pad te zien/verbergen">
+                <span style="color: #ffc107; margin-right: 5px; flex-shrink: 0;">📂</span>
+                
+                <div class="path-collapsed" style="display: flex; align-items: center; overflow: hidden;">
+                    <span class="path-ellipsis">...</span>
+                    <span class="folder-path" style="margin-left: 5px;">${this.highlightText(table.parentFolder, searchTerm)}</span>
+                </div>
 
-                                  <div class="btn-group">
-                                      <button class="toggle-view active" data-view="grid">📊 Grid</button>
-                                      <button class="toggle-view" data-view="sql">⌨️ SQL</button>
-                                  </div>
-                                </div>
-                                <div class="view-content grid-view" style="padding: 15px;">
-                                    ${columnList}
-                                </div>
-                                <div class="view-content sql-view" style="padding: 0; display: none;">
-                                  <div class="sql-container">
-                                      <button class="copy-sql-btn">Copy SQL</button>
-                                      <div class="sql-container clickable-sql" title="Click to toggle highlighting" data-highlight="on">
-                
-                                          <pre class="sql-block highlighted-version">${searchHighlightedSQL}</pre>
-                                          <pre class="sql-block clean-version" style="display:none;">${highlightedSQL}</pre>
-                
-                                      </div>
-                                  </div>
-                                </div>
-                            </div>
-                        `;
+                <div class="path-expanded" style="display: none; overflow: hidden;">
+                    <span class="full-path-display">${this.highlightText(table.fullPath, searchTerm)}</span>
+                </div>
+
+                <span style="color: #ccc; margin: 0 8px; flex-shrink: 0;">/</span>
+                <strong class="table-name" style="color: #333; flex-shrink: 0;">
+                    ${this.highlightText(table.name, searchTerm)}
+                </strong>
+            </div>
+
+            <div class="btn-group">
+                <button class="toggle-view active" data-view="grid">📊 Grid</button>
+                <button class="toggle-view" data-view="sql">⌨️ SQL</button>
+            </div>
+        </div>
+
+        <div class="view-content grid-view" style="padding: 15px;">
+            ${columnList}
+        </div>
+
+        <div class="view-content sql-view" style="padding: 0; display: none; position: relative;">
+            <button class="copy-sql-btn">Copy SQL</button>
+            <div class="sql-container clickable-sql" title="Click to toggle highlighting" data-highlight="on">
+                <pre class="sql-block highlighted-version">${searchHighlightedSQL}</pre>
+                <pre class="sql-block clean-version" style="display:none;">${highlightedSQL}</pre>
+            </div>
+        </div>
+    </div>
+`;
         $preview.append(html);
       });
     }

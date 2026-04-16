@@ -182,25 +182,31 @@ define([], function () {
     color: inherit !important;
 }
 
-
-.breadcrumb-container {
+.breadcrumb-wrapper {
     display: flex;
     align-items: center;
-    overflow: hidden; /* Zorgt dat ellips werkt */
-    white-space: nowrap;
-    max-width: 70%; /* Voorkomt dat het de knoppen raakt */
+    cursor: pointer;
+    user-select: none;
+    padding: 2px 5px;
+    border-radius: 4px;
+    transition: background 0.2s;
 }
 
-.folder-path {
-    font-size: 11px; 
-    color: #888; 
-    text-transform: uppercase; 
-    letter-spacing: 0.5px;
-    overflow: hidden;
-    text-overflow: ellipsis; /* Voegt '...' toe als het te lang is */
-    white-space: nowrap;
-    display: inline-block;
-    vertical-align: middle;
+.breadcrumb-wrapper:hover {
+    background: rgba(0,0,0,0.05);
+}
+
+.path-ellipsis {
+    color: #005fb8;
+    font-weight: bold;
+    margin: 0 5px;
+    letter-spacing: 1px;
+}
+
+.full-path-display {
+    font-size: 11px;
+    color: #888;
+    text-transform: uppercase;
 }
 
 
