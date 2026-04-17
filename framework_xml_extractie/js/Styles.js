@@ -276,13 +276,12 @@ define([], function () {
     color: #fff;
 }
 
-#export-tech-sql:hover {
-    background: #004a91;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 8px rgba(0,95,184,0.3);
+
+.dropdown-item:hover {
+    background-color: #f5f5f5;
 }
-#export-tech-sql:active {
-    transform: translateY(0);
+#export-custom-sql:hover {
+    background-color: #218838 !important;
 }
 
 
