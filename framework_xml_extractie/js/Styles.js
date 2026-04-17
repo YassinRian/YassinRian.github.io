@@ -209,6 +209,81 @@ define([], function () {
     text-transform: uppercase;
 }
 
+/* Time Machine Controls */
+.time-travel-panel {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px;
+    background: #fcfcfc;
+    border: 1px solid #e0e0e0;
+    border-radius: 8px;
+    /*margin-bottom: 20px; */
+    box-shadow: inset 0 1px 3px rgba(0,0,0,0.02);
+}
+
+.time-label {
+    font-size: 11px;
+    font-weight: 800;
+    color: #005fb8;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+/* New Badge Styles */
+.column-badge-modified {
+    display: inline-block;
+    background: #fff9db; /* Soft Amber */
+    color: #856404;
+    padding: 4px 10px;
+    margin: 3px;
+    border-radius: 4px;
+    font-size: 11px;
+    border: 1px solid #ffe066;
+    font-weight: 600;
+    cursor: help;
+}
+
+.modified-indicator {
+    background: #f08c00;
+    color: white;
+    font-size: 9px;
+    padding: 2px 6px;
+    border-radius: 10px;
+    margin-left: 8px;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+
+#export-tech-sql:hover {
+    background: #004a91 !important;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+}
+
+.layer-tab {
+    padding: 6px 14px;
+    border: 1px solid #005fb8;
+    background: #fff;
+    color: #005fb8;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    cursor: pointer;
+}
+.layer-tab.active {
+    background: #005fb8;
+    color: #fff;
+}
+
+#export-tech-sql:hover {
+    background: #004a91;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,95,184,0.3);
+}
+#export-tech-sql:active {
+    transform: translateY(0);
+}
 
 
     `; /*einde CSS*/

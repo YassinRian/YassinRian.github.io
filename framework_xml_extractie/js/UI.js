@@ -2,38 +2,60 @@ define(["jquery"], function ($) {
   "use strict";
 
   class UI {
-    constructor(container) {
+    constructor(container, app) {
       this.$cnt = $(container);
+      this.app = app; // Reference to app to access timeMachine
     }
 
-    renderSkeleton() {
-      this.$cnt.html(`
-                        <div class="cognos-extractor-wrapper" style="font-family: sans-serif; padding: 15px;">
-                            <div id="status-bar" style="background: #f8f9fa; padding: 10px; border-radius: 4px; margin-bottom: 15px; border-left: 4px solid #005fb8;">
-                                Ready to load model...
-                            </div>
+renderSkeleton() {
+    this.$cnt.html(`
+        <div class="cognos-extractor-wrapper" style="font-family: -apple-system, system-ui, sans-serif; padding: 20px; background: #fff; color: #333;">
+            
+            <div id="status-bar" style="background: #f0f7ff; padding: 12px 18px; border-radius: 4px; margin-bottom: 20px; border-left: 4px solid #005fb8; font-size: 13px; color: #004a91;">
+                Klaar voor gebruik...
+            </div>
 
-                            <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 20px;">
-                                <input type="file" id="xml-upload" accept=".xml" />
-                                <input type="text" id="search-box" placeholder="Zoek tabellen of kolommen..."
-                                       style="flex-grow: 1; padding: 8px; border: 1px solid #ccc; border-radius: 4px;" />
-                        </div>
+            <div style="display: flex; gap: 10px; margin-bottom: 12px; height: 40px;">
+                <div style="position: relative; width: 110px; flex-shrink: 0;">
+                    <button style="width: 100%; height: 100%; border: 1px solid #ccc; background: #fff; border-radius: 4px; font-size: 12px; font-weight: 500; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 5px;">
+                        📂 Kies XML
+                    </button>
+                    <input type="file" id="xml-upload" accept=".xml" style="position: absolute; left: 0; top: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer;" />
+                </div>
+                
+                <input type="text" id="search-box" placeholder="Zoek tabellen of kolommen (gebruik :: voor incrementeel zoeken, regExp is ook mogelijk)..."
+                       style="flex-grow: 1; height: 100%; padding: 0 15px; border: 1px solid #ccc; border-radius: 4px; font-size: 13px; outline: none; box-sizing: border-box;" />
 
-                        <div id="layer-tabs" style="display: flex; gap: 5px; margin-bottom: 15px;">
-                                <button class="layer-tab active" data-layer="all">Alles</button>
-                                <button class="layer-tab" data-layer="Data">Datalaag</button>
-                                <button class="layer-tab" data-layer="Model">Modellaag</button>
-                        </div>
-                            <div id="data-preview"></div>
+                <button id="export-tech-sql" style="width: 180px; height: 100%; background: #005fb8; color: white; border: none; border-radius: 4px; font-size: 12px; font-weight: 600; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s;">
+                    <span>📥</span> Export Tech SQL
+                </button>
+            </div>
 
-                            <div id="pagination-controls" style="margin-top: 20px; text-align: center; display: none;">
-                                <button id="load-more" style="padding: 10px 20px; cursor: pointer; background: #005fb8; color: white; border: none; border-radius: 4px;">
-                                    Load More Results
-                                </button>
-                            </div>
-                        </div>
-                         `);
-    }
+            <div style="display: flex; align-items: center; justify-content: space-between; margin: 20px 0px 20px; padding-bottom: 15px; border-bottom: 1px solid #eee;">
+                
+                <div id="layer-tabs" style="display: flex; gap: 8px;">
+                    <button class="layer-tab active" data-layer="all">Alles</button>
+                    <button class="layer-tab" data-layer="Data">Datalaag</button>
+                    <button class="layer-tab" data-layer="Model">Modellaag</button>
+                </div>
+
+                <div class="time-travel-panel" style="display: flex; align-items: center; gap: 10px; padding: 4px 12px; background: #fafafa; border: 1px solid #ddd; border-radius: 4px; height: 32px; box-sizing: border-box;">
+                    <span style="font-size: 10px; font-weight: 800; color: #005fb8; text-transform: uppercase; letter-spacing: 0.5px; white-space: nowrap;">🕒 Laatst Gewijzigd</span>
+                    <select id="time-range-select" style="border: none; background: transparent; font-size: 12px; color: #555; cursor: pointer; outline: none;">
+                        <option value="all">Anytime (Full Model)</option>
+                        <option value="1">Last 24 Hours</option>
+                        <option value="7">Last 7 Days</option>
+                        <option value="30">Last 30 Days</option>
+                        <option value="1100">Legacy (Mei 2023)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div id="data-preview"></div>
+        </div>
+    `);
+}
+
 
     updateStatus(msg) {
       this.$cnt.find("#status-bar").text(msg);
@@ -46,72 +68,78 @@ define(["jquery"], function ($) {
       if (!append) $preview.empty();
 
       tables.forEach((table) => {
-        // --- DE FIX HIER ---
         let sqlContent = "";
 
         if (table.layer === "Model") {
-          // Voor de Modellaag bouwen we het ALTIJD zelf op basis van de kolommen
           sqlContent = this.generateVirtualSQL(table);
         } else {
-          // Voor de Datalaag gebruiken we de SQL uit de XML (als die bestaat)
-          sqlContent =
-            table.sql && table.sql.length > 5
-              ? table.sql
-              : "/* Geen SQL bron gevonden in Datalaag */";
+          sqlContent = table.sql && table.sql.length > 5 ? table.sql : "/* Geen SQL bron gevonden in Datalaag */";
         }
 
         const highlightedSQL = this.highlightSQL(sqlContent);
-        // We highlighten de SQL nu apart van de tekst-zoekterm
         const searchHighlightedSQL = this.highlightText(highlightedSQL, searchTerm);
-        // -------------------
 
+        // --- TIME TRAVEL LOGIC FOR TABLE ---
+        const isTableModified = this.app.timeMachine.isModified(table.lastModified);
+        const tableRecentBadge = isTableModified
+          ? `<span class="modified-indicator" title="Gewijzigd op: ${table.lastModified.toLocaleString()} door ${table.modifiedBy}">MODIFIED</span>`
+          : "";
+
+        // --- TIME TRAVEL LOGIC FOR COLUMNS ---
         const columnList = table.columns
           .map((col) => {
             const hName = this.highlightText(col.name, searchTerm);
-            return `<span class="column-badge">${hName}</span>`;
+            const isColModified = this.app.timeMachine.isModified(col.lastModified);
+
+            // Gebruik oranje badge als de kolom recent gewijzigd is
+            const badgeClass = isColModified ? "column-badge-modified" : "column-badge";
+            const tooltip = isColModified
+              ? `title="Gewijzigd op: ${col.lastModified.toLocaleString()} door ${col.modifiedBy}"`
+              : "";
+
+            return `<span class="${badgeClass}" ${tooltip}>${hName}</span>`;
           })
           .join("");
 
-   const html = `
-    <div class="card">
-        <div class="card-header">
-            <div class="breadcrumb-wrapper" title="Klik om het volledige pad te zien/verbergen">
-                <span style="color: #ffc107; margin-right: 5px; flex-shrink: 0;">📂</span>
-                
-                <div class="path-collapsed" style="display: flex; align-items: center; overflow: hidden;">
-                    <span class="path-ellipsis">...</span>
-                    <span class="folder-path" style="margin-left: 5px;">${this.highlightText(table.parentFolder, searchTerm)}</span>
-                </div>
+        //const technicalSQL = (table.layer === "Model") ? this.generateTechnicalExportSQL(table) : null;
 
-                <div class="path-expanded" style="display: none; overflow: hidden;">
-                    <span class="full-path-display">${this.highlightText(table.fullPath, searchTerm)}</span>
-                </div>
-
-                <span style="color: #ccc; margin: 0 8px; flex-shrink: 0;">/</span>
-                <strong class="table-name" style="color: #333; flex-shrink: 0;">
-                    ${this.highlightText(table.name, searchTerm)}
-                </strong>
-            </div>
-
-            <div class="btn-group">
-                <button class="toggle-view active" data-view="grid">📊 Grid</button>
-                <button class="toggle-view" data-view="sql">⌨️ SQL</button>
-            </div>
-        </div>
-
-        <div class="view-content grid-view" style="padding: 15px;">
-            ${columnList}
-        </div>
-
-        <div class="view-content sql-view" style="padding: 0; display: none; position: relative;">
-            <button class="copy-sql-btn">Copy SQL</button>
-            <div class="sql-container clickable-sql" title="Click to toggle highlighting" data-highlight="on">
-                <pre class="sql-block highlighted-version">${searchHighlightedSQL}</pre>
-                <pre class="sql-block clean-version" style="display:none;">${highlightedSQL}</pre>
-            </div>
-        </div>
-    </div>
+        const html = `
+        <div class="card">
+   <div class="card-header">
+      <div class="breadcrumb-wrapper" title="Klik om het volledige pad te zien/verbergen">
+         <span style="color: #ffc107; margin-right: 5px; flex-shrink: 0;">📂</span>
+         <div class="path-collapsed" style="display: flex; align-items: center; overflow: hidden;">
+            <span class="path-ellipsis">...</span>
+            <span class="folder-path" style="margin-left: 5px;">${this.highlightText(table.parentFolder, searchTerm)}</span>
+         </div>
+         <div class="path-expanded" style="display: none; overflow: hidden;">
+            <span class="full-path-display">${this.highlightText(table.fullPath, searchTerm)}</span>
+         </div>
+         <span style="color: #ccc; margin: 0 8px; flex-shrink: 0;">/</span>
+         <strong class="table-name" style="color: #333; flex-shrink: 0;">
+         ${this.highlightText(table.name, searchTerm)}
+         </strong>
+         ${tableRecentBadge}
+      </div>
+      <div class="btn-group">
+         <button class="toggle-view active" data-view="grid">📊 Grid</button>
+         <button class="toggle-view" data-view="sql">⌨️ SQL</button>
+      </div>
+   </div>
+   <div class="view-content grid-view" style="padding: 15px;">
+      ${columnList}
+   </div>
+   <div class="view-content sql-view" style="padding: 0; display: none; position: relative;">
+      <button class="copy-sql-btn">Copy SQL</button>
+      <div class="sql-container clickable-sql" title="Click to toggle highlighting" data-highlight="on">
+         <pre class="sql-block highlighted-version">${searchHighlightedSQL}</pre>
+         <pre class="sql-block clean-version" style="display:none;">${highlightedSQL}</pre>
+      </div>
+   </div>
+</div>
 `;
+
+
         $preview.append(html);
       });
     }
@@ -183,9 +211,9 @@ define(["jquery"], function ($) {
       return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
     }
 
+
     generateVirtualSQL(table) {
-      if (!table.columns || table.columns.length === 0)
-        return "-- Geen kolommen gevonden --";
+      if (!table.columns || table.columns.length === 0) return "-- Geen kolommen gevonden --";
 
       let rawLines = [];
       let physicalTable = "BRONTABEL";
@@ -194,19 +222,13 @@ define(["jquery"], function ($) {
       table.columns.forEach((col) => {
         const lineage = col.lineage || [];
         const aliasMatch = lineage[0]?.match(/\[.*?\]\.\[(.*?)\]/);
-        const sourceMatch = lineage[lineage.length - 1]?.match(
-          /\[.*?\]\.\[(.*?)\]\.\[(.*?)\]/,
-        );
+        const sourceMatch = lineage[lineage.length - 1]?.match(/\[.*?\]\.\[(.*?)\]\.\[(.*?)\]/);
 
         if (sourceMatch && aliasMatch) {
           physicalTable = sourceMatch[1];
           aliasName = aliasMatch[1];
-
           const sourcePart = `${aliasName}.${sourceMatch[2]}`;
-          rawLines.push({
-            source: sourcePart,
-            alias: `"${col.name}"`,
-          });
+          rawLines.push({ source: sourcePart, alias: `"${col.name}"` });
         }
       });
 
@@ -214,19 +236,88 @@ define(["jquery"], function ($) {
 
       const maxLength = Math.max(...rawLines.map((l) => l.source.length));
 
-      // Bouw de SELECT regels
       const selectLines = rawLines.map((line, index) => {
-        // De eerste regel krijgt 1 spatie om uit te lijnen met de komma's eronder
         const prefix = index === 0 ? " " : ",";
         const padding = " ".repeat(maxLength - line.source.length);
-
         return `${prefix}${line.source}${padding} AS ${line.alias}`;
       });
 
       return `SELECT\n${selectLines.join("\n")}\nFROM ${physicalTable} ${aliasName}`;
     }
 
-    // this is the end of the class
+
+   generateTechnicalExportSQL(table) {
+    if (table.layer !== "Model") return null;
+
+    let techLines = [];
+    let businessLines = this.getRawLineageLines(table);
+    
+    // We pakken de tabelnaam van de eerste kolom lineage
+    const physicalTableName = businessLines[0]?.physicalTable || "UNKNOWN";
+    const aliasName = businessLines[0]?.aliasName || "ALIAS";
+
+    // Zoek de Datalaag op in de achtergrond via de app referentie
+    const dataLayerTable = this.app.allData.find(t => 
+        t.layer === "Data" && t.name === physicalTableName
+    );
+
+    if (dataLayerTable) {
+        dataLayerTable.columns.forEach(col => {
+            const isID = col.name.toUpperCase().includes("_ID") || 
+                         col.name.toUpperCase().includes("_ID_");
+            
+            // Ontdubbeling
+            const alreadyInModel = businessLines.some(line => 
+                line.source.toLowerCase() === `${aliasName}.${col.name}`.toLowerCase()
+            );
+
+            if (isID && !alreadyInModel) {
+                techLines.push({
+                    source: `${aliasName}.${col.name}`,
+                    alias: `"${col.name}"`
+                });
+            }
+        });
+    }
+
+    // Combineer: ID's eerst, dan de rest
+    const combinedLines = [...techLines, ...businessLines];
+    return this.formatSQLLines(combinedLines, physicalTableName, aliasName);
+}
+
+getRawLineageLines(table) {
+    let lines = [];
+    table.columns.forEach((col) => {
+        const lineage = col.lineage || [];
+        const aliasMatch = lineage[0]?.match(/\[.*?\]\.\[(.*?)\]/);
+        const sourceMatch = lineage[lineage.length - 1]?.match(/\[.*?\]\.\[(.*?)\]\.\[(.*?)\]/);
+
+        if (sourceMatch && aliasMatch) {
+            lines.push({
+                source: `${aliasMatch[1]}.${sourceMatch[2]}`,
+                alias: `"${col.name}"`,
+                physicalTable: sourceMatch[1],
+                aliasName: aliasMatch[1]
+            });
+        }
+    });
+    return lines;
+}
+
+formatSQLLines(rawLines, physicalTable, aliasName) {
+    if (rawLines.length === 0) return "";
+    const maxLength = Math.max(...rawLines.map(l => l.source.length));
+
+    const selectLines = rawLines.map((line, index) => {
+        const prefix = (index === 0) ? " " : ",";
+        const padding = " ".repeat(maxLength - line.source.length);
+        return `${prefix}${line.source}${padding} AS ${line.alias}`;
+    });
+
+    return `SELECT\n${selectLines.join("\n")}\nFROM ${physicalTable} ${aliasName}`;
+}
+
+
   }
   return UI;
 });

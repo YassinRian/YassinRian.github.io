@@ -1,14 +1,16 @@
-define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.js", "https://yassinrian.netlify.app/framework_xml_extractie/js/Extractor.js", "https://yassinrian.netlify.app/framework_xml_extractie/js/Styles.js"], function (
+define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.js", "https://yassinrian.netlify.app/framework_xml_extractie/js/Extractor.js", "https://yassinrian.netlify.app/framework_xml_extractie/js/Styles.js", "https://yassinrian.netlify.app/framework_xml_extractie/js/TimeMachine.js"], function (
   $,
   UI,
   Extractor,
   Styles,
+  TimeMachine
 ) {
   "use strict";
 
   class App {
     constructor() {
       this.extractor = new Extractor();
+      this.timeMachine = new TimeMachine();
       this.ui = null;
       this.allData = [];
       this.filteredData = [];
@@ -19,7 +21,7 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
     }
 
     draw(oControlHost) {
-      this.ui = new UI(oControlHost.container); ///
+      this.ui = new UI(oControlHost.container, this); ///
       this.ui.renderSkeleton();
 
       const $container = $(oControlHost.container);
@@ -55,6 +57,8 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
         this.handleSearch($container.find("#search-box").val() || "");
       });
 
+      // 5. SQL/GRID view
+
       $(oControlHost.container).on("click", ".toggle-view", (e) => {
         const $btn = $(e.target);
         const view = $btn.data("view");
@@ -71,6 +75,8 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
           $card.find(".grid-view").show();
         }
       });
+
+      // 6. COPY SQL
 
       $(oControlHost.container).on("click", ".copy-sql-btn", function(e) {
         // Voorkom dat de toggle (click op de container) ook afgaat!
@@ -95,7 +101,7 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
         });
     });
 
-
+      // 7. HIGHLIGHT ON/OFF
       $(oControlHost.container).on("click", ".clickable-sql", function() {
           const $container = $(this);
           const state = $container.attr("data-highlight");
@@ -115,7 +121,7 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
           }
       });
 
-
+      // 8. BREADCRUMB VIEWER
       $(oControlHost.container).on("click", ".breadcrumb-wrapper", function() {
         const $wrapper = $(this);
         const $collapsed = $wrapper.find(".path-collapsed");
@@ -130,51 +136,79 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
         }
     });
 
+    // 9. Time Travel Filter (Nieuw!)
+        $container.on("change", "#time-range-select", (e) => {
+            const val = e.target.value;
+            if (val === "all") {
+                this.timeMachine.reset();
+                $("#time-info-msg").text("");
+            } else {
+                this.timeMachine.setRange(parseInt(val));
+                $("#time-info-msg").text(`Changes since ${this.timeMachine.startDate.toLocaleDateString()}`);
+            }
+            this.handleSearch($("#search-box").val());
+        });
+
+// GEBRUIK DEZE SYNTAX: Dit werkt ALTIJD voor dynamische knoppen
+  $container.on("click", "#export-tech-sql", (e) => {
+        console.log("BOOM! De knop werkt nu."); 
+        e.preventDefault();
+        e.stopPropagation();
+        this.handleTechnicalExport();
+    });
+
 
     }
 
-    handleSearch(term = "") {
-      this.currentPage = 1;
-      const searchParts = term
+handleSearch(term = "") {
+    this.currentPage = 1;
+
+    // 1. TIJD FILTER (Nieuw!)
+    // We laten de TimeMachine eerst de lijst uitdunnen
+    let results = this.timeMachine.isActive 
+        ? this.timeMachine.filterData(this.allData) 
+        : this.allData;
+
+    // 2. LAAG FILTER
+    results = results.filter((item) => {
+        return (
+            this.currentLayerFilter === "all" ||
+            item.layer === this.currentLayerFilter
+        );
+    });
+
+    // 3. TEKST SEARCH (Bestaande :: logica)
+    const searchParts = term
         .split("::")
         .map((p) => p.trim())
         .filter((p) => p !== "");
 
-      let results = this.allData.filter((item) => {
-        return (
-          this.currentLayerFilter === "all" ||
-          item.layer === this.currentLayerFilter
-        );
-      });
-
-      searchParts.forEach((part) => {
+    searchParts.forEach((part) => {
         let regex = null;
         try {
-          // We checken of het een geldige Regex is.
-          // Bijv: ^dim_ of [0-9]+
-          regex = new RegExp(part, "i");
+            regex = new RegExp(part, "i");
         } catch (e) {
-          regex = null; // Ongeldige regex, gebruik normale string match
+            regex = null;
         }
 
         results = results.filter((item) => {
-          const check = (val) =>
-            regex
-              ? regex.test(val)
-              : val.toLowerCase().includes(part.toLowerCase());
+            const check = (val) =>
+                regex
+                    ? regex.test(val)
+                    : (val || "").toLowerCase().includes(part.toLowerCase());
 
-          return (
-            check(item.name) ||
-            check(item.sql) ||
-            item.columns.some((c) => check(c.name)) ||
-            check(item.folder)
-          );
+            return (
+                check(item.name) ||
+                check(item.sql) ||
+                item.columns.some((c) => check(c.name)) ||
+                check(item.fullPath) // Gebruik fullPath voor betere context
+            );
         });
-      });
+    });
 
-      this.filteredData = results;
-      this.renderCurrentPage(false);
-    }
+    this.filteredData = results;
+    this.renderCurrentPage(false);
+}
 
     renderCurrentPage(append = false) {
       const start = (this.currentPage - 1) * this.itemsPerPage;
@@ -232,6 +266,66 @@ define(["jquery", "https://yassinrian.netlify.app/framework_xml_extractie/js/UI.
         console.error(err);
       }
     }
+
+
+handleTechnicalExport() {
+    // Check of we data hebben
+    if (!this.filteredData || this.filteredData.length === 0) {
+        alert("Er zijn geen resultaten om te exporteren. Upload eerst een model of pas je zoekterm aan.");
+        return;
+    }
+
+    this.ui.updateStatus("Bezig met genereren van technische export...");
+
+    let exportContent = `-- Cognos Framework Manager Technical Export\n`;
+    exportContent += `-- Genereerd op: ${new Date().toLocaleString()}\n`;
+    exportContent += `-- Filter: ${$("#search-box").val() || "Geen"}\n`;
+    exportContent += `--------------------------------------------------\n\n`;
+
+    let exportCount = 0;
+
+    this.filteredData.forEach(table => {
+        // We exporteren alleen de Modellaag omdat de Datalaag al de ID's heeft
+        if (table.layer === "Model") {
+            const techSql = this.ui.generateTechnicalExportSQL(table);
+            if (techSql) {
+                exportContent += `/* Table: ${table.name} */\n`;
+                exportContent += `/* Path: ${table.fullPath} */\n`;
+                exportContent += techSql + ";\n\n";
+                exportContent += `--------------------------------------------------\n\n`;
+                exportCount++;
+            }
+        }
+    });
+
+    if (exportCount === 0) {
+        alert("Geen Modellaag tabellen gevonden in de huidige selectie.");
+        return;
+    }
+
+    // De download actie
+    const blob = new Blob([exportContent], { type: 'text/sql' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `Cognos_Tech_Export_${new Date().toISOString().slice(0,10)}.sql`;
+    document.body.appendChild(a);
+    a.click();
+    
+    // Opruimen
+    window.URL.revokeObjectURL(url);
+    document.body.removeChild(a);
+    
+    this.ui.updateStatus(`Export voltooid! ${exportCount} tabellen geëxporteerd.`);
+}
+
+
+
+
+
+
+
+
   }
 
   return App;
