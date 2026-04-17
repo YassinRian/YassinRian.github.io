@@ -102,6 +102,11 @@ const helpModalHtml = `
       </div>
    </div>
    <div id="data-preview"></div>
+   <div id="pagination-controls" style="display: none; text-align: center; padding: 20px;">
+    <button id="load-more" style="padding: 10px 30px; background: #fff; border: 1px solid #005fb8; color: #005fb8; border-radius: 4px; cursor: pointer; font-weight: 600; font-size: 13px;">
+        Toon meer resultaten...
+    </button>
+</div>
 
    ${helpModalHtml}
 </div>
