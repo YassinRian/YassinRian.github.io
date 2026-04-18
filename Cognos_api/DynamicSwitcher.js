@@ -64,30 +64,33 @@ define(["jquery"], function($) {
                 }
 
 
-                handleNavigation(targetID) {
-                        const oPage = this.oControlHost.page;
+                // 1. Add this method to your class
+setData(oControlHost, oData) {
+    // This method is called after valueChanged() or reprompt()
+    // when the server sends the new page state.
 
-                        // 1. Correct the User Role check
-                        // getValues() returns an array; we need to check the first element.
-                        const userSelection = oPage.getControlByName("p_UserRole").getValues();
-                        const userRole = (userSelection && userSelection.length > 0) ? userSelection[0].use : "";
+    // Logic to clear the spinner:
+    const fnDoneRunning = arguments[2];
+    if (typeof fnDoneRunning === "function") {
+        fnDoneRunning(); // This tells Cognos: "I've received the update, stop spinning."
+    }
+}
 
-                        if (targetID === 5 && userRole !== 'Admin') {
-                                alert("Access Denied: Only Admins can load the audit Query.");
-                                return; // Stop execution if unauthorized
-                        }
+// 2. Update your handleNavigation to use valueChanged
+handleNavigation(targetID) {
+    const oPage = this.oControlHost.page;
+    const ctrl = oPage.getControlByName(this.targetParam);
 
-                        // 2. Set the target parameter
-                        const targetCtrl = oPage.getControlByName(this.targetParam);
-                        if (targetCtrl) {
-                                targetCtrl.setValues([{ "use": targetID.toString() }]);
+    if (ctrl) {
+        ctrl.setValues([{ "use": targetID.toString() }]);
 
-                                // 3. The "Breezy" Update: Use reprompt() instead of valueChanged()
-                                // oPage.reprompt() often bypasses the blocked 'Working...' heartbeat
-                                // while still forcing the Conditional Blocks to update.
-                                oPage.finish();
-                        }
-                }
+        // This triggers the server request and eventually calls setData()
+        this.oControlHost.valueChanged();
+    }
+}
+
+
+
 
 
                 destroy(oControlHost) {
