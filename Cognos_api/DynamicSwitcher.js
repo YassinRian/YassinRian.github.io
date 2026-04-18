@@ -22,11 +22,8 @@ define(["jquery"], function($) {
                         // Draw your buttons
                         this.render(oControlHost);
 
-                        // CRITICAL: Tell Cognos the control is ready.
-                        // This hides the initial "Working..." spinner.
-                        if (typeof fnDoneInitializing === "function") {
-                                fnDoneInitializing();
-                        }
+                        fnDoneInitializing();
+
                 }
 
 
