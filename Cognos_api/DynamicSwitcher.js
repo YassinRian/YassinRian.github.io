@@ -17,6 +17,7 @@ define(["jquery"], function($) {
                         if (oConfig && oConfig.parameterName) {
                                 this.targetParam = oConfig.parameterName;
                         }
+                        this.render(oControlHost);
                 }
 
                 // render: Builds the interface.
