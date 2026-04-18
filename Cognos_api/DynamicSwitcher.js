@@ -10,18 +10,26 @@ define(["jquery"], function($) {
                 }
 
 
-                // initialize: Called by Cognos when the control is first loaded.
-                initialize(oControlHost, oConfig) {
+                // Add the 3rd argument: fnDoneInitializing
+                initialize(oControlHost, oConfig, fnDoneInitializing) {
                         this.oControlHost = oControlHost;
                         this.config = oConfig;
+
                         if (oConfig && oConfig.parameterName) {
                                 this.targetParam = oConfig.parameterName;
                         }
+
+                        // Draw your buttons
                         this.render(oControlHost);
 
-                        this.fnDoneInitializing();
-
+                        // CRITICAL: Tell Cognos the control is ready.
+                        // This hides the initial "Working..." spinner.
+                        if (typeof fnDoneInitializing === "function") {
+                                fnDoneInitializing();
+                        }
                 }
+
+
 
                 // render: Builds the interface.
                 // Instead of just buttons, we can check current report data here.
