@@ -80,7 +80,7 @@ define(["jquery"], function($) {
                         const targetCtrl = oPage.getControlByName(this.targetParam);
                         if (targetCtrl) {
                                 targetCtrl.setValues([{ "use": targetID.toString() }]);
-                                this.oControlHost.valueChanged();
+                                this.oControlHost.reprompt();
                         } else {
                                 console.error("Target control '" + this.targetParam + "' not found.");
                         }
