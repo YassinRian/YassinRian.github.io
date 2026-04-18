@@ -85,7 +85,7 @@ define(["jquery"], function($) {
                                 // 3. The "Breezy" Update: Use reprompt() instead of valueChanged()
                                 // oPage.reprompt() often bypasses the blocked 'Working...' heartbeat
                                 // while still forcing the Conditional Blocks to update.
-                                oPage.reprompt();
+                                oPage.finish();
                         }
                 }
 
