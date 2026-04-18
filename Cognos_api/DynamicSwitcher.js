@@ -19,11 +19,8 @@ define(["jquery"], function($) {
                         }
                         this.render(oControlHost);
 
-                        // CRITICAL: Tell Cognos the control is ready.
-                        // This hides the initial "Working..." spinner.
-                        if (typeof fnDoneInitializing === "function") {
-                                fnDoneInitializing();
-                        }
+                        fnDoneInitializing();
+
                 }
 
                 // render: Builds the interface.
