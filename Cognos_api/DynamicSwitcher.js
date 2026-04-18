@@ -67,15 +67,26 @@ define(["jquery"], function($) {
                 handleNavigation(targetID) {
                         const oPage = this.oControlHost.page;
 
+                        // 1. Correct the User Role check
+                        // getValues() returns an array; we need to check the first element.
                         const userSelection = oPage.getControlByName("p_UserRole").getValues();
+                        const userRole = (userSelection && userSelection.length > 0) ? userSelection[0].use : "";
 
-                        if (targetID === 5 && userSelection.use !== 'Admin') {
+                        if (targetID === 5 && userRole !== 'Admin') {
                                 alert("Access Denied: Only Admins can load the audit Query.");
+                                return; // Stop execution if unauthorized
                         }
 
-                        oPage.getControlByName(this.targetParam).setValues([{ "use": targetID }]);
-                        this.oControlHost.valueChanged();
+                        // 2. Set the target parameter
+                        const targetCtrl = oPage.getControlByName(this.targetParam);
+                        if (targetCtrl) {
+                                targetCtrl.setValues([{ "use": targetID.toString() }]);
 
+                                // 3. The "Breezy" Update: Use reprompt() instead of valueChanged()
+                                // oPage.reprompt() often bypasses the blocked 'Working...' heartbeat
+                                // while still forcing the Conditional Blocks to update.
+                                oPage.reprompt();
+                        }
                 }
 
 
