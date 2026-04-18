@@ -55,25 +55,38 @@ define(["jquery"], function($) {
                         $container.append($wrapper);
                 }
 
+
+
                 handleNavigation(targetID) {
                         const oPage = this.oControlHost.page;
 
-                        // User Role logic check (mirroring your App.js filter style)
-                        const userSelection = oPage.getControlByName("p_UserRole").getValues();
-                        const userRole = (userSelection && userSelection.length > 0) ? userSelection[0].use : "";
+                        // 1. DEFENSIVE CHECK for the User Role control
+                        const roleCtrl = oPage.getControlByName("p_UserRole");
 
-                        if (targetID === 5 && userRole !== 'Admin') {
-                                alert("Access Denied: Only Admins can load the Audit Query.");
-                                return;
+                        if (roleCtrl) {
+                                const userSelection = roleCtrl.getValues();
+                                const userRole = (userSelection && userSelection.length > 0) ? userSelection[0].use : "";
+
+                                if (targetID === 5 && userRole !== 'Admin') {
+                                        alert("Access Denied: Only Admins can load the Audit Query.");
+                                        return;
+                                }
+                        } else {
+                                // If the control is missing, log it so you can verify the name in the report
+                                console.warn("Control 'p_UserRole' not found on this page.");
                         }
 
-                        const ctrl = oPage.getControlByName(this.targetParam);
-                        if (ctrl) {
-                                ctrl.setValues([{ "use": targetID.toString() }]);
-                                // Refresh the report state
+                        // 2. DEFENSIVE CHECK for the Target Parameter
+                        const targetCtrl = oPage.getControlByName(this.targetParam);
+                        if (targetCtrl) {
+                                targetCtrl.setValues([{ "use": targetID.toString() }]);
                                 this.oControlHost.valueChanged();
+                        } else {
+                                console.error("Target control '" + this.targetParam + "' not found.");
                         }
                 }
+
+
         }
 
         return DynamicSwitcher;
