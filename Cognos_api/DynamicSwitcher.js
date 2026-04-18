@@ -19,7 +19,7 @@ define(["jquery"], function($) {
                         }
                         this.render(oControlHost);
 
-                        fnDoneInitializing();
+                        this.fnDoneInitializing();
 
                 }
 
