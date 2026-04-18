@@ -10,7 +10,6 @@ define(["jquery"], function($) {
                 }
 
 
-                // Add the 3rd argument: fnDoneInitializing
                 initialize(oControlHost, oConfig, fnDoneInitializing) {
                         this.oControlHost = oControlHost;
                         this.config = oConfig;
@@ -22,11 +21,17 @@ define(["jquery"], function($) {
                         // Draw your buttons
                         this.render(oControlHost);
 
-                        fnDoneInitializing();
-
+                        /**
+                         * Safety Check: Only call if it exists.
+                         * If fnDoneInitializing is missing, Cognos is likely
+                         * not waiting for a signal for this specific control.
+                         */
+                        if (typeof fnDoneInitializing === "function") {
+                                fnDoneInitializing();
+                        } else {
+                                console.warn("fnDoneInitializing was not provided by Cognos.");
+                        }
                 }
-
-
 
                 // render: Builds the interface.
                 // Instead of just buttons, we can check current report data here.
