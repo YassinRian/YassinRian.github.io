@@ -6,6 +6,8 @@ define(["jquery"], function($){
     MyControl.prototype.draw = function(oControlHost) {
         const container = oControlHost.container;
 
+        $(container).html("<div id='duck-status'>Testing DuckDB...</div>");
+
         const workerPath = "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js";
 
         try {
