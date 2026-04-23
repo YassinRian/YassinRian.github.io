@@ -21,45 +21,51 @@ define([
     }
 
     async setData(oControlHost, oData) {
-        console.log(oData.name);
-      if (oData.name === "store_cashflow") {
-        // SAFETY CHECK: If rows don't exist, stop here and log it
+    console.log("Main: setData triggered for store:", oData.name);
+
+    if (oData.name === "store_cashflow") {
+        // 1. Check if View is ready (avoids the 'null' error)
+        if (!this.view) {
+            console.warn("Main: setData called before draw(). Waiting...");
+            return; 
+        }
+
+        // 2. Check if data actually exists
         if (!oData.rows || oData.rows.length === 0) {
-          console.warn(
-            "Main: No data rows received! Check Categories/Values slots.",
-          );
-          this.view.updateStatus("Wachten op data configuratie...");
-          return;
+            console.warn("Main: No data rows received! Check Categories/Values slots.");
+            this.view.updateStatus("Wachten op data configuratie...");
+            return;
         }
 
-        // Initialize ECharts if it's the first data load
-        if (!this.chart) {
-          const node = this.view.getChartNode();
-          if (node) {
-            this.chart = echarts.init(node);
-            window.addEventListener("resize", () => this.chart.resize());
-          }
-        }
-
+        // 3. If we get here, we have data! 
+        this.view.updateStatus("Data ontvangen: " + oData.rows.length + " rijen.");
+        
         try {
-          this.view.updateStatus("Initialiseren DuckDB...");
-          await this.engine.init();
+            // Init ECharts if not done
+            if (!this.chart) {
+                const node = this.view.getChartNode();
+                if (node) {
+                    this.chart = echarts.init(node);
+                    window.addEventListener('resize', () => this.chart.resize());
+                }
+            }
 
-          this.view.updateStatus("Data inladen...");
-          const data = await this.engine.insertData(
-            "cashflow",
-            oData.columnNames,
-            oData.rows,
-          );
-
-          this.view.updateStatus("Klaar! " + data.length + " rijen verwerkt.");
-          console.log("Main: Pipeline complete. System ready for SQL.");
+            await this.engine.init();
+            await this.engine.insertData("cashflow", oData.columnNames, oData.rows);
+            this.view.updateStatus("DuckDB Ready! Rijen: " + oData.rows.length);
+            
         } catch (error) {
-          this.view.updateStatus("Fout: " + error.message);
-          console.error("Main Error:", error);
+            console.error("setData Error:", error);
+            this.view.updateStatus("Fout: " + error.message);
         }
-      }
     }
+}
+
+
+
+
+
+
   }
   return CashflowController;
 });
