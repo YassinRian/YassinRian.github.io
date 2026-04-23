@@ -17,7 +17,7 @@ define([
     }
 
     draw(oControlHost) {
-     this.view = new CashflowView(oControlHost.container);
+     this.view = new CashflowView(oControlHost);
      this.view.renderLayout();
 
     }
