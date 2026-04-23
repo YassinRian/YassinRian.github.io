@@ -1,49 +1,55 @@
 define(["jquery"], function($) {
-        "use strict";
+    "use strict";
 
-        class CashflowView {
-                constructor(oControlHost) {
-                        this.$container = $(oControlHost.container);
-                        this.chartId = "rtm-cashflow-chart-" + oControlHost.id
-                }
+    class CashflowView {
+        constructor(oControlHost) {
+            this.$container = $(oControlHost.container);
+            this.chartId = "rtm-cashflow-chart-" + oControlHost.id;
+        }
 
-                renderLayout() {
-                        // 1. Create Rotterdam-specific Styles
-                        const style = `
+        renderLayout() {
+            const style = `
                 <style>
-                    .rtm-dash-wrapper { border: 1px solid #004699; background: #fff; border-radius: 4px; overflow: hidden; }
-                    .rtm-toolbar { background: #004699; color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
-                    .rtm-chart-canvas { width: 100%; height: 500px; padding: 10px; box-sizing: border-box; }
-                    .rtm-loading-overlay { font-style: italic; color: #666; font-size: 0.9em; }
+                    .rtm-dash-wrapper { 
+                        border: 3px solid #004699; 
+                        background: #fff; 
+                        border-radius: 4px; 
+                        min-height: 500px;
+                    }
+                    .rtm-toolbar { 
+                        background: #004699; 
+                        color: white; 
+                        padding: 12px; 
+                        font-family: sans-serif;
+                    }
+                    .rtm-chart-canvas { 
+                        width: 100%; 
+                        height: 500px; 
+                        background: #f9f9f9;
+                    }
+                    .rtm-status { padding: 10px; color: #666; font-size: 12px; }
                 </style>
             `;
 
-                        // 2. Build the HTML Layout
-                        const layout = `
+            const layout = `
                 <div class="rtm-dash-wrapper">
-                    <div class="rtm-toolbar">
-                        <span>Project Cashflow - Gemeente Rotterdam</span>
-                        <div id="filter-anchor"></div>
-                    </div>
-                    <div id="${this.chartId}" class="rtm-chart-canvas">
-                        <span class="rtm-loading-overlay">DuckDB initialiseren...</span>
-                    </div>
+                    <div class="rtm-toolbar">Project Cashflow - Rotterdam</div>
+                    <div id="rtm-status-msg" class="rtm-status">Wachten op data...</div>
+                    <div id="${this.chartId}" class="rtm-chart-canvas"></div>
                 </div>
             `;
 
-                        // 3. Inject into the Cognos container
-                        this.$container.empty().append(style).append(layout);
-                }
+            this.$container.empty().append(style).append(layout);
+        }
 
-                getChartNode() {
-                        // Search specifically for the div inside our own container
-                        const $node = this.$container.find(`.rtm-chart-canvas`);
-                        return $node[0]; // Return the raw DOM element for ECharts
-                }
+        getChartNode() {
+            // Scoped search inside this container
+            return this.$container.find("#" + this.chartId)[0];
+        }
 
-                updateStatus(text) {
-                        this.$container.find(".rtm-loading-overlay").text(text);
-                }
-        };
-        return CashflowView;
+        updateStatus(text) {
+            this.$container.find("#rtm-status-msg").text(text);
+        }
+    }
+    return CashflowView;
 });
