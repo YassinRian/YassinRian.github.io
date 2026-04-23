@@ -6,6 +6,8 @@ define([
 ], function($, echarts, DuckDbManager, CashflowView) {
         "use strict"
 
+        console.log("!!! THE SCRIPT HAS LOADED !!!"); // ADD THIS LINE
+
         class CashflowController {
                 constructor() {
                         this.engine = new DuckDbManager();
