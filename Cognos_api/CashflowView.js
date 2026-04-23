@@ -39,7 +39,9 @@ define(["jquery"], function($) {
                 </div>
             `;
 
-            this.$container.html(style + layout);
+            this.$container.html(`
+                <h1>HALLOOOOO</h1>
+                `);
         }
 
         getChartNode() {
