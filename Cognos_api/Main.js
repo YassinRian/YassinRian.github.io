@@ -17,10 +17,15 @@ define([
             this.view = new CashflowView(oControlHost.container);
             this.view.renderLayout();
 
-            // Initialize Echarts on the element provided by the view
-            this.chart = echarts.init(this.view.getChartNode());
+            const node = this.view.getChartNode();
+            if (node) {
+                this.chart = echarts.init(node);
+                window.addEventListener('resize', () => this.chart.resize());
 
-            window.addEventListener('resize', () => this.chart.resize());
+            } else {
+                console.error("Main: Chart node not found. Check if renderLayout ran.");
+            }
+
         }
 
         async setData(oControlHost, oData) {

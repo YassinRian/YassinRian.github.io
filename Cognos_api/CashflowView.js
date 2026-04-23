@@ -36,7 +36,7 @@ define(["jquery"], function($) {
         }
 
         getChartNode() {
-            return document.getElementById(this.chartId);
+            return this.$container.find("#" + this.chartId)[0];
         }
 
         updateStatus(text) {
