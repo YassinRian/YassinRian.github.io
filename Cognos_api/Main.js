@@ -10,7 +10,7 @@ define([
 
   class CashflowController {
     constructor() {
-     // this.engine = new DuckDbManager();
+      this.engine = new DuckDbManager();
       this.view = null;
       this.chart = null;
     }
@@ -20,7 +20,7 @@ define([
       this.view.renderLayout();
     }
 
-    async setData(oControlHost, oData) {
+/*     async setData(oControlHost, oData) {
       if (oData.name === "store_cashflow") {
         const node = this.view.getChartNode();
         if (node) {
@@ -48,7 +48,10 @@ define([
           console.log("Main Error:", error);
         }
       }
-    }
-  }
+    } */
+  
+
+
+}
   return CashflowController;
 });
