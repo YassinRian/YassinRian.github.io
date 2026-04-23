@@ -21,6 +21,7 @@ define([
     }
 
     async setData(oControlHost, oData) {
+        console.log(oData.name);
       if (oData.name === "store_cashflow") {
         // SAFETY CHECK: If rows don't exist, stop here and log it
         if (!oData.rows || oData.rows.length === 0) {
