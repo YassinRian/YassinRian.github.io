@@ -1,15 +1,15 @@
 define(["jquery"], function($) {
-    "use strict";
+        "use strict";
 
-    class CashflowView {
-        constructor(oControlHost) {
-            this.$container = $(oControlHost.container);
-            this.chartId = "rtm-cashflow-chart-" + oControlHost.id
-        }
+        class CashflowView {
+                constructor(oControlHost) {
+                        this.$container = $(oControlHost.container);
+                        this.chartId = "rtm-cashflow-chart-" + oControlHost.id
+                }
 
-        renderLayout() {
-            // 1. Create Rotterdam-specific Styles
-            const style = `
+                renderLayout() {
+                        // 1. Create Rotterdam-specific Styles
+                        const style = `
                 <style>
                     .rtm-dash-wrapper { border: 1px solid #004699; background: #fff; border-radius: 4px; overflow: hidden; }
                     .rtm-toolbar { background: #004699; color: white; padding: 12px; display: flex; justify-content: space-between; align-items: center; }
@@ -18,8 +18,8 @@ define(["jquery"], function($) {
                 </style>
             `;
 
-            // 2. Build the HTML Layout
-            const layout = `
+                        // 2. Build the HTML Layout
+                        const layout = `
                 <div class="rtm-dash-wrapper">
                     <div class="rtm-toolbar">
                         <span>Project Cashflow - Gemeente Rotterdam</span>
@@ -31,17 +31,19 @@ define(["jquery"], function($) {
                 </div>
             `;
 
-            // 3. Inject into the Cognos container
-            this.$container.empty().append(style).append(layout);
-        }
+                        // 3. Inject into the Cognos container
+                        this.$container.empty().append(style).append(layout);
+                }
 
-        getChartNode() {
-            return this.$container.find("#" + this.chartId)[0];
-        }
+                getChartNode() {
+                        // Search specifically for the div inside our own container
+                        const $node = this.$container.find(`.rtm-chart-canvas`);
+                        return $node[0]; // Return the raw DOM element for ECharts
+                }
 
-        updateStatus(text) {
-            this.$container.find(".rtm-loading-overlay").text(text);
-        }
-    };
-    return CashflowView;
+                updateStatus(text) {
+                        this.$container.find(".rtm-loading-overlay").text(text);
+                }
+        };
+        return CashflowView;
 });
