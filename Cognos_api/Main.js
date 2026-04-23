@@ -3,7 +3,10 @@ define([
   //"https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js",
   //"https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js",
   "https://yassinrian.netlify.app/Cognos_api/CashflowView.js",
-], function ($, echarts, DuckDbManager, CashflowView) {
+], function ($, 
+        //echarts, 
+        //DuckDbManager, 
+        CashflowView) {
   "use strict";
 
   class CashflowController {
