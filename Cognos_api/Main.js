@@ -16,8 +16,11 @@ define([
     }
 
     draw(oControlHost) {
-      this.view = new CashflowView(oControlHost.container);
-      this.view.renderLayout();
+     // this.view = new CashflowView(oControlHost.container);
+     // this.view.renderLayout();
+      this.$view = $(oControlHost.container)
+      this.$view.html(`<h1>Hallo</h1>`)
+
     }
 
 /*     async setData(oControlHost, oData) {
