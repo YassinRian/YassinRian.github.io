@@ -27,28 +27,32 @@ define([
     }
 
     async setData(oControlHost, oData) {
-        console.log(oData);
       if (oData.name === "store_cashflow") {
-        // If view isn't ready, put data in the backpack and stop
         if (!this.view) {
-          console.warn("Main: Data arrived early. Saving to pendingData.");
           this.pendingData = oData;
           return;
         }
 
-        // If we have no rows, wait
-        if (!oData.rows || oData.rows.length === 0) {
+        // --- NEW EXTRACTION LOGIC ---
+        // Get rows and column names safely
+        const rows = oData.rows;
+        const colNames = oData.columnNames || oData.columns.map((c) => c.name);
+
+        if (!rows || rows.length === 0) {
           this.view.updateStatus("Wachten op data slots...");
           return;
         }
 
-        this.view.updateStatus(
-          "Data ontvangen: " + oData.rows.length + " rijen.",
+        console.log(
+          "Main: Data confirmed. Rows:",
+          rows.length,
+          "Cols:",
+          colNames,
         );
-        this.pendingData = null; // Clear the backpack
+        this.view.updateStatus("Data ontvangen: " + rows.length + " rijen.");
 
         try {
-          // Initialize ECharts node
+          // Ensure ECharts is ready
           if (!this.chart) {
             const node = this.view.getChartNode();
             if (node) {
@@ -57,16 +61,15 @@ define([
           }
 
           await this.engine.init();
-          await this.engine.insertData(
-            "cashflow",
-            oData.columnNames,
-            oData.rows,
-          );
-          this.view.updateStatus("Systeem Gereed! Rijen: " + oData.rows.length);
 
-          console.log("SUCCESS: Data is loaded in DuckDB and ready for SQL.");
+          // Pass the extracted rows/cols to DuckDB
+          await this.engine.insertData("cashflow", colNames, rows);
+
+          this.view.updateStatus("Systeem Gereed! Rijen: " + rows.length);
+          console.log("Main: DuckDB is loaded with 87 rows.");
         } catch (error) {
           console.error("setData Error:", error);
+          this.view.updateStatus("Fout in verwerking.");
         }
       }
     }
