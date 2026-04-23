@@ -16,20 +16,8 @@ define([
     }
 
     draw(oControlHost) {
-      //  this.view = new CashflowView(oControlHost.container);
-      //  this.view.renderLayout();
-
-      console.log("Controller: draw() triggered!");
-
-      // Manual HTML injection - bypasses the View brick entirely
-      oControlHost.container.innerHTML = `
-        <div style="border: 10px solid green; padding: 20px; background: white;">
-            <h1>BRICK TEST SUCCESSFUL</h1>
-            <p>If you see this, the Main.js handshake is perfect.</p>
-        </div>
-    `;
-
-      console.log("Controller: Manual HTML injected.");
+      this.view = new CashflowView(oControlHost.container);
+      this.view.renderLayout();
     }
 
     async setData(oControlHost, oData) {
