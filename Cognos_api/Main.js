@@ -10,7 +10,7 @@ define([
 
   class CashflowController {
     constructor() {
-      this.engine = new DuckDbManager();
+     // this.engine = new DuckDbManager();
       this.view = null;
       this.chart = null;
     }
