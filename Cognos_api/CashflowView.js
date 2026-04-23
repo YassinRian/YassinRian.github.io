@@ -39,7 +39,7 @@ define(["jquery"], function($) {
                 </div>
             `;
 
-            this.container.innerHTML = style + layout;
+            this.$container.html(style + layout);
         }
 
         getChartNode() {
