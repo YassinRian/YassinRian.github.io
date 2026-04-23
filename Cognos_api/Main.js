@@ -27,6 +27,7 @@ define([
     }
 
     async setData(oControlHost, oData) {
+        console.log(oData);
       if (oData.name === "store_cashflow") {
         // If view isn't ready, put data in the backpack and stop
         if (!this.view) {
