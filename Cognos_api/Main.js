@@ -1,50 +1,66 @@
 define([
-        "jquery",
-        "https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js",
-        "https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js",
-        "https://yassinrian.netlify.app/Cognos_api/CashflowView.js"
-], function($, echarts, DuckDbManager, CashflowView) {
-        "use strict"
+  "jquery",
+  "https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js",
+  "https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js",
+  "https://yassinrian.netlify.app/Cognos_api/CashflowView.js",
+], function ($, echarts, DuckDbManager, CashflowView) {
+  "use strict";
 
-        console.log("!!! THE SCRIPT HAS LOADED !!!"); // ADD THIS LINE
+  console.log("!!! THE SCRIPT HAS LOADED !!!"); // ADD THIS LINE
 
-        class CashflowController {
-                constructor() {
-                        this.engine = new DuckDbManager();
-                        this.view = null;
-                        this.chart = null;
-                }
+  class CashflowController {
+    constructor() {
+      this.engine = new DuckDbManager();
+      this.view = null;
+      this.chart = null;
+    }
 
-                draw(oControlHost) {
-                        this.view = new CashflowView(oControlHost.container);
-                        this.view.renderLayout();
+    draw(oControlHost) {
+      //  this.view = new CashflowView(oControlHost.container);
+      //  this.view.renderLayout();
 
-                }
+      console.log("Controller: draw() triggered!");
 
-                async setData(oControlHost, oData) {
-                        if (oData.name === "store_cashflow") {
-                                const node = this.view.getChartNode();
-                                if (node) {
-                                        this.chart = echarts.init(node);
-                                        window.addEventListener('resize', () => this.chart.resize());
+      // Manual HTML injection - bypasses the View brick entirely
+      oControlHost.container.innerHTML = `
+        <div style="border: 10px solid green; padding: 20px; background: white;">
+            <h1>BRICK TEST SUCCESSFUL</h1>
+            <p>If you see this, the Main.js handshake is perfect.</p>
+        </div>
+    `;
 
-                                } else {
-                                        console.error("Main: Chart node not found. Check if renderLayout ran.");
-                                }
+      console.log("Controller: Manual HTML injected.");
+    }
 
-                                this.view.updateStatus("Data ontvangen. Engine start...");
-
-                                try {
-                                        await this.engine.init();
-                                        await this.engine.insertData("cashflow", oData.columnNames, oData.rows);
-                                        this.view.updateStatus("Data geladen in DuckDB! (Check Console)");
-                                        console.log("Main: Ready to run local SQL queries.");
-                                } catch (error) {
-                                        this.view.updateStatus("Fout: " + error.message);
-                                        console.log("Main Error:", error);
-                                }
-                        }
-                }
+    async setData(oControlHost, oData) {
+      if (oData.name === "store_cashflow") {
+        const node = this.view.getChartNode();
+        if (node) {
+          this.chart = echarts.init(node);
+          window.addEventListener("resize", () => this.chart.resize());
+        } else {
+          console.error(
+            "Main: Chart node not found. Check if renderLayout ran.",
+          );
         }
-        return CashflowController;
+
+        this.view.updateStatus("Data ontvangen. Engine start...");
+
+        try {
+          await this.engine.init();
+          await this.engine.insertData(
+            "cashflow",
+            oData.columnNames,
+            oData.rows,
+          );
+          this.view.updateStatus("Data geladen in DuckDB! (Check Console)");
+          console.log("Main: Ready to run local SQL queries.");
+        } catch (error) {
+          this.view.updateStatus("Fout: " + error.message);
+          console.log("Main Error:", error);
+        }
+      }
+    }
+  }
+  return CashflowController;
 });
