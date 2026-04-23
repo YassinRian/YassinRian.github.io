@@ -11,61 +11,65 @@ define([
       this.engine = new DuckDbManager();
       this.view = null;
       this.chart = null;
+      this.pendingData = null; // Our "Backpack"
     }
 
     draw(oControlHost) {
       console.log("Main: draw() started");
-      // CORRECTED: Passing the full host object
       this.view = new CashflowView(oControlHost);
       this.view.renderLayout();
+
+      // Check if data arrived while we were building
+      if (this.pendingData) {
+        console.log("Main: Processing pending data from backpack...");
+        this.setData(oControlHost, this.pendingData);
+      }
     }
 
     async setData(oControlHost, oData) {
-    console.log("Main: setData triggered for store:", oData.name);
-
-    if (oData.name === "store_cashflow") {
-        // 1. Check if View is ready (avoids the 'null' error)
+      if (oData.name === "store_cashflow") {
+        // If view isn't ready, put data in the backpack and stop
         if (!this.view) {
-            console.warn("Main: setData called before draw(). Waiting...");
-            return; 
+          console.warn("Main: Data arrived early. Saving to pendingData.");
+          this.pendingData = oData;
+          return;
         }
 
-        // 2. Check if data actually exists
+        // If we have no rows, wait
         if (!oData.rows || oData.rows.length === 0) {
-            console.warn("Main: No data rows received! Check Categories/Values slots.");
-            this.view.updateStatus("Wachten op data configuratie...");
-            return;
+          this.view.updateStatus("Wachten op data slots...");
+          return;
         }
 
-        // 3. If we get here, we have data! 
-        this.view.updateStatus("Data ontvangen: " + oData.rows.length + " rijen.");
-        
+        this.view.updateStatus(
+          "Data ontvangen: " + oData.rows.length + " rijen.",
+        );
+        this.pendingData = null; // Clear the backpack
+
         try {
-            // Init ECharts if not done
-            if (!this.chart) {
-                const node = this.view.getChartNode();
-                if (node) {
-                    this.chart = echarts.init(node);
-                    window.addEventListener('resize', () => this.chart.resize());
-                }
+          // Initialize ECharts node
+          if (!this.chart) {
+            const node = this.view.getChartNode();
+            if (node) {
+              this.chart = echarts.init(node);
             }
+          }
 
-            await this.engine.init();
-            await this.engine.insertData("cashflow", oData.columnNames, oData.rows);
-            this.view.updateStatus("DuckDB Ready! Rijen: " + oData.rows.length);
-            
+          await this.engine.init();
+          await this.engine.insertData(
+            "cashflow",
+            oData.columnNames,
+            oData.rows,
+          );
+          this.view.updateStatus("Systeem Gereed! Rijen: " + oData.rows.length);
+
+          console.log("SUCCESS: Data is loaded in DuckDB and ready for SQL.");
         } catch (error) {
-            console.error("setData Error:", error);
-            this.view.updateStatus("Fout: " + error.message);
+          console.error("setData Error:", error);
         }
+      }
     }
-}
-
-
-
-
-
-
   }
+
   return CashflowController;
 });
