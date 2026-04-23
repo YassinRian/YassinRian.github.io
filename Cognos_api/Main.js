@@ -1,12 +1,10 @@
 define([
   "jquery",
-  "https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js",
-  "https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js",
+  //"https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js",
+  //"https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js",
   "https://yassinrian.netlify.app/Cognos_api/CashflowView.js",
 ], function ($, echarts, DuckDbManager, CashflowView) {
   "use strict";
-
-  console.log("!!! THE SCRIPT HAS LOADED !!!"); // ADD THIS LINE
 
   class CashflowController {
     constructor() {
@@ -16,10 +14,8 @@ define([
     }
 
     draw(oControlHost) {
-     // this.view = new CashflowView(oControlHost.container);
-     // this.view.renderLayout();
-      this.$view = $(oControlHost.container)
-      this.$view.html(`<h1>Hallo</h1>`)
+     this.view = new CashflowView(oControlHost.container);
+     this.view.renderLayout();
 
     }
 
