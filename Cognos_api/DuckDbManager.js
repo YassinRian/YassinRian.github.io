@@ -59,26 +59,54 @@ define([], function () {
     }
 
     async insertData(tableName, columnNames, rows) {
-      console.log(`Ingesting ${rows.length} rows into table: ${tableName}`);
-
-      // This is the transformation you had working
-      const dataObjects = rows.map((row) => {
-        let obj = {};
-        columnNames.forEach((col, index) => {
-          obj[col] = row[index];
+      if (!this.conn) {
+        console.warn("Using simulation mode - no SQL connection.");
+        this.storedData = rows.map((row) => {
+          let obj = {};
+          columnNames.forEach((col, i) => (obj[col] = row[i]));
+          return obj;
         });
-        return obj;
-      });
+        return;
+      }
 
-      this.storedData = dataObjects;
-      console.log("Data transformed for DuckDB:", dataObjects[0]);
+      try {
+        console.log(`DuckDB: Ingesting ${rows.length} rows...`);
+
+        // Convert rows to JSON
+        const dataObjects = rows.map((row) => {
+          let obj = {};
+          columnNames.forEach((col, i) => (obj[col] = row[i]));
+          return obj;
+        });
+
+        const jsonString = JSON.stringify(dataObjects);
+
+        // Register the virtual file and create the table
+        await this.db.registerFileText("data.json", jsonString);
+        await this.conn.query(
+          `CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_json_auto('data.json')`,
+        );
+
+        console.log(`DuckDB: Table ${tableName} is ready for SQL!`);
+      } catch (e) {
+        console.error("DuckDB Ingestion Error:", e);
+      }
     }
 
     async query(sql) {
-      console.log("Executing Local SQL (Simulation Mode):", sql);
-      // Since the worker is just handshaking, we return the transformed data
-      // directly so your chart doesn't break.
-      return this.storedData;
+      if (!this.conn) {
+        console.log("Simulating query (returning raw data)");
+        return this.storedData;
+      }
+
+      try {
+        const result = await this.conn.query(sql);
+        // Convert the DuckDB Arrow result into a standard JS Array
+        return result.toArray().map((row) => row.toJSON());
+      } catch (e) {
+        console.error("SQL Query Error:", e);
+        return [];
+      }
     }
   }
   return DuckDbManager;
