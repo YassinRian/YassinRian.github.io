@@ -11,54 +11,36 @@ define([], function () {
     async init() {
       if (this.isInitialized) return;
 
+      // 1. The exact paths we verified earlier
+      const libPath =
+        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/duckdb-browser-eh";
+      const workerPath = libPath + ".worker.js";
+      const wasmPath = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
+
       try {
-        // 1. Load Library
-        if (!window.duckdb) {
-          await new Promise((resolve) => {
-            const script = document.createElement("script");
-            script.src =
-              "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.js";
-            script.onload = resolve;
-            document.head.appendChild(script);
-          });
-        }
-
-        const duckdb = window.duckdb;
-        const version = "1.28.0";
-        const baseUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${version}/dist/`;
-
-        // 2. Fetch Worker and turn into local Blob
-        const workerRes = await fetch(baseUrl + "duckdb-browser-eh.worker.js");
-        const workerBlob = new Blob([await workerRes.text()], {
-          type: "text/javascript",
+        // 2. Use Cognos's internal 'require' to get the library
+        const duckdb = await new Promise((resolve, reject) => {
+          require([libPath], (mod) => resolve(mod), (err) => reject(err));
         });
-        const workerUrl = URL.createObjectURL(workerBlob);
 
-        // 3. Fetch WASM and turn into local Blob
-        const wasmRes = await fetch(baseUrl + "duckdb-eh.wasm");
-        const wasmBlob = new Blob([await wasmRes.arrayBuffer()], {
-          type: "application/wasm",
-        });
-        const wasmUrl = URL.createObjectURL(wasmBlob);
+        // 3. Spawn the worker we already know works
+        this.worker = new Worker(workerPath);
 
-        // 4. Start Engine
-        this.worker = new Worker(workerUrl);
+        // 4. Initialize the engine
         this.db = new duckdb.AsyncDuckDB(
           new duckdb.ConsoleLogger(),
           this.worker,
         );
 
-        await this.db.instantiate(wasmUrl);
+        // This is likely where it was hanging.
+        // We use the direct WASM path without a CDN fallback.
+        await this.db.instantiate(wasmPath);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
-
-        // Cleanup URLs
-        URL.revokeObjectURL(workerUrl);
-        URL.revokeObjectURL(wasmUrl);
       } catch (e) {
-        console.error("DuckDB Deep Init Error:", e);
-        throw new Error("Initialisatie mislukt: " + e.message);
+        console.error("DuckDB Local Init Failed:", e);
+        throw new Error("Local lader fout: " + e.message);
       }
     }
 
