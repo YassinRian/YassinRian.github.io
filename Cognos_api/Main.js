@@ -19,6 +19,7 @@ define(["https://yassinrian.netlify.app/Cognos_api/CashflowView.js"], function (
     }
 
     setData(oControlHost, oData) {
+      console.log("Incoming Store Name:", oData.name);
       if (oData.name === "store_cashflow") {
         if (!this.view) {
           this.pendingData = oData;
