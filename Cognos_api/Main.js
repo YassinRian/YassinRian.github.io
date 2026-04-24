@@ -19,6 +19,7 @@ define([
         }
 
         setData(oControlHost, oData) {
+          console.log(oData);
             if (oData.name === "store_cashflow") {
                 if (!this.view) {
                     this.pendingData = oData;
