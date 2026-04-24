@@ -1,6 +1,6 @@
 // We add the internal Cognos path directly to the define dependencies
 define([
-  "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/duckdb-browser-eh",
+  "https://cognos.ontw.rotterdam.local/ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.js",
 ], function (duckdb) {
   "use strict";
 
