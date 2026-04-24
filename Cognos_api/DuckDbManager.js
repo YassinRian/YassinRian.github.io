@@ -1,5 +1,5 @@
 define([
-  "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-eh",
+  "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.js?",
 ], function (duckdb) {
   "use strict";
 
@@ -13,55 +13,46 @@ define([
     async init() {
       if (this.isInitialized) return;
 
-      // Local paths for Worker and WASM (The Crew and Brain)
-      const localWorker =
-        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js";
-      const localWasm = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
-
       try {
-        // 1. The 'duckdb' object is passed in by the define block above
-        if (!duckdb) throw new Error("DuckDB module failed to load from CDN.");
+        // 1. Logic from your screenshot: Get JSDelivr Bundles
+        // Note: if the module is on window, we use window.duckdb
+        const lib = duckdb || window.duckdb;
+        const JSDELIVR_BUNDLES = lib.getJsDelivrBundles();
 
-        // 2. The Blob Bypass for the WASM brain
-        // (Crucial for avoiding the 'Engine Start' hang)
-        const wasmRes = await fetch(localWasm);
-        const wasmBlob = new Blob([await wasmRes.arrayBuffer()], {
-          type: "application/wasm",
-        });
-        const wasmUrl = URL.createObjectURL(wasmBlob);
+        // 2. Select a bundle based on browser checks
+        const bundle = await lib.selectBundle(JSDELIVR_BUNDLES);
 
-        // 3. Initialize the Engine
-        this.worker = new Worker(localWorker);
-        this.db = new duckdb.AsyncDuckDB(
-          new duckdb.ConsoleLogger(),
-          this.worker,
+        // 3. Create the worker URL via Blob (as seen in your screenshot)
+        const worker_url = URL.createObjectURL(
+          new Blob([`importScripts("${bundle.mainWorker}");`], {
+            type: "text/javascript",
+          }),
         );
 
-        await this.db.instantiate(wasmUrl);
+        // 4. Instantiate the asynchronous version of DuckDB-wasm
+        this.worker = new Worker(worker_url);
+        const logger = new lib.ConsoleLogger();
 
+        this.db = new lib.AsyncDuckDB(logger, this.worker);
+
+        // Use the bundle's main module and pthread worker as shown in your screenshot
+        await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+
+        // Revoke the URL after instantiation
+        URL.revokeObjectURL(worker_url);
+
+        // 5. Create connection
         this.conn = await this.db.connect();
         this.isInitialized = true;
 
-        console.log("DuckDB Module loaded and SQL engine active!");
-        URL.revokeObjectURL(wasmUrl);
+        console.log("DuckDB initialized using JSDelivr Bundles successfully.");
       } catch (e) {
-        console.error("DuckDB Module Error:", e);
-        // Safety net
-        this.isInitialized = true;
-        this.simulation = true;
+        console.error("DuckDB Boot Error:", e);
+        throw new Error("DuckDB failed: " + e.message);
       }
     }
 
     async insertData(tableName, columnNames, rows) {
-      if (this.simulation) {
-        this.storedData = rows.map((row) => {
-          let obj = {};
-          columnNames.forEach((col, i) => (obj[col] = row[i]));
-          return obj;
-        });
-        return;
-      }
-
       const dataObjects = rows.map((row) => {
         let obj = {};
         columnNames.forEach((col, i) => (obj[col] = row[i]));
@@ -76,7 +67,6 @@ define([
     }
 
     async query(sql) {
-      if (this.simulation) return this.storedData;
       const result = await this.conn.query(sql);
       return result.toArray().map((row) => row.toJSON());
     }
