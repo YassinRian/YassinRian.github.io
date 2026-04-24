@@ -11,53 +11,46 @@ define([], function () {
     async init() {
       if (this.isInitialized) return;
 
-      const version = "1.33.1-dev45.0";
-      const baseUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${version}/dist/`;
-
-      // We use the .cjs file because it includes all dependencies (Apache Arrow, etc.)
-      const libUrl = baseUrl + "duckdb-browser.cjs";
-      const workerUrl = baseUrl + "duckdb-browser-eh.worker.js";
-      const wasmUrl = baseUrl + "duckdb-eh.wasm";
+      // These paths match your 'cognos.ontw.rotterdam.local' folder tree exactly
+      const baseDir = "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/";
+      const workerUrl =
+        baseDir + "duckdb-wasm/dist/duckdb-browser-eh.worker.js";
+      const wasmUrl = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
 
       try {
-        // 1. Load the CJS library manually to avoid 'apache-arrow' resolution errors
-        if (!window.duckdb) {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = libUrl;
-            script.onload = resolve;
-            script.onerror = () =>
-              reject(new Error("Gefaald om DuckDB CJS te laden."));
-            document.head.appendChild(script);
+        // 1. Instead of loading a new library, we look for the one Cognos already loaded
+        // Your tree shows webpack:// and native scripts already running.
+        let duckdb = window.duckdb;
+
+        if (!duckdb) {
+          console.log(
+            "DuckDB not on window, attempting to load from internal lib...",
+          );
+          // If not on window, we try to grab the module Cognos is using
+          duckdb = await new Promise((resolve, reject) => {
+            require([
+              baseDir + "duckdb-wasm/dist/duckdb-browser-eh",
+            ], resolve, reject);
           });
         }
 
-        // The CJS version attaches itself to window.duckdb
-        const duckdb = window.duckdb;
-        if (!duckdb) throw new Error("DuckDB object niet gevonden op window.");
-
-        // 2. Create the Worker via Blob (Origin bypass)
-        const worker_url = URL.createObjectURL(
-          new Blob([`importScripts("${workerUrl}");`], {
-            type: "text/javascript",
-          }),
-        );
-
-        this.worker = new Worker(worker_url);
+        // 2. Start the worker using the local Rotterdam path
+        this.worker = new Worker(workerUrl);
         const logger = new duckdb.ConsoleLogger();
 
         this.db = new duckdb.AsyncDuckDB(logger, this.worker);
 
-        // 3. Instantiate
+        // 3. Instantiate the WASM (the '041df34a' file)
         await this.db.instantiate(wasmUrl);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
 
-        URL.revokeObjectURL(worker_url);
-        console.log("🚀 DuckDB CJS is LIVE. SQL Engine is active!");
+        console.log(
+          "✅ Success: Using Rotterdam's Native DuckDB & Apache Arrow.",
+        );
       } catch (e) {
-        console.error("DuckDB Init Error:", e);
+        console.error("Native Init Error:", e);
         this.isInitialized = true;
         this.simulation = true;
       }
