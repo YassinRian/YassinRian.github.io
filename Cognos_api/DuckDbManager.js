@@ -11,37 +11,42 @@ define([], function () {
     async init() {
       if (this.isInitialized) return;
 
+      // Paths based on your screenshots
+      const distPath =
+        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
+      const wasmPath = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a"; // No extension as per your screenshot
+
       try {
-        // 1. Load the library from CDN
-        if (!window.duckdb) {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src =
-              "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.js";
-            script.onload = resolve;
-            script.onerror = reject;
-            document.head.appendChild(script);
-          });
+        // Check if Cognos already put duckdb on the window
+        let duckdb = window.duckdb;
+
+        // If not, we try to grab it from the global dashboard analytics object
+        if (!duckdb && window.dashboardAnalytics) {
+          duckdb = window.dashboardAnalytics.duckdb;
         }
 
-        const duckdb = window.duckdb;
+        if (!duckdb) {
+          throw new Error(
+            "DuckDB library missing. Ensure Dashboard is enabled.",
+          );
+        }
 
-        // 2. Automatically select the best bundle from the CDN
-        const BUNDLES = duckdb.getJsDelivrBundles();
-        const bundle = await duckdb.selectBundle(BUNDLES);
+        const logger = new duckdb.ConsoleLogger();
+        // Use the specific worker from your 'dist' folder
+        this.worker = new Worker(distPath + "duckdb-browser-eh.worker.js");
 
-        // 3. Create the worker using the CDN worker script
-        const worker = await duckdb.createWorker(bundle.mainWorker);
+        this.db = new duckdb.AsyncDuckDB(logger, this.worker);
 
-        // 4. Instantiate the database
-        this.db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
-        await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+        // Instantiate using the hash-named wasm file in your screenshot
+        await this.db.instantiate(wasmPath);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
       } catch (e) {
-        console.error("DuckDB failed to start:", e);
-        throw e;
+        // Improved error reporting
+        const msg = e.message || "Onbekende fout";
+        console.error("DuckDB Init Error:", e);
+        throw new Error(msg);
       }
     }
 
@@ -56,6 +61,7 @@ define([], function () {
 
       const jsonString = JSON.stringify(dataObjects);
       await this.db.registerFileText("data.json", jsonString);
+      // Using the table creation from your data
       await this.conn.query(
         `CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_json_auto('data.json')`,
       );
