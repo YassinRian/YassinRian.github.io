@@ -1,72 +1,79 @@
-define([], function() {
+define([
+    "https://yassinrian.netlify.app/Cognos_api/CashflowView.js",
+    "https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js"
+], function(CashflowView, DuckDbManager) {
     "use strict";
 
-    class DuckDbManager {
+    class CashflowController {
         constructor() {
-            this.db = null;
-            this.conn = null;
-            this.isInitialized = false;
+            this.view = null;
+            this.engine = new DuckDbManager();
+            this.pendingData = null;
+            this.chart = null;
         }
 
-        async init() {
-            if (this.isInitialized) return;
+        draw(oControlHost) {
+            this.view = new CashflowView(oControlHost);
+            this.view.renderLayout();
 
-            try {
-                // 1. Load the library
-                if (!window.duckdb) {
-                    await new Promise((resolve) => {
-                        const script = document.createElement('script');
-                        script.src = "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.js";
-                        script.onload = resolve;
-                        document.head.appendChild(script);
-                    });
-                }
-
-                const duckdb = window.duckdb;
-                
-                // 2. Setup the bundles
-                const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
-                const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
-
-                // 3. Create worker
-                const worker = await duckdb.createWorker(bundle.mainWorker);
-                
-                // 4. Instantiate
-                this.db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
-                await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
-                
-                this.conn = await this.db.connect();
-                this.isInitialized = true;
-                
-                console.log("DuckDB initialized successfully.");
-            } catch(e) {
-                console.error("DuckDB Init Error:", e);
-                throw e;
+            // Handover if data beat the UI to the finish line
+            if (this.pendingData) {
+                this.setData(oControlHost, this.pendingData);
             }
         }
 
-        async insertData(tableName, columnNames, rows) {
-            // Mapping the rows we got from setData
-            const dataObjects = rows.map(row => {
-                let obj = {};
-                columnNames.forEach((col, index) => {
-                    obj[col] = row[index];
-                });
-                return obj;
-            });
+        async setData(oControlHost, oData) {
+            if (oData.name === "store_cashflow") {
+                // 1. Race condition safety
+                if (!this.view) {
+                    this.pendingData = oData;
+                    return;
+                }
 
-            const jsonString = JSON.stringify(dataObjects);
-            await this.db.registerFileText('data.json', jsonString);
-            
-            // This creates the table and auto-detects types (String vs Number)
-            await this.conn.query(`CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_json_auto('data.json')`);
-            console.log(`Table ${tableName} created with ${rows.length} rows.`);
+                const iRowCount = oData.rowCount;
+                if (iRowCount === 0) {
+                    this.view.updateStatus("Wachten op data...");
+                    return;
+                }
+
+                // 2. Clean Extraction (Cognos DataStore -> Array)
+                const colNames = oData.columnNames;
+                const colCount = oData.columnCount;
+                const allRows = [];
+
+                for (let i = 0; i < iRowCount; i++) {
+                    const row = [];
+                    for (let j = 0; j < colCount; j++) {
+                        row.push(oData.getCellValue(i, j));
+                    }
+                    allRows.push(row);
+                }
+
+                this.pendingData = null;
+
+                // 3. DuckDB Activation
+                try {
+                    this.view.updateStatus("Engine starten...");
+                    await this.engine.init();
+                    
+                    this.view.updateStatus("Data inladen...");
+                    await this.engine.insertData("cashflow", colNames, allRows);
+                    
+                    this.view.updateStatus("Systeem Gereed: " + iRowCount + " rijen.");
+                    
+                    // Final step: Trigger the visual draw
+                    this.renderChart();
+                } catch (error) {
+                    this.view.updateStatus("Fout: " + error.message);
+                }
+            }
         }
 
-        async query(sql) {
-            const result = await this.conn.query(sql);
-            return result.toArray().map(row => row.toJSON());
+        async renderChart() {
+            // This is where we will write the SQL to draw the Rotterdam bars
+            console.log("DuckDB is ready for SQL queries.");
         }
     }
-    return DuckDbManager;
+
+    return CashflowController;
 });

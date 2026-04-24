@@ -1,7 +1,4 @@
-// We add the internal Cognos path directly to the define dependencies
-define([
-  "https://cognos.ontw.rotterdam.local/ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.js",
-], function (duckdb) {
+define([], function () {
   "use strict";
 
   class DuckDbManager {
@@ -14,32 +11,43 @@ define([
     async init() {
       if (this.isInitialized) return;
 
-      // Paths from your internal server screenshots
-      const distPath =
-        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
-      const wasmPath = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
-
       try {
-        // 'duckdb' is now available because we included it in the 'define' above
-        if (!duckdb) throw new Error("Internal DuckDB module not found");
+        // 1. Load the library
+        if (!window.duckdb) {
+          await new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src =
+              "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser.js";
+            script.onload = resolve;
+            document.head.appendChild(script);
+          });
+        }
 
-        const logger = new duckdb.ConsoleLogger();
-        this.worker = new Worker(distPath + "duckdb-browser-eh.worker.js");
+        const duckdb = window.duckdb;
 
-        this.db = new duckdb.AsyncDuckDB(logger, this.worker);
+        // 2. Setup the bundles
+        const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+        const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
-        // Point to that specific wasm hash we saw in your files
-        await this.db.instantiate(wasmPath);
+        // 3. Create worker
+        const worker = await duckdb.createWorker(bundle.mainWorker);
+
+        // 4. Instantiate
+        this.db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
+        await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
+
+        console.log("DuckDB initialized successfully.");
       } catch (e) {
-        console.error("DuckDB local init failed:", e);
-        throw new Error("Local init error: " + e.message);
+        console.error("DuckDB Init Error:", e);
+        throw e;
       }
     }
 
     async insertData(tableName, columnNames, rows) {
+      // Mapping the rows we got from setData
       const dataObjects = rows.map((row) => {
         let obj = {};
         columnNames.forEach((col, index) => {
@@ -50,9 +58,12 @@ define([
 
       const jsonString = JSON.stringify(dataObjects);
       await this.db.registerFileText("data.json", jsonString);
+
+      // This creates the table and auto-detects types (String vs Number)
       await this.conn.query(
         `CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_json_auto('data.json')`,
       );
+      console.log(`Table ${tableName} created with ${rows.length} rows.`);
     }
 
     async query(sql) {
