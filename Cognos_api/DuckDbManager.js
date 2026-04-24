@@ -12,7 +12,7 @@ define([], function () {
       if (this.isInitialized) return;
 
       try {
-        // 1. Load the library
+        // 1. Load Library
         if (!window.duckdb) {
           await new Promise((resolve) => {
             const script = document.createElement("script");
@@ -24,34 +24,41 @@ define([], function () {
         }
 
         const duckdb = window.duckdb;
-        const workerUrl =
-          "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-eh.worker.js";
-        const wasmUrl =
-          "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-eh.wasm";
+        const version = "1.28.0";
+        const baseUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${version}/dist/`;
 
-        // 2. THE BYPASS: Fetch the worker as text and create a BLOB URL
-        // This makes the browser think the worker is local to Rotterdam
-        const response = await fetch(workerUrl);
-        const workerCode = await response.text();
-        const blob = new Blob([workerCode], { type: "text/javascript" });
-        const blobUrl = URL.createObjectURL(blob);
+        // 2. Fetch Worker and turn into local Blob
+        const workerRes = await fetch(baseUrl + "duckdb-browser-eh.worker.js");
+        const workerBlob = new Blob([await workerRes.text()], {
+          type: "text/javascript",
+        });
+        const workerUrl = URL.createObjectURL(workerBlob);
 
-        this.worker = new Worker(blobUrl);
+        // 3. Fetch WASM and turn into local Blob
+        const wasmRes = await fetch(baseUrl + "duckdb-eh.wasm");
+        const wasmBlob = new Blob([await wasmRes.arrayBuffer()], {
+          type: "application/wasm",
+        });
+        const wasmUrl = URL.createObjectURL(wasmBlob);
 
+        // 4. Start Engine
+        this.worker = new Worker(workerUrl);
         this.db = new duckdb.AsyncDuckDB(
           new duckdb.ConsoleLogger(),
           this.worker,
         );
+
         await this.db.instantiate(wasmUrl);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
 
-        // Clean up the virtual file
-        URL.revokeObjectURL(blobUrl);
+        // Cleanup URLs
+        URL.revokeObjectURL(workerUrl);
+        URL.revokeObjectURL(wasmUrl);
       } catch (e) {
-        console.error("DuckDB Bypass Failed:", e);
-        throw new Error("DuckDB failed: " + e.message);
+        console.error("DuckDB Deep Init Error:", e);
+        throw new Error("Initialisatie mislukt: " + e.message);
       }
     }
 
