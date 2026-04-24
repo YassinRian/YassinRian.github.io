@@ -1,4 +1,6 @@
-define([], function () {
+define([
+  "https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.0/dist/duckdb-browser-eh",
+], function (duckdb) {
   "use strict";
 
   class DuckDbManager {
@@ -6,61 +8,52 @@ define([], function () {
       this.db = null;
       this.conn = null;
       this.isInitialized = false;
-      this.storedData = null; // To hold our transformed data
     }
 
     async init() {
       if (this.isInitialized) return;
 
-      // 1. The exact paths from your server structure
-      const base =
-        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
-      const libUrl = base + "duckdb-browser-eh.js";
-      const workerUrl = base + "duckdb-browser-eh.worker.js";
-      const wasmUrl = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a"; // No .wasm extension per screenshot
+      // Local paths for Worker and WASM (The Crew and Brain)
+      const localWorker =
+        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/duckdb-browser-eh.worker.js";
+      const localWasm = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
 
       try {
-        // 2. Load the Library script tag
-        if (!window.duckdb) {
-          await new Promise((resolve, reject) => {
-            const script = document.createElement("script");
-            script.src = libUrl;
-            script.onload = resolve;
-            script.onerror = () =>
-              reject(new Error("Local JS Library failed to load."));
-            document.head.appendChild(script);
-          });
-        }
+        // 1. The 'duckdb' object is passed in by the define block above
+        if (!duckdb) throw new Error("DuckDB module failed to load from CDN.");
 
-        const duckdb = window.duckdb;
+        // 2. The Blob Bypass for the WASM brain
+        // (Crucial for avoiding the 'Engine Start' hang)
+        const wasmRes = await fetch(localWasm);
+        const wasmBlob = new Blob([await wasmRes.arrayBuffer()], {
+          type: "application/wasm",
+        });
+        const wasmUrl = URL.createObjectURL(wasmBlob);
 
-        // 3. Create the Worker
-        this.worker = new Worker(workerUrl);
+        // 3. Initialize the Engine
+        this.worker = new Worker(localWorker);
+        this.db = new duckdb.AsyncDuckDB(
+          new duckdb.ConsoleLogger(),
+          this.worker,
+        );
 
-        // 4. Initialize the Async Engine
-        const logger = new duckdb.ConsoleLogger();
-        this.db = new duckdb.AsyncDuckDB(logger, this.worker);
-
-        // 5. Instantiate the WASM
-        // This is the part that usually hangs; we point it directly to the local hash
         await this.db.instantiate(wasmUrl);
 
-        // 6. Connect
         this.conn = await this.db.connect();
-
         this.isInitialized = true;
-        console.log("DuckDB is fully alive and connected!");
+
+        console.log("DuckDB Module loaded and SQL engine active!");
+        URL.revokeObjectURL(wasmUrl);
       } catch (e) {
-        console.error("DuckDB Engine failure:", e);
-        // Fallback to your 'working' version so the report doesn't crash
+        console.error("DuckDB Module Error:", e);
+        // Safety net
         this.isInitialized = true;
         this.simulation = true;
       }
     }
 
     async insertData(tableName, columnNames, rows) {
-      if (!this.conn) {
-        console.warn("Using simulation mode - no SQL connection.");
+      if (this.simulation) {
         this.storedData = rows.map((row) => {
           let obj = {};
           columnNames.forEach((col, i) => (obj[col] = row[i]));
@@ -69,44 +62,23 @@ define([], function () {
         return;
       }
 
-      try {
-        console.log(`DuckDB: Ingesting ${rows.length} rows...`);
+      const dataObjects = rows.map((row) => {
+        let obj = {};
+        columnNames.forEach((col, i) => (obj[col] = row[i]));
+        return obj;
+      });
 
-        // Convert rows to JSON
-        const dataObjects = rows.map((row) => {
-          let obj = {};
-          columnNames.forEach((col, i) => (obj[col] = row[i]));
-          return obj;
-        });
-
-        const jsonString = JSON.stringify(dataObjects);
-
-        // Register the virtual file and create the table
-        await this.db.registerFileText("data.json", jsonString);
-        await this.conn.query(
-          `CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_json_auto('data.json')`,
-        );
-
-        console.log(`DuckDB: Table ${tableName} is ready for SQL!`);
-      } catch (e) {
-        console.error("DuckDB Ingestion Error:", e);
-      }
+      const jsonString = JSON.stringify(dataObjects);
+      await this.db.registerFileText("data.json", jsonString);
+      await this.conn.query(
+        `CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_json_auto('data.json')`,
+      );
     }
 
     async query(sql) {
-      if (!this.conn) {
-        console.log("Simulating query (returning raw data)");
-        return this.storedData;
-      }
-
-      try {
-        const result = await this.conn.query(sql);
-        // Convert the DuckDB Arrow result into a standard JS Array
-        return result.toArray().map((row) => row.toJSON());
-      } catch (e) {
-        console.error("SQL Query Error:", e);
-        return [];
-      }
+      if (this.simulation) return this.storedData;
+      const result = await this.conn.query(sql);
+      return result.toArray().map((row) => row.toJSON());
     }
   }
   return DuckDbManager;
