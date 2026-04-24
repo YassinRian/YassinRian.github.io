@@ -11,20 +11,32 @@ define([], function () {
     async init() {
       if (this.isInitialized) return;
 
-      // Paths verified exactly from your screenshot
       const version = "1.33.1-dev45.0";
       const baseUrl = `https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@${version}/dist/`;
 
-      // The "Captain" (Library), "Crew" (Worker), and "Brain" (WASM)
-      const libUrl = baseUrl + "duckdb-browser.mjs";
+      // We use the .cjs file because it includes all dependencies (Apache Arrow, etc.)
+      const libUrl = baseUrl + "duckdb-browser.cjs";
       const workerUrl = baseUrl + "duckdb-browser-eh.worker.js";
       const wasmUrl = baseUrl + "duckdb-eh.wasm";
 
       try {
-        // 1. Load the Library as a Module
-        const duckdb = await import(libUrl);
+        // 1. Load the CJS library manually to avoid 'apache-arrow' resolution errors
+        if (!window.duckdb) {
+          await new Promise((resolve, reject) => {
+            const script = document.createElement("script");
+            script.src = libUrl;
+            script.onload = resolve;
+            script.onerror = () =>
+              reject(new Error("Gefaald om DuckDB CJS te laden."));
+            document.head.appendChild(script);
+          });
+        }
 
-        // 2. Create the Worker via the Blob bypass (The only way to avoid the Origin error)
+        // The CJS version attaches itself to window.duckdb
+        const duckdb = window.duckdb;
+        if (!duckdb) throw new Error("DuckDB object niet gevonden op window.");
+
+        // 2. Create the Worker via Blob (Origin bypass)
         const worker_url = URL.createObjectURL(
           new Blob([`importScripts("${workerUrl}");`], {
             type: "text/javascript",
@@ -36,17 +48,16 @@ define([], function () {
 
         this.db = new duckdb.AsyncDuckDB(logger, this.worker);
 
-        // 3. Instantiate using the EH WASM file from your screenshot
+        // 3. Instantiate
         await this.db.instantiate(wasmUrl);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
 
         URL.revokeObjectURL(worker_url);
-        console.log("🚀 DuckDB 1.33.1-dev45.0 is LIVE via CDN.");
+        console.log("🚀 DuckDB CJS is LIVE. SQL Engine is active!");
       } catch (e) {
-        console.error("DuckDB CDN Init Error:", e);
-        // Fallback to ensure the report doesn't freeze
+        console.error("DuckDB Init Error:", e);
         this.isInitialized = true;
         this.simulation = true;
       }
