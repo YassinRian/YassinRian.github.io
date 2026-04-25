@@ -14,7 +14,8 @@ define([
       this.pendingData = null;
       this.chart = null;
       this.tableComponent = new CashflowTable("rtm-table-container");
-      this.syncTimer = null;
+      this.currentRowOffset = 0;
+      this.pageSize = 10;
     }
 
     // Inside your Main.js draw method
@@ -31,6 +32,13 @@ define([
       if (this.pendingData) {
         this.setData(oControlHost, this.pendingData);
       }
+
+      // Listen for the "Load More" click from the table module
+    window.addEventListener('rtm-load-more', () => {
+        this.loadMoreTableData();
+    });
+
+    
     }
 
     async setData(oControlHost, oData) {
@@ -93,15 +101,35 @@ define([
 
       try {
         const results = await this.engine.query(sql);
-        console.log("SQL Analysis Results:", results);
 
         // Pass to ECharts
         this.renderChart(results);
 
-        // 2. Update the Table (Synchronized!)
-        this.tableComponent.render(results);
+        // 2. Initial Table Load (First 10)
+        await this.loadMoreTableData(true);
       } catch (e) {
         console.error("SQL Error:", e);
+      }
+    }
+
+    async loadMoreTableData(isInitial) {
+      const sql = `
+        SELECT 
+            CAST("Jaar" AS VARCHAR) as label, 
+            SUM(CAST("Restbudget (okr)" AS DOUBLE)) as total_budget,
+            SUM(CAST("Lopend totaal" AS DOUBLE)) as running_total
+        FROM cashflow 
+        GROUP BY "Jaar" 
+        ORDER BY "Jaar" ASC
+        LIMIT ${this.pageSize} OFFSET ${this.currentRowOffset}
+      `;
+
+      const nextBatch = await this.engine.query(sql);
+
+      if (nextBatch.length > 0) {
+        // Render the batch (if initial, overwrite; if not append)
+        this.tableComponent.render(nextBatch, !isInitial);
+        this.currentRowOffset += this.pageSize;
       }
     }
 
@@ -114,14 +142,23 @@ define([
 
       const option = {
         title: { text: "Cashflow Details", left: "center" },
-        tooltip: { trigger: "axis" },
-        dataZoom: [{ type: "slider", start: 0, end: 50 }, { type: "inside" }],
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          borderWidth: 1,
+          borderColor: "#ccc",
+        },
+        // ADD THIS: Allows the user to zoom/scroll through the 87 rows
+        dataZoom: [
+          { type: "slider", start: 0, end: 50 }, // Bottom scrollbar
+          { type: "inside" }, // Mousewheel zoom
+        ],
         legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 40 },
-        grid: { bottom: 80 },
+        grid: { bottom: 80 }, // Make space for the slider
         xAxis: {
           type: "category",
           data: labels,
-          axisLabel: { rotate: 45 },
+          axisLabel: { rotate: 45 }, // Tilt the labels for readability
         },
         yAxis: [
           { type: "value", name: "Budget (€)" },
@@ -133,6 +170,7 @@ define([
             type: "bar",
             data: budget,
             itemStyle: {
+              // Dark Blue for positive, Rotterdam Red for negative
               color: (p) => (p.value >= 0 ? "#004699" : "#d9534f"),
             },
           },
@@ -141,7 +179,7 @@ define([
             type: "line",
             yAxisIndex: 1,
             smooth: true,
-            symbol: "none",
+            symbol: "none", // Cleaner look for 87 points
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: "rgba(255, 204, 0, 0.5)" },
@@ -154,37 +192,6 @@ define([
       };
 
       this.chart.setOption(option);
-
-      // 2. IMMEDIATE Table Render (This fixes the "Table wordt geladen" issue)
-      // We show the first 50% immediately to match the initial slider
-      const initialSlice = data.slice(0, Math.ceil(data.length * 0.5));
-      if (this.table) {
-          this.table.render(initialSlice);
-      }
-
-      // 3. SECURE Sync Logic (Encapsulated so it can't break the main thread)
-      this.chart.off('datazoom');
-      this.chart.on('datazoom', () => {
-          clearTimeout(this.syncTimer);
-          this.syncTimer = setTimeout(() => {
-              try {
-                  // Using getOption is safer than getModel for simple index retrieval
-                  const dz = this.chart.getOption().dataZoom[0];
-                  const startIdx = dz.startValue;
-                  const endIdx = dz.endValue;
-
-                  if (startIdx !== undefined && endIdx !== undefined) {
-                      const filtered = data.slice(startIdx, endIdx + 1);
-                      this.table.render(filtered);
-                  }
-              } catch (err) {
-                  console.error("Sync error:", err);
-              }
-          }, 100);
-      });
-
-
-
     }
 
     // einde class
