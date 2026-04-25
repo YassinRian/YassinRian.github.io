@@ -11,46 +11,38 @@ define([], function () {
     async init() {
       if (this.isInitialized) return;
 
-      // These paths match your 'cognos.ontw.rotterdam.local' folder tree exactly
-      const baseDir = "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/";
-      const workerUrl =
-        baseDir + "duckdb-wasm/dist/duckdb-browser-eh.worker.js";
-      const wasmUrl = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
-
       try {
-        // 1. Instead of loading a new library, we look for the one Cognos already loaded
-        // Your tree shows webpack:// and native scripts already running.
-        let duckdb = window.duckdb;
+        // 1. Load the ESM bundle discovered on GitHub
+        // This '+esm' suffix tells JSDelivr to bundle all dependencies (like Arrow) together
+        const duckdb =
+          await import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev106.0/+esm");
 
-        if (!duckdb) {
-          console.log(
-            "DuckDB not on window, attempting to load from internal lib...",
-          );
-          // If not on window, we try to grab the module Cognos is using
-          duckdb = await new Promise((resolve, reject) => {
-            require([
-              baseDir + "duckdb-wasm/dist/duckdb-browser-eh",
-            ], resolve, reject);
-          });
-        }
+        // 2. Use the exact logic from the GitHub snippet
+        const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+        const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
-        // 2. Start the worker using the local Rotterdam path
-        this.worker = new Worker(workerUrl);
+        // 3. The Worker Blob Bypass (Crucial for Rotterdam's security)
+        const worker_url = URL.createObjectURL(
+          new Blob([`importScripts("${bundle.mainWorker}");`], {
+            type: "text/javascript",
+          }),
+        );
+
+        const worker = new Worker(worker_url);
         const logger = new duckdb.ConsoleLogger();
+        this.db = new duckdb.AsyncDuckDB(logger, worker);
 
-        this.db = new duckdb.AsyncDuckDB(logger, this.worker);
-
-        // 3. Instantiate the WASM (the '041df34a' file)
-        await this.db.instantiate(wasmUrl);
+        // 4. Instantiate
+        await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+        URL.revokeObjectURL(worker_url);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
 
-        console.log(
-          "✅ Success: Using Rotterdam's Native DuckDB & Apache Arrow.",
-        );
+        console.log("🚀 DuckDB initialized using GitHub ESM logic!");
       } catch (e) {
-        console.error("Native Init Error:", e);
+        console.error("DuckDB ESM Init Error:", e);
+        // Fallback for UI stability
         this.isInitialized = true;
         this.simulation = true;
       }
