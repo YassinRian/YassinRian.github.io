@@ -69,8 +69,7 @@ define([
 
           this.view.updateStatus("Systeem Gereed: " + iRowCount + " rijen.");
 
-          // --- CHANGE THIS: Call the SQL analysis, not the raw render ---
-          this.updateAnalysis();
+          await this.updateAnalysis();
 
           // Final step: Trigger the visual draw
           this.renderChart();
@@ -104,6 +103,12 @@ define([
     }
 
     renderChart(data) {
+      // Safety Guard
+      if (!data || !Array.isArray(data) || data.length === 0) {
+        console.log("Waiting for SQL results before rendering...");
+        return;
+      }
+
       const labels = data.map((d) => d.label);
       const budget = data.map((d) => d.total_budget);
       const running = data.map((d) => d.running_total);
