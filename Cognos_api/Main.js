@@ -105,96 +105,67 @@ define([
     }
 
     renderChart(data) {
-      if (!data || data.length === 0) return;
-
-      const labels = data.map((d) => d.label);
-      const budget = data.map((d) => d.total_budget);
-      const running = data.map((d) => d.running_total);
+      if (!data || !this.chart || data.length === 0) return;
 
       const option = {
         title: { text: "Cashflow Details", left: "center" },
-        tooltip: {
-          trigger: "axis",
-          backgroundColor: "rgba(255, 255, 255, 0.9)",
-          borderWidth: 1,
-          borderColor: "#ccc",
-        },
+        tooltip: { trigger: "axis" },
         dataZoom: [
-          { type: "slider", start: 0, end: 50 }, // Initial view is 50%
+          { type: "slider", start: 0, end: 50, id: "syncZoom" },
           { type: "inside" },
         ],
-        legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 40 },
-        grid: { bottom: 80 },
-        xAxis: {
-          type: "category",
-          data: labels,
-          axisLabel: { rotate: 45 },
-        },
+        xAxis: { type: "category", data: data.map((d) => d.label) },
         yAxis: [
-          { type: "value", name: "Budget (€)" },
-          { type: "value", name: "Cumulatief", position: "right" },
+          { type: "value", name: "Budget" },
+          { type: "value", name: "Totaal", position: "right" },
         ],
         series: [
           {
             name: "Restbudget",
             type: "bar",
-            data: budget,
-            itemStyle: {
-              color: (p) => (p.value >= 0 ? "#004699" : "#d9534f"),
-            },
+            data: data.map((d) => d.total_budget),
+            itemStyle: { color: (p) => (p.value >= 0 ? "#004699" : "#d9534f") },
           },
           {
             name: "Lopend Totaal",
             type: "line",
             yAxisIndex: 1,
-            smooth: true,
-            symbol: "none",
-            areaStyle: {
-              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-                { offset: 0, color: "rgba(255, 204, 0, 0.5)" },
-                { offset: 1, color: "rgba(255, 204, 0, 0)" },
-              ]),
-            },
-            data: running,
+            data: data.map((d) => d.running_total),
+            itemStyle: { color: "#ffcc00" },
           },
         ],
       };
 
       this.chart.setOption(option);
 
-      // --- Sync Logic ---
+      // --- SAFE SYNC LOGIC ---
       this.chart.off("datazoom");
 
-      // Define the update function so we can call it immediately AND on event
-      const syncTable = (startPercent, endPercent) => {
-        const startIndex = Math.floor((startPercent / 100) * data.length);
-        const endIndex = Math.ceil((endPercent / 100) * data.length);
-        const filteredData = data.slice(startIndex, endIndex);
-        this.table.render(filteredData);
-      };
-
       this.chart.on("datazoom", (params) => {
-        let s, e;
-        if (params.batch) {
-          s = params.batch[0].start;
-          e = params.batch[0].end;
-        } else {
-          // Handle cases where start/end might be undefined if only one changed
-          s =
-            params.start !== undefined
-              ? params.start
-              : this.chart.getOption().dataZoom[0].start;
-          e =
-            params.end !== undefined
-              ? params.end
-              : this.chart.getOption().dataZoom[0].end;
+        try {
+          // 1. Get the current view window from the chart model
+          const model = this.chart.getModel();
+          const axis = model.getComponent("xAxis", 0).axis;
+          const range = axis.scale.getExtent(); // Get min/max index of visible bars
+
+          const startIndex = range[0];
+          const endIndex = range[1];
+
+          // 2. Slice the data based on actual visible indices
+          const filteredData = data.slice(startIndex, endIndex + 1);
+
+          // 3. Only render if the table component is actually ready
+          if (this.table && typeof this.table.render === "function") {
+            this.table.render(filteredData);
+          }
+        } catch (e) {
+          console.warn("Sync failed, but keeping script alive:", e);
         }
-        syncTable(s, e);
       });
 
-      // --- ADD THIS: Initial Sync ---
-      // This ensures the table matches the 'start: 0, end: 50' on first load
-      syncTable(0, 50);
+      // Initial table render to match the 0-50% start
+      const initialSplit = Math.ceil(data.length * 0.5);
+      if (this.table) this.table.render(data.slice(0, initialSplit));
     }
 
     // einde class
