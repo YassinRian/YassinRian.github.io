@@ -70,9 +70,6 @@ define([
           this.view.updateStatus("Systeem Gereed: " + iRowCount + " rijen.");
 
           await this.updateAnalysis();
-
-          // Final step: Trigger the visual draw
-          // this.renderChart();
         } catch (error) {
           this.view.updateStatus("Fout: " + error.message);
         }
@@ -82,13 +79,13 @@ define([
     async updateAnalysis() {
       // 1. Let's group the budget by Year
       const sql = `
-        SELECT 
+          SELECT 
             CAST("Jaar" AS VARCHAR) as label, 
-            SUM(CAST("Restbudget (okr)" AS DOUBLE)) as total_budget,
-            SUM(CAST("Lopend totaal" AS DOUBLE)) as running_total
-        FROM cashflow 
-        GROUP BY "Jaar" 
-        ORDER BY "Jaar" ASC
+            CAST("Restbudget (okr)" AS DOUBLE) as total_budget,
+            CAST("Lopend totaal" AS DOUBLE) as running_total,
+            "Project naam nummer" as project_info -- Optional: useful for tooltips
+          FROM cashflow 
+          ORDER BY "Jaar" ASC
     `;
 
       try {
