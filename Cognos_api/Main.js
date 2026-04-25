@@ -79,13 +79,13 @@ define([
     async updateAnalysis() {
       // 1. Let's group the budget by Year
       const sql = `
-          SELECT 
-            CAST("Jaar" AS VARCHAR) as label, 
-            CAST("Restbudget (okr)" AS DOUBLE) as total_budget,
-            CAST("Lopend totaal" AS DOUBLE) as running_total,
-            "Project naam nummer" as project_info -- Optional: useful for tooltips
-          FROM cashflow 
-          ORDER BY "Jaar" ASC
+            SELECT 
+                CAST("Jaar" AS VARCHAR) as label, 
+                SUM(CAST("Restbudget (okr)" AS DOUBLE)) as total_budget,
+                SUM(CAST("Lopend totaal" AS DOUBLE)) as running_total
+            FROM cashflow 
+            GROUP BY "Jaar" 
+            ORDER BY "Jaar" ASC
     `;
 
       try {
@@ -134,17 +134,25 @@ define([
           {
             name: "Restbudget",
             type: "bar",
-            barMaxWidth: 30, // Prevents bars from becoming giant blocks
             data: budget,
-            itemStyle: { color: "#005da3" },
+            itemStyle: {
+              // Dark Blue for positive, Rotterdam Red for negative
+              color: (p) => (p.value >= 0 ? "#004699" : "#d9534f"),
+            },
           },
           {
             name: "Lopend Totaal",
             type: "line",
             yAxisIndex: 1,
-            smooth: true, // Makes the line look more organic
+            smooth: true,
+            symbol: "none", // Cleaner look for 87 points
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: "rgba(255, 204, 0, 0.5)" },
+                { offset: 1, color: "rgba(255, 204, 0, 0)" },
+              ]),
+            },
             data: running,
-            itemStyle: { color: "#ffcc00" },
           },
         ],
       };
