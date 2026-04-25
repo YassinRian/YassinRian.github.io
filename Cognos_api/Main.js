@@ -100,38 +100,51 @@ define([
     }
 
     renderChart(data) {
-      // Safety Guard
-      if (!data || !Array.isArray(data) || data.length === 0) {
-        console.log("Waiting for SQL results before rendering...");
-        return;
-      }
+      if (!data || data.length === 0) return;
 
       const labels = data.map((d) => d.label);
       const budget = data.map((d) => d.total_budget);
       const running = data.map((d) => d.running_total);
 
       const option = {
-        title: { text: "Cashflow Verloop", left: "left" },
-        tooltip: { trigger: "axis" },
-        legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 0 },
-        xAxis: { type: "category", data: labels },
+        title: { text: "Cashflow Details", left: "center" },
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          borderWidth: 1,
+          borderColor: "#ccc",
+        },
+        // ADD THIS: Allows the user to zoom/scroll through the 87 rows
+        dataZoom: [
+          { type: "slider", start: 0, end: 50 }, // Bottom scrollbar
+          { type: "inside" }, // Mousewheel zoom
+        ],
+        legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 40 },
+        grid: { bottom: 80 }, // Make space for the slider
+        xAxis: {
+          type: "category",
+          data: labels,
+          axisLabel: { rotate: 45 }, // Tilt the labels for readability
+        },
         yAxis: [
-          { type: "value", name: "Budget" },
-          { type: "value", name: "Totaal", position: "right" },
+          { type: "value", name: "Budget (€)" },
+          { type: "value", name: "Cumulatief", position: "right" },
         ],
         series: [
           {
             name: "Restbudget",
             type: "bar",
+            barMaxWidth: 30, // Prevents bars from becoming giant blocks
             data: budget,
-            itemStyle: { color: "#005da3" }, // Rotterdam Blue
+            itemStyle: { color: "#005da3" },
           },
           {
             name: "Lopend Totaal",
             type: "line",
             yAxisIndex: 1,
+            smooth: true, // Makes the line look more organic
             data: running,
-            itemStyle: { color: "#ffcc00" }, // Accent Gold
+            itemStyle: { color: "#ffcc00" },
           },
         ],
       };
