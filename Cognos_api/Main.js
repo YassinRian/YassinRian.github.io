@@ -72,7 +72,7 @@ define([
           await this.updateAnalysis();
 
           // Final step: Trigger the visual draw
-          this.renderChart();
+          // this.renderChart();
         } catch (error) {
           this.view.updateStatus("Fout: " + error.message);
         }
