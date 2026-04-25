@@ -34,11 +34,9 @@ define([
       }
 
       // Listen for the "Load More" click from the table module
-    window.addEventListener('rtm-load-more', () => {
+      window.addEventListener("rtm-load-more", () => {
         this.loadMoreTableData();
-    });
-
-    
+      });
     }
 
     async setData(oControlHost, oData) {
@@ -189,6 +187,60 @@ define([
             data: running,
           },
         ],
+        toolbox: {
+          show: true,
+          right: 20,
+          feature: {
+            dataView: {
+              show: true,
+              readOnly: true, // Keep it read-only for safety
+              title: "Tabelweergave",
+              lang: ["Data Tabel", "Sluiten", "Verversen"],
+              // This is where you format the "Pop-up" table
+              optionToContent: function (opt) {
+                const axisData = opt.xAxis[0].data;
+                const series = opt.series;
+                let table = `
+                    <div style="padding:20px; font-family:sans-serif;">
+                        <h3 style="color:#004699;">Data Details</h3>
+                        <table style="width:100%; border-collapse:collapse; text-align:left;">
+                            <thead>
+                                <tr style="border-bottom:2px solid #004699; background:#f4f4f4;">
+                                    <th style="padding:10px;">Jaar</th>
+                                    <th style="padding:10px; text-align:right;">${series[0].name}</th>
+                                    <th style="padding:10px; text-align:right;">${series[1].name}</th>
+                                </tr>
+                            </thead>
+                            <tbody>`;
+
+                for (let i = 0; i < axisData.length; i++) {
+                  const budget = new Intl.NumberFormat("nl-NL", {
+                    style: "currency",
+                    currency: "EUR",
+                  }).format(series[0].data[i]);
+                  const total = new Intl.NumberFormat("nl-NL", {
+                    style: "currency",
+                    currency: "EUR",
+                  }).format(series[1].data[i]);
+
+                  table += `
+                        <tr style="border-bottom:1px solid #eee;">
+                            <td style="padding:10px;">${axisData[i]}</td>
+                            <td style="padding:10px; text-align:right;">${budget}</td>
+                            <td style="padding:10px; text-align:right;">${total}</td>
+                        </tr>`;
+                }
+                table += "</tbody></table></div>";
+                return table;
+              },
+            },
+            saveAsImage: {
+              show: true,
+              title: "Downloaden",
+              pixelRatio: 2, // High quality for reports
+            },
+          },
+        },
       };
 
       this.chart.setOption(option);
