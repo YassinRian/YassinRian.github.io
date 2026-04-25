@@ -14,6 +14,7 @@ define([
       this.pendingData = null;
       this.chart = null;
       this.tableComponent = new CashflowTable("rtm-table-container");
+      this.syncTimer = null;
     }
 
     // Inside your Main.js draw method
@@ -113,23 +114,14 @@ define([
 
       const option = {
         title: { text: "Cashflow Details", left: "center" },
-        tooltip: {
-          trigger: "axis",
-          backgroundColor: "rgba(255, 255, 255, 0.9)",
-          borderWidth: 1,
-          borderColor: "#ccc",
-        },
-        // ADD THIS: Allows the user to zoom/scroll through the 87 rows
-        dataZoom: [
-          { type: "slider", start: 0, end: 50 }, // Bottom scrollbar
-          { type: "inside" }, // Mousewheel zoom
-        ],
+        tooltip: { trigger: "axis" },
+        dataZoom: [{ type: "slider", start: 0, end: 50 }, { type: "inside" }],
         legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 40 },
-        grid: { bottom: 80 }, // Make space for the slider
+        grid: { bottom: 80 },
         xAxis: {
           type: "category",
           data: labels,
-          axisLabel: { rotate: 45 }, // Tilt the labels for readability
+          axisLabel: { rotate: 45 },
         },
         yAxis: [
           { type: "value", name: "Budget (€)" },
@@ -141,7 +133,6 @@ define([
             type: "bar",
             data: budget,
             itemStyle: {
-              // Dark Blue for positive, Rotterdam Red for negative
               color: (p) => (p.value >= 0 ? "#004699" : "#d9534f"),
             },
           },
@@ -150,7 +141,7 @@ define([
             type: "line",
             yAxisIndex: 1,
             smooth: true,
-            symbol: "none", // Cleaner look for 87 points
+            symbol: "none",
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: "rgba(255, 204, 0, 0.5)" },
@@ -163,6 +154,33 @@ define([
       };
 
       this.chart.setOption(option);
+
+      // --- THE SAFE SYNC BRIDGE ---
+      this.chart.off("datazoom"); // Clean up old listeners
+
+      this.chart.on("datazoom", () => {
+        // We use a small timeout to make sure ECharts has updated its internal view
+        clearTimeout(this.syncTimer);
+        this.syncTimer = setTimeout(() => {
+          try {
+            // Get the current visible range indices
+            const startIndex = this.chart.getOption().dataZoom[0].startValue;
+            const endIndex = this.chart.getOption().dataZoom[0].endValue;
+
+            // If we have valid indices, slice and render
+            if (startIndex !== undefined && endIndex !== undefined) {
+              const filteredData = data.slice(startIndex, endIndex + 1);
+              if (this.table) this.table.render(filteredData);
+            }
+          } catch (e) {
+            console.warn("Table sync skipped - chart busy.");
+          }
+        }, 50); // 50ms delay makes it feel smooth but safe
+      });
+
+      // Initial Table Render (match the 0-50% starting zoom)
+      const initialEnd = Math.floor(data.length * 0.5);
+      if (this.table) this.table.render(data.slice(0, initialEnd + 1));
     }
 
     // einde class
