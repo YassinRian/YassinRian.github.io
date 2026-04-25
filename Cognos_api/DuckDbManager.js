@@ -11,37 +11,38 @@ define([], function () {
     async init() {
       if (this.isInitialized) return;
 
-      // 1. Point to the EXACT local files we saw in your Cognos tree
-      const base =
-        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
-      const wasmBase = "../ibmcognos/bi/js/dashboard-analytics/wasm/";
-
       try {
-        // Load the library from the local Cognos path
-        const duckdb = await new Promise((resolve, reject) => {
-          require([base + "duckdb-browser-eh"], resolve, reject);
-        });
+        // 1. Load the ESM bundle discovered on GitHub
+        // This '+esm' suffix tells JSDelivr to bundle all dependencies (like Arrow) together
+        const duckdb =
+          await import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev106.0/+esm");
 
-        // 2. Manual Config (Logic from your GitHub find)
-        // We point the 'mainModule' to that hashed WASM file we saw: 041df34a
-        const DUCKDB_CONFIG = {
-          mainModule: wasmBase + "041df34a",
-          mainWorker: base + "duckdb-browser-eh.worker.js",
-        };
+        // 2. Use the exact logic from the GitHub snippet
+        const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+        const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
-        // 3. Start the engine
+        // 3. The Worker Blob Bypass (Crucial for Rotterdam's security)
+        const worker_url = URL.createObjectURL(
+          new Blob([`importScripts("${bundle.mainWorker}");`], {
+            type: "text/javascript",
+          }),
+        );
+
+        const worker = new Worker(worker_url);
         const logger = new duckdb.ConsoleLogger();
-        this.worker = new Worker(DUCKDB_CONFIG.mainWorker);
-        this.db = new duckdb.AsyncDuckDB(logger, this.worker);
+        this.db = new duckdb.AsyncDuckDB(logger, worker);
 
-        await this.db.instantiate(DUCKDB_CONFIG.mainModule);
+        // 4. Instantiate
+        await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+        URL.revokeObjectURL(worker_url);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
 
-        console.log("✅ Manual Handshake Successful: Native DuckDB is LIVE.");
+        console.log("🚀 DuckDB initialized using GitHub ESM logic!");
       } catch (e) {
-        console.error("DuckDB Manual Init Error:", e);
+        console.error("DuckDB ESM Init Error:", e);
+        // Fallback for UI stability
         this.isInitialized = true;
         this.simulation = true;
       }
