@@ -119,17 +119,16 @@ define([
           borderWidth: 1,
           borderColor: "#ccc",
         },
-        // ADD THIS: Allows the user to zoom/scroll through the 87 rows
         dataZoom: [
-          { type: "slider", start: 0, end: 50 }, // Bottom scrollbar
-          { type: "inside" }, // Mousewheel zoom
+          { type: "slider", start: 0, end: 50 }, // Initial view is 50%
+          { type: "inside" },
         ],
         legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 40 },
-        grid: { bottom: 80 }, // Make space for the slider
+        grid: { bottom: 80 },
         xAxis: {
           type: "category",
           data: labels,
-          axisLabel: { rotate: 45 }, // Tilt the labels for readability
+          axisLabel: { rotate: 45 },
         },
         yAxis: [
           { type: "value", name: "Budget (€)" },
@@ -141,7 +140,6 @@ define([
             type: "bar",
             data: budget,
             itemStyle: {
-              // Dark Blue for positive, Rotterdam Red for negative
               color: (p) => (p.value >= 0 ? "#004699" : "#d9534f"),
             },
           },
@@ -150,7 +148,7 @@ define([
             type: "line",
             yAxisIndex: 1,
             smooth: true,
-            symbol: "none", // Cleaner look for 87 points
+            symbol: "none",
             areaStyle: {
               color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
                 { offset: 0, color: "rgba(255, 204, 0, 0.5)" },
@@ -163,7 +161,43 @@ define([
       };
 
       this.chart.setOption(option);
+
+      // --- Sync Logic ---
+      this.chart.off("datazoom");
+
+      // Define the update function so we can call it immediately AND on event
+      const syncTable = (startPercent, endPercent) => {
+        const startIndex = Math.floor((startPercent / 100) * data.length);
+        const endIndex = Math.ceil((endPercent / 100) * data.length);
+        const filteredData = data.slice(startIndex, endIndex);
+        this.table.render(filteredData);
+      };
+
+      this.chart.on("datazoom", (params) => {
+        let s, e;
+        if (params.batch) {
+          s = params.batch[0].start;
+          e = params.batch[0].end;
+        } else {
+          // Handle cases where start/end might be undefined if only one changed
+          s =
+            params.start !== undefined
+              ? params.start
+              : this.chart.getOption().dataZoom[0].start;
+          e =
+            params.end !== undefined
+              ? params.end
+              : this.chart.getOption().dataZoom[0].end;
+        }
+        syncTable(s, e);
+      });
+
+      // --- ADD THIS: Initial Sync ---
+      // This ensures the table matches the 'start: 0, end: 50' on first load
+      syncTable(0, 50);
     }
+
+    // einde class
   }
   return CashflowController;
 });
