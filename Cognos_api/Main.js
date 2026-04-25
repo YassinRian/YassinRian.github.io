@@ -105,67 +105,64 @@ define([
     }
 
     renderChart(data) {
-      if (!data || !this.chart || data.length === 0) return;
+      if (!data || data.length === 0) return;
+
+      const labels = data.map((d) => d.label);
+      const budget = data.map((d) => d.total_budget);
+      const running = data.map((d) => d.running_total);
 
       const option = {
         title: { text: "Cashflow Details", left: "center" },
-        tooltip: { trigger: "axis" },
+        tooltip: {
+          trigger: "axis",
+          backgroundColor: "rgba(255, 255, 255, 0.9)",
+          borderWidth: 1,
+          borderColor: "#ccc",
+        },
+        // ADD THIS: Allows the user to zoom/scroll through the 87 rows
         dataZoom: [
-          { type: "slider", start: 0, end: 50, id: "syncZoom" },
-          { type: "inside" },
+          { type: "slider", start: 0, end: 50 }, // Bottom scrollbar
+          { type: "inside" }, // Mousewheel zoom
         ],
-        xAxis: { type: "category", data: data.map((d) => d.label) },
+        legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 40 },
+        grid: { bottom: 80 }, // Make space for the slider
+        xAxis: {
+          type: "category",
+          data: labels,
+          axisLabel: { rotate: 45 }, // Tilt the labels for readability
+        },
         yAxis: [
-          { type: "value", name: "Budget" },
-          { type: "value", name: "Totaal", position: "right" },
+          { type: "value", name: "Budget (€)" },
+          { type: "value", name: "Cumulatief", position: "right" },
         ],
         series: [
           {
             name: "Restbudget",
             type: "bar",
-            data: data.map((d) => d.total_budget),
-            itemStyle: { color: (p) => (p.value >= 0 ? "#004699" : "#d9534f") },
+            data: budget,
+            itemStyle: {
+              // Dark Blue for positive, Rotterdam Red for negative
+              color: (p) => (p.value >= 0 ? "#004699" : "#d9534f"),
+            },
           },
           {
             name: "Lopend Totaal",
             type: "line",
             yAxisIndex: 1,
-            data: data.map((d) => d.running_total),
-            itemStyle: { color: "#ffcc00" },
+            smooth: true,
+            symbol: "none", // Cleaner look for 87 points
+            areaStyle: {
+              color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+                { offset: 0, color: "rgba(255, 204, 0, 0.5)" },
+                { offset: 1, color: "rgba(255, 204, 0, 0)" },
+              ]),
+            },
+            data: running,
           },
         ],
       };
 
       this.chart.setOption(option);
-
-      // --- SAFE SYNC LOGIC ---
-      this.chart.off("datazoom");
-
-      this.chart.on("datazoom", (params) => {
-        try {
-          // 1. Get the current view window from the chart model
-          const model = this.chart.getModel();
-          const axis = model.getComponent("xAxis", 0).axis;
-          const range = axis.scale.getExtent(); // Get min/max index of visible bars
-
-          const startIndex = range[0];
-          const endIndex = range[1];
-
-          // 2. Slice the data based on actual visible indices
-          const filteredData = data.slice(startIndex, endIndex + 1);
-
-          // 3. Only render if the table component is actually ready
-          if (this.table && typeof this.table.render === "function") {
-            this.table.render(filteredData);
-          }
-        } catch (e) {
-          console.warn("Sync failed, but keeping script alive:", e);
-        }
-      });
-
-      // Initial table render to match the 0-50% start
-      const initialSplit = Math.ceil(data.length * 0.5);
-      if (this.table) this.table.render(data.slice(0, initialSplit));
     }
 
     // einde class
