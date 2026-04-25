@@ -155,32 +155,44 @@ define([
 
       this.chart.setOption(option);
 
-      // --- THE SAFE SYNC BRIDGE ---
-      this.chart.off("datazoom"); // Clean up old listeners
+      // --- REWIRED SYNC LOGIC ---
+      this.chart.off("datazoom");
 
       this.chart.on("datazoom", () => {
-        // We use a small timeout to make sure ECharts has updated its internal view
+        // Use a small delay to let the chart finish its animation
         clearTimeout(this.syncTimer);
         this.syncTimer = setTimeout(() => {
           try {
-            // Get the current visible range indices
-            const startIndex = this.chart.getOption().dataZoom[0].startValue;
-            const endIndex = this.chart.getOption().dataZoom[0].endValue;
+            // 1. Get the actual visible labels from the X-Axis
+            const model = this.chart.getModel();
+            const xAxis = model.getComponent("xAxis", 0).axis;
+            const viewLabels = xAxis.getViewLabels();
 
-            // If we have valid indices, slice and render
-            if (startIndex !== undefined && endIndex !== undefined) {
-              const filteredData = data.slice(startIndex, endIndex + 1);
-              if (this.table) this.table.render(filteredData);
+            if (viewLabels && viewLabels.length > 0) {
+              // 2. Get the list of strings currently visible (e.g., ["2022", "2023"])
+              const visibleNames = viewLabels.map((item) => item.label);
+
+              // 3. Filter our main data array to match these names
+              const filteredData = data.filter((d) =>
+                visibleNames.includes(d.label),
+              );
+
+              // 4. Update the table
+              if (this.table) {
+                this.table.render(filteredData);
+              }
             }
           } catch (e) {
-            console.warn("Table sync skipped - chart busy.");
+            console.warn("Sync failed: Chart busy or labels not ready.");
           }
-        }, 50); // 50ms delay makes it feel smooth but safe
+        }, 100); // 100ms is the "sweet spot" for performance
       });
 
-      // Initial Table Render (match the 0-50% starting zoom)
-      const initialEnd = Math.floor(data.length * 0.5);
-      if (this.table) this.table.render(data.slice(0, initialEnd + 1));
+      // Initial table render to match the 0-50% start
+      const initialLabels = data
+        .slice(0, Math.floor(data.length * 0.5))
+        .map((d) => d.label);
+      this.table.render(data.filter((d) => initialLabels.includes(d.label)));
     }
 
     // einde class
