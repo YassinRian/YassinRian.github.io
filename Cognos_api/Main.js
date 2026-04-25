@@ -1,22 +1,30 @@
 define([
+  "https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?",
   "https://yassinrian.netlify.app/Cognos_api/CashflowView.js",
   "https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js",
-], function (CashflowView, DuckDbManager) {
+], function (echarts, CashflowView, DuckDbManager) {
   "use strict";
 
   class CashflowController {
     constructor() {
+      this.chart = null;
       this.view = null;
       this.engine = new DuckDbManager();
       this.pendingData = null;
       this.chart = null;
     }
 
+    // Inside your Main.js draw method
     draw(oControlHost) {
       this.view = new CashflowView(oControlHost);
       this.view.renderLayout();
 
-      // Handover if data beat the UI to the finish line
+      // Use your View's helper to get the exact DOM node
+      const chartDom = this.view.getChartNode();
+      if (chartDom) {
+        this.chart = echarts.init(chartDom);
+      }
+
       if (this.pendingData) {
         this.setData(oControlHost, this.pendingData);
       }
@@ -61,6 +69,9 @@ define([
 
           this.view.updateStatus("Systeem Gereed: " + iRowCount + " rijen.");
 
+          // --- CHANGE THIS: Call the SQL analysis, not the raw render ---
+          this.updateAnalysis();
+
           // Final step: Trigger the visual draw
           this.renderChart();
         } catch (error) {
@@ -69,11 +80,62 @@ define([
       }
     }
 
-    async renderChart() {
-      // This is where we will write the SQL to draw the Rotterdam bars
-      console.log("DuckDB is ready for SQL queries.");
+    async updateAnalysis() {
+      // 1. Let's group the budget by Year
+      const sql = `
+        SELECT 
+            CAST("Jaar" AS VARCHAR) as label, 
+            SUM(CAST("Restbudget (okr)" AS DOUBLE)) as total_budget,
+            SUM(CAST("Lopend totaal" AS DOUBLE)) as running_total
+        FROM cashflow 
+        GROUP BY "Jaar" 
+        ORDER BY "Jaar" ASC
+    `;
+
+      try {
+        const results = await this.engine.query(sql);
+        console.log("SQL Analysis Results:", results);
+
+        // Pass to ECharts
+        this.renderChart(results);
+      } catch (e) {
+        console.error("SQL Error:", e);
+      }
+    }
+
+    renderChart(data) {
+      const labels = data.map((d) => d.label);
+      const budget = data.map((d) => d.total_budget);
+      const running = data.map((d) => d.running_total);
+
+      const option = {
+        title: { text: "Cashflow Verloop", left: "left" },
+        tooltip: { trigger: "axis" },
+        legend: { data: ["Restbudget", "Lopend Totaal"], bottom: 0 },
+        xAxis: { type: "category", data: labels },
+        yAxis: [
+          { type: "value", name: "Budget" },
+          { type: "value", name: "Totaal", position: "right" },
+        ],
+        series: [
+          {
+            name: "Restbudget",
+            type: "bar",
+            data: budget,
+            itemStyle: { color: "#005da3" }, // Rotterdam Blue
+          },
+          {
+            name: "Lopend Totaal",
+            type: "line",
+            yAxisIndex: 1,
+            data: running,
+            itemStyle: { color: "#ffcc00" }, // Accent Gold
+          },
+        ],
+      };
+
+      this.chart.setOption(option);
     }
   }
-
   return CashflowController;
 });
