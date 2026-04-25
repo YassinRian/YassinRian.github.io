@@ -11,55 +11,57 @@ define([], function () {
     async init() {
       if (this.isInitialized) return;
 
+      // 1. Local Rotterdam Paths from your screenshot
+      const baseDir =
+        "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
+      const wasmPath = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a"; // The 'brain' hash
+
       try {
-        // 1. Load the ESM bundle discovered on GitHub
-        // This '+esm' suffix tells JSDelivr to bundle all dependencies (like Arrow) together
-        const duckdb =
-          await import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev106.0/+esm");
+        // 2. Load the Local Library (The Captain)
+        // We use the local path instead of the CDN URL
+        const duckdb = await import(baseDir + "duckdb-browser.mjs");
 
-        // 2. Use the exact logic from the GitHub snippet
-        const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
-        const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
-
-        // 3. The Worker Blob Bypass (Crucial for Rotterdam's security)
+        // 3. The WORKER BYPASS (The key to your ESM success)
+        // We point the importScripts to the Rotterdam worker
         const worker_url = URL.createObjectURL(
-          new Blob([`importScripts("${bundle.mainWorker}");`], {
-            type: "text/javascript",
-          }),
+          new Blob(
+            [`importScripts("${baseDir}duckdb-browser-eh.worker.js");`],
+            {
+              type: "text/javascript",
+            },
+          ),
         );
 
         const worker = new Worker(worker_url);
         const logger = new duckdb.ConsoleLogger();
         this.db = new duckdb.AsyncDuckDB(logger, worker);
 
-        // 4. Instantiate
-        await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
+        // 4. Instantiate using the local wasm brain
+        await this.db.instantiate(wasmPath);
         URL.revokeObjectURL(worker_url);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
 
-        console.log("🚀 DuckDB initialized using GitHub ESM logic!");
+        console.log("🏙️ Native Rotterdam DuckDB is LIVE (No CDN needed)!");
       } catch (e) {
-        console.error("DuckDB ESM Init Error:", e);
-        // Fallback for UI stability
+        console.error("Native Local Init Error:", e);
         this.isInitialized = true;
         this.simulation = true;
       }
     }
 
+    // ... insertData and query methods stay the same
     async insertData(tableName, columnNames, rows) {
       const dataObjects = rows.map((row) => {
         let obj = {};
         columnNames.forEach((col, i) => (obj[col] = row[i]));
         return obj;
       });
-
       if (this.simulation) {
         this.storedData = dataObjects;
         return;
       }
-
       const jsonString = JSON.stringify(dataObjects);
       await this.db.registerFileText("data.json", jsonString);
       await this.conn.query(
