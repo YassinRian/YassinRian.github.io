@@ -2,7 +2,8 @@ define([
   "https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?",
   "https://yassinrian.netlify.app/Cognos_api/CashflowView.js",
   "https://yassinrian.netlify.app/Cognos_api/DuckDbManager.js",
-], function (echarts, CashflowView, DuckDbManager) {
+  "https://yassinrian.netlify.app/Cognos_api/CashflowTable.js",
+], function (echarts, CashflowView, DuckDbManager, CashflowTable) {
   "use strict";
 
   class CashflowController {
@@ -12,6 +13,7 @@ define([
       this.engine = new DuckDbManager();
       this.pendingData = null;
       this.chart = null;
+      this.tableComponent = new CashflowTable("rtm-table-container");
     }
 
     // Inside your Main.js draw method
@@ -94,6 +96,9 @@ define([
 
         // Pass to ECharts
         this.renderChart(results);
+
+        // 2. Update the Table (Synchronized!)
+        this.tableComponent.render(results);
       } catch (e) {
         console.error("SQL Error:", e);
       }
