@@ -155,44 +155,36 @@ define([
 
       this.chart.setOption(option);
 
-      // --- REWIRED SYNC LOGIC ---
-      this.chart.off("datazoom");
+      // 2. IMMEDIATE Table Render (This fixes the "Table wordt geladen" issue)
+      // We show the first 50% immediately to match the initial slider
+      const initialSlice = data.slice(0, Math.ceil(data.length * 0.5));
+      if (this.table) {
+          this.table.render(initialSlice);
+      }
 
-      this.chart.on("datazoom", () => {
-        // Use a small delay to let the chart finish its animation
-        clearTimeout(this.syncTimer);
-        this.syncTimer = setTimeout(() => {
-          try {
-            // 1. Get the actual visible labels from the X-Axis
-            const model = this.chart.getModel();
-            const xAxis = model.getComponent("xAxis", 0).axis;
-            const viewLabels = xAxis.getViewLabels();
+      // 3. SECURE Sync Logic (Encapsulated so it can't break the main thread)
+      this.chart.off('datazoom');
+      this.chart.on('datazoom', () => {
+          clearTimeout(this.syncTimer);
+          this.syncTimer = setTimeout(() => {
+              try {
+                  // Using getOption is safer than getModel for simple index retrieval
+                  const dz = this.chart.getOption().dataZoom[0];
+                  const startIdx = dz.startValue;
+                  const endIdx = dz.endValue;
 
-            if (viewLabels && viewLabels.length > 0) {
-              // 2. Get the list of strings currently visible (e.g., ["2022", "2023"])
-              const visibleNames = viewLabels.map((item) => item.label);
-
-              // 3. Filter our main data array to match these names
-              const filteredData = data.filter((d) =>
-                visibleNames.includes(d.label),
-              );
-
-              // 4. Update the table
-              if (this.table) {
-                this.table.render(filteredData);
+                  if (startIdx !== undefined && endIdx !== undefined) {
+                      const filtered = data.slice(startIdx, endIdx + 1);
+                      this.table.render(filtered);
+                  }
+              } catch (err) {
+                  console.error("Sync error:", err);
               }
-            }
-          } catch (e) {
-            console.warn("Sync failed: Chart busy or labels not ready.");
-          }
-        }, 100); // 100ms is the "sweet spot" for performance
+          }, 100);
       });
 
-      // Initial table render to match the 0-50% start
-      const initialLabels = data
-        .slice(0, Math.floor(data.length * 0.5))
-        .map((d) => d.label);
-      this.table.render(data.filter((d) => initialLabels.includes(d.label)));
+
+
     }
 
     // einde class
