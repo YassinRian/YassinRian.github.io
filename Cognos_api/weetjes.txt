@@ -1,1 +1,1 @@
-duckdb werkt ..maar ik heb met deze change een hulpfunctie toegevoegd om een arrow tabel naar een begrijpbare formaat te converteren
+duckdbmanager weer aangepast hopelijk gaat dit werken. 

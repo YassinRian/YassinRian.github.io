@@ -8,31 +8,35 @@ define([], function () {
       this.isInitialized = false;
     }
 
-    async init() {
-      if (this.isInitialized) return;
+async init() {
+    if (this.isInitialized) return;
 
-      // 1. Updated Paths based on typical Cognos 12 lib structures
-      const rootPath = "../ibmcognos/bi/js/dashboard-analytics/lib/";
-      const duckdbDist = rootPath + "@duckdb/duckdb-wasm/dist/";
+    const baseDir = "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
+    const libPath = baseDir + "duckdb-browser-eh.js"; // The main lib
+    const workerPath = baseDir + "duckdb-browser-eh.worker.js";
+    const wasmPath = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
 
-      // The main entry point IBM uses is often just 'duckdb-browser-eh.js' or '.mjs'
-      const libPath = duckdbDist + "duckdb-browser-eh.js";
-      const workerPath = duckdbDist + "duckdb-browser-eh.worker.js";
-      const wasmPath = rootPath + "041df34a"; // Keeping your hash path
+    try {
+        // 1. Instead of 'import()', we use a Script Tag to bypass CORS-module blocks
+        if (!window.duckdb) {
+            await new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.src = libPath;
+                script.onload = resolve;
+                script.onerror = reject;
+                document.head.appendChild(script);
+            });
+        }
+        
+        // The internal lib usually puts 'duckdb' on the global window object
+        const duckdb = window.duckdb;
 
-      try {
-        // 2. Load the library using dynamic import
-        const duckdb = await import(libPath);
-
-        // 3. Create the Worker Blob (The 'Worker Bypass' you used is perfect)
+        // 2. The Worker Blob Bypass (this keeps the worker local to the domain)
         const worker_url = URL.createObjectURL(
-          new Blob([`importScripts("${workerPath}");`], { type: "text/javascript" })
+            new Blob([`importScripts("${workerPath}");`], { type: "text/javascript" })
         );
 
         const worker = new Worker(worker_url);
-
-        // 4. Connect the dots using the library exports
-        // Note: Check if IBM exports are named differently (e.g. duckdb.AsyncDuckDB)
         this.db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
 
         await this.db.instantiate(wasmPath);
@@ -40,15 +44,14 @@ define([], function () {
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
+        console.log("🏙️ Internal Engine Hijacked Successfully!");
 
-        console.log("🏙️ Rotterdam Captain has seized the internal DuckDB engine!");
-
-      } catch (e) {
-        console.warn("Internal Load failed, falling back to Simulation mode", e);
+    } catch (e) {
+        console.warn("Internal Load failed, sticking to Simulation Mode", e);
         this.simulation = true;
         this.isInitialized = true;
-      }
     }
+}
 
     async insertData(tableName, columnNames, rows) {
       const dataObjects = rows.map((row) => {
