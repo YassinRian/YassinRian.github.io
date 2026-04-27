@@ -10,32 +10,43 @@ define(["jquery", "./DuckDbManager.js"], function ($, DuckDbManager) {
       this._pendingData = null;
     }
 
-    async draw(oControlHost) {
-      const container = document.createElement("div");
-      oControlHost.container.appendChild(container);
+async draw(oControlHost) {
+    const container = document.createElement("div");
+    oControlHost.container.appendChild(container);
 
-      try {
-        const appPath = "https://yassinrian.netlify.app/react_cognos_api/App.js";
-        const deps = "deps=react@18.2.0,react-dom@18.2.0";
+    try {
+        const netlifyAppUrl = "https://yassinrian.netlify.app/react_cognos_api/App.js";
 
-        // 1. Load ESM dependencies
+        // 1. FETCH code as text to bypass strict CORS module blocking
+        const response = await fetch(netlifyAppUrl);
+        const scriptText = await response.text();
+
+        // 2. CREATE a local Blob URL
+        const blob = new Blob([scriptText], { type: 'text/javascript' });
+        const blobUrl = URL.createObjectURL(blob);
+
+        // 3. LOAD dependencies via ESM
         this.React = await import("https://esm.sh/react@18.2.0");
         const { createRoot } = await import("https://esm.sh/react-dom@18.2.0/client");
-        
-        // 2. Load MUI Core and DataGrid
+        const deps = "deps=react@18.2.0,react-dom@18.2.0";
         const Mui = await import(`https://esm.sh/@mui/material@5.15.0?${deps}`);
         const MuiX = await import(`https://esm.sh/@mui/x-data-grid@6.18.0?${deps}`);
 
-        // 3. Load App module
-        const module = await import(appPath);
+        // 4. IMPORT from the Blob URL
+        const module = await import(blobUrl);
+        
+        // Cleanup the URL to save memory
+        URL.revokeObjectURL(blobUrl);
+
         this.AppComponent = module.initApp;
         this.root = createRoot(container);
-
         this._update(this._pendingData, { ...Mui, ...MuiX });
-      } catch (err) {
-        console.error("Dependency Load Error:", err);
-      }
+
+    } catch (err) {
+        console.error("Load Error:", err);
+        oControlHost.container.innerHTML = "Error: " + err.message;
     }
+}
 
     setData(oControlHost, oData) {
       if (oData && oData.name === "store_cashflow") {
