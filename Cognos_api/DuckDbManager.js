@@ -8,50 +8,45 @@ define([], function () {
       this.isInitialized = false;
     }
 
-async init() {
-    if (this.isInitialized) return;
+    async init() {
+      if (this.isInitialized) return;
 
-    const baseDir = "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
-    const libPath = "https://cognos.ontw.rotterdam.local/ibmcognos/bi/js/dashboard-analytics/lib/DuckDB.js?v=3534350292"; // The main lib
-    const workerPath = baseDir + "duckdb-browser-eh.worker.js";
-    const wasmPath = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
+      try {
+        // 1. Load the ESM bundle discovered on GitHub
+        // This '+esm' suffix tells JSDelivr to bundle all dependencies (like Arrow) together
+        const duckdb =
+          await import("https://cdn.jsdelivr.net/npm/@duckdb/duckdb-wasm@1.28.1-dev106.0/+esm");
 
-    try {
-        // 1. Instead of 'import()', we use a Script Tag to bypass CORS-module blocks
-        if (!window.duckdb) {
-            await new Promise((resolve, reject) => {
-                const script = document.createElement('script');
-                script.src = libPath;
-                script.onload = resolve;
-                script.onerror = reject;
-                document.head.appendChild(script);
-            });
-        }
-        
-        // The internal lib usually puts 'duckdb' on the global window object
-        const duckdb = window.duckdb;
+        // 2. Use the exact logic from the GitHub snippet
+        const JSDELIVR_BUNDLES = duckdb.getJsDelivrBundles();
+        const bundle = await duckdb.selectBundle(JSDELIVR_BUNDLES);
 
-        // 2. The Worker Blob Bypass (this keeps the worker local to the domain)
+        // 3. The Worker Blob Bypass (Crucial for Rotterdam's security)
         const worker_url = URL.createObjectURL(
-            new Blob([`importScripts("${workerPath}");`], { type: "text/javascript" })
+          new Blob([`importScripts("${bundle.mainWorker}");`], {
+            type: "text/javascript",
+          }),
         );
 
         const worker = new Worker(worker_url);
-        this.db = new duckdb.AsyncDuckDB(new duckdb.ConsoleLogger(), worker);
+        const logger = new duckdb.ConsoleLogger();
+        this.db = new duckdb.AsyncDuckDB(logger, worker);
 
-        await this.db.instantiate(wasmPath);
+        // 4. Instantiate
+        await this.db.instantiate(bundle.mainModule, bundle.pthreadWorker);
         URL.revokeObjectURL(worker_url);
 
         this.conn = await this.db.connect();
         this.isInitialized = true;
-        console.log("🏙️ Internal Engine Hijacked Successfully!");
 
-    } catch (e) {
-        console.warn("Internal Load failed, sticking to Simulation Mode", e);
-        this.simulation = true;
+        console.log("🚀 DuckDB initialized using GitHub ESM logic!");
+      } catch (e) {
+        console.error("DuckDB ESM Init Error:", e);
+        // Fallback for UI stability
         this.isInitialized = true;
+        this.simulation = true;
+      }
     }
-}
 
     async insertData(tableName, columnNames, rows) {
       const dataObjects = rows.map((row) => {
@@ -74,20 +69,8 @@ async init() {
 
     async query(sql) {
       if (this.simulation) return this.storedData;
-
-      // 1. Run the query
       const result = await this.conn.query(sql);
-
-      // 2. The Conversion Step (The "Arrow Unpacker")
-      // .toArray() turns the Arrow table into a list of Arrow rows
-      // .toJSON() turns each Arrow row into a standard JS object
-      const cleanData = result.toArray().map((row) => {
-        // Some internal versions of Arrow require this check
-        return typeof row.toJSON === 'function' ? row.toJSON() : { ...row };
-      });
-
-      console.log("Unpacked Data for ECharts:", cleanData[0]);
-      return cleanData;
+      return result.toArray().map((row) => row.toJSON());
     }
   }
   return DuckDbManager;

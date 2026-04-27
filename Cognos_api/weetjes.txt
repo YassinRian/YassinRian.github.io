@@ -1,1 +1,1 @@
-duckdbmanager weer aangepast hopelijk gaat dit werken. 
+terug naar jsdelivr en esm, ik kreeg duckdb niet te werken via de interne bestanden..jammer..maar goed deze kan je altijd nog daar plaatsen.
