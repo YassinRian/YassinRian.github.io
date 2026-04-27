@@ -12,7 +12,7 @@ async init() {
     if (this.isInitialized) return;
 
     const baseDir = "../ibmcognos/bi/js/dashboard-analytics/lib/@duckdb/duckdb-wasm/dist/";
-    const libPath = baseDir + "duckdb-browser-eh.js"; // The main lib
+    const libPath = "https://cognos.ontw.rotterdam.local/ibmcognos/bi/js/dashboard-analytics/lib/DuckDB.js?v=3534350292"; // The main lib
     const workerPath = baseDir + "duckdb-browser-eh.worker.js";
     const wasmPath = "../ibmcognos/bi/js/dashboard-analytics/wasm/041df34a";
 
