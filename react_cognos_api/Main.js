@@ -1,4 +1,4 @@
-define(["jquery", "./DuckDbManager"], function ($, DuckDbManager) {
+define(["jquery", "./DuckDbManager.js"], function ($, DuckDbManager) {
   "use strict";
 
   class Main {
