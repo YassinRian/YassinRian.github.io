@@ -27,7 +27,7 @@ define(["jquery", "./DuckDbManager.js", "./App.js"], function ($, DuckDbManager,
         const MuiX = await import(`https://esm.sh/@mui/x-data-grid@6.18.0?${deps}`);
 
         // 3. Load App module
-        const module = await import(App);
+        const module = await App;
         this.AppComponent = module.initApp;
         this.root = createRoot(container);
 
