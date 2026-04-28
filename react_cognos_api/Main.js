@@ -15,7 +15,7 @@ define(["jquery", "./DuckDbManager.js", "./App.js"], function ($, DuckDbManager,
       oControlHost.container.appendChild(container);
 
       try {
-        //const appPath = window.location.origin + "/" + require.toUrl("./App.js");
+        const appPath = "https://yassinrian.netlify.app/react_cognos_api/App.js";
         const deps = "deps=react@18.2.0,react-dom@18.2.0";
 
         // 1. Load ESM dependencies
@@ -27,7 +27,7 @@ define(["jquery", "./DuckDbManager.js", "./App.js"], function ($, DuckDbManager,
         const MuiX = await import(`https://esm.sh/@mui/x-data-grid@6.18.0?${deps}`);
 
         // 3. Load App module
-        const module = await App;
+        const module = await import(appPath);
         this.AppComponent = module.initApp;
         this.root = createRoot(container);
 
