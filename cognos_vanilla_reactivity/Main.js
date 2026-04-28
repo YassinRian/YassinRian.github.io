@@ -1,9 +1,9 @@
 define([
   "https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js?",
-  "./CashflowView",
-  "./GridView",
-  "./DuckDbManager",
-  "./DataStore"
+  "./CashflowView.js",
+  "./GridView.js",
+  "./DuckDbManager.js",
+  "./DataStore.js"
 ], function (echarts, View, Grid, DuckDbManager, store) {
   "use strict";
 
