@@ -145,19 +145,22 @@ define([], function () {
       var html = '<div style="overflow-x: auto;">';
       html += '<table style="border-collapse: collapse; font-size: 12px; width: 100%;">';
 
-      // Header
+      // Header - use colValues length since it determines what we can display
+      var numCols = colValues ? colValues.length : 0;
       html += "<tr>";
-      for (var c = 0; c < colNames.length; c++) {
-        html += '<th style="border: 1px solid #ddd; padding: 6px; background: #fafafa; white-space: nowrap;">' + colNames[c] + "</th>";
+      for (var c = 0; c < numCols; c++) {
+        var headerName = colNames && c < colNames.length ? colNames[c] : "Column " + (c + 1);
+        html += '<th style="border: 1px solid #ddd; padding: 6px; background: #fafafa; white-space: nowrap;">' + headerName + "</th>";
       }
       html += "</tr>";
 
       // Rows
-      var maxRows = Math.min(rowCount, 10);
+      var maxRows = Math.min(rowCount || 0, 10);
       for (var r = 0; r < maxRows; r++) {
         html += "<tr>";
-        for (var v = 0; v < colValues.length; v++) {
-          var val = colValues[v][r];
+        for (var v = 0; v < numCols; v++) {
+          var col = colValues[v];
+          var val = col && r < col.length ? col[r] : null;
           html += '<td style="border: 1px solid #ddd; padding: 6px;">' + (val !== null && val !== undefined ? val : "null") + "</td>";
         }
         html += "</tr>";
