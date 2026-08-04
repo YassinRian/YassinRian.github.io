@@ -1,139 +1,148 @@
+// ExtractionTest.js - Simple Cognos data extraction test
+// Log immediately to verify module loads
+console.log("[ExtractionTest] Module file loaded");
+
 define([], function () {
   "use strict";
 
-  // Ultra-simple extraction test - no dependencies, maximum compatibility
-  function ExtractionTest() {
-    this.data = null;
-    this.drawCalled = false;
-    this.setCalled = false;
-  }
+  console.log("[ExtractionTest] define() callback executed");
 
-  // Cognos calls this first
-  ExtractionTest.prototype.setData = function (oControlHost, dataStore, name) {
-    try {
-      this.setCalled = true;
-      this.data = dataStore;
-      this.dataName = name || "unnamed";
-
-      // Try console log
-      if (typeof console !== "undefined" && console.log) {
-        console.log("[ExtractionTest] setData called");
-        console.log("[ExtractionTest] name:", name);
-        console.log("[ExtractionTest] dataStore:", dataStore);
-      }
-    } catch (e) {
-      // Silent fail - draw will show error
+  class ExtractionTest {
+    constructor() {
+      console.log("[ExtractionTest] constructor called");
+      this.datasets = [];
+      this.setDataCalled = false;
+      this.drawCalled = false;
     }
-  };
 
-  // Cognos calls this after setData
-  ExtractionTest.prototype.draw = function (oControlHost) {
-    try {
+    setData(oControlHost, dataStore, name) {
+      console.log("[ExtractionTest] setData() called");
+      this.setDataCalled = true;
+
+      var datasetName = name || "dataset_" + (this.datasets.length + 1);
+      console.log("[ExtractionTest] Dataset name:", datasetName);
+      console.log("[ExtractionTest] dataStore:", dataStore);
+
+      this.datasets.push({
+        name: datasetName,
+        raw: dataStore,
+      });
+    }
+
+    draw(oControlHost) {
+      console.log("[ExtractionTest] draw() called");
       this.drawCalled = true;
-      var container = oControlHost.container;
-      var output = "";
 
-      output += '<div style="font-family: sans-serif; padding: 20px;">';
-      output += '<h1 style="font-size: 18px;">Cognos Extraction Test</h1>';
+      var container = oControlHost.container;
+      var html = "";
+
+      html += '<div style="font-family: sans-serif; padding: 20px;">';
+      html += '<h1 style="font-size: 18px; margin-bottom: 16px;">Cognos Extraction Test</h1>';
 
       // Status
-      output += '<div style="background: #f6ffed; padding: 12px; margin: 10px 0; border-left: 4px solid #52c41a;">';
-      output += "draw() called: YES<br>";
-      output += "setData() called: " + (this.setCalled ? "YES" : "NO") + "<br>";
-      output += "Dataset name: " + (this.dataName || "N/A");
-      output += "</div>";
+      html += '<div style="background: #f6ffed; padding: 12px; border-left: 4px solid #52c41a; margin-bottom: 16px;">';
+      html += "<strong>Status:</strong><br>";
+      html += "setData called: " + (this.setDataCalled ? "YES" : "NO") + "<br>";
+      html += "draw called: YES<br>";
+      html += "Datasets received: " + this.datasets.length;
+      html += "</div>";
 
-      if (!this.data) {
-        output += '<div style="background: #fff2f0; padding: 12px; margin: 10px 0; border-left: 4px solid #ff4d4f;">';
-        output += "No data received from setData()";
-        output += "</div>";
-      } else {
-        // Show data structure
-        output += '<div style="background: #e6f7ff; padding: 12px; margin: 10px 0; border-left: 4px solid #1890ff;">';
-        output += "<strong>Data received!</strong><br>";
-        output += "Type: " + typeof this.data + "<br>";
-
-        var keys = [];
-        for (var k in this.data) {
-          if (this.data.hasOwnProperty(k)) {
-            keys.push(k);
-          }
-        }
-        output += "Keys: " + keys.join(", ");
-        output += "</div>";
-
-        // Try to show columnHeaders
-        if (this.data.columnHeaders) {
-          output += '<div style="background: white; padding: 12px; margin: 10px 0; border: 1px solid #ddd;">';
-          output += "<strong>Column Headers (" + this.data.columnHeaders.length + "):</strong><br>";
-          for (var i = 0; i < this.data.columnHeaders.length; i++) {
-            var h = this.data.columnHeaders[i];
-            if (typeof h === "string") {
-              output += (i + 1) + ". " + h + "<br>";
-            } else if (h && h.name) {
-              output += (i + 1) + ". " + h.name + " (" + (h.dataType || "unknown") + ")<br>";
-            } else {
-              output += (i + 1) + ". " + JSON.stringify(h) + "<br>";
-            }
-          }
-          output += "</div>";
-        }
-
-        // Try to show rowData
-        if (this.data.rowData) {
-          output += '<div style="background: white; padding: 12px; margin: 10px 0; border: 1px solid #ddd;">';
-          output += "<strong>Row Data: " + this.data.rowData.length + " rows</strong><br><br>";
-
-          if (this.data.rowData.length > 0) {
-            output += '<table style="border-collapse: collapse; font-size: 11px;">';
-
-            // Header row
-            if (this.data.columnHeaders) {
-              output += "<tr>";
-              for (var c = 0; c < this.data.columnHeaders.length; c++) {
-                var colName = typeof this.data.columnHeaders[c] === "string"
-                  ? this.data.columnHeaders[c]
-                  : this.data.columnHeaders[c].name;
-                output += '<th style="border: 1px solid #ddd; padding: 4px 8px; background: #fafafa;">' + colName + "</th>";
-              }
-              output += "</tr>";
-            }
-
-            // Data rows (first 5)
-            var maxRows = Math.min(this.data.rowData.length, 5);
-            for (var r = 0; r < maxRows; r++) {
-              output += "<tr>";
-              var row = this.data.rowData[r];
-              for (var v = 0; v < row.length; v++) {
-                output += '<td style="border: 1px solid #ddd; padding: 4px 8px;">' + (row[v] !== null ? row[v] : "null") + "</td>";
-              }
-              output += "</tr>";
-            }
-            output += "</table>";
-          }
-          output += "</div>";
-        }
-
-        // Raw JSON
-        output += '<details style="margin-top: 10px;">';
-        output += '<summary style="cursor: pointer;">Show Raw JSON</summary>';
-        output += '<pre style="background: #1e1e1e; color: #d4d4d4; padding: 10px; font-size: 10px; overflow: auto; max-height: 300px;">';
-        try {
-          output += JSON.stringify(this.data, null, 2).substring(0, 3000);
-        } catch (jsonErr) {
-          output += "JSON.stringify error: " + jsonErr.message;
-        }
-        output += "</pre></details>";
+      // Process each dataset
+      for (var d = 0; d < this.datasets.length; d++) {
+        var ds = this.datasets[d];
+        html += this.renderDataset(ds);
       }
 
-      output += "</div>";
-      container.innerHTML = output;
-    } catch (e) {
-      // Last resort error display
-      oControlHost.container.innerHTML =
-        '<div style="padding: 20px; color: red;"><strong>Error in draw():</strong> ' + e.message + "<br>" + e.stack + "</div>";
+      html += "</div>";
+      container.innerHTML = html;
     }
-  };
 
+    renderDataset(dataset) {
+      var html = "";
+      var raw = dataset.raw;
+
+      html += '<div style="background: white; padding: 16px; border: 1px solid #ddd; border-radius: 4px; margin-bottom: 16px;">';
+      html += '<h2 style="font-size: 14px; margin: 0 0 12px 0;">Dataset: ' + dataset.name + "</h2>";
+
+      if (!raw) {
+        html += '<div style="color: #999;">No data received</div>';
+        html += "</div>";
+        return html;
+      }
+
+      // Show keys
+      var keys = [];
+      for (var k in raw) {
+        if (raw.hasOwnProperty(k)) {
+          keys.push(k);
+        }
+      }
+      html += '<div style="margin-bottom: 8px;"><strong>Keys:</strong> ' + keys.join(", ") + "</div>";
+
+      // Column headers
+      if (raw.columnHeaders) {
+        html += '<div style="margin-bottom: 8px;"><strong>Columns (' + raw.columnHeaders.length + "):</strong></div>";
+        html += '<div style="margin-bottom: 12px; padding: 8px; background: #f5f5f5; font-size: 12px;">';
+        for (var i = 0; i < raw.columnHeaders.length; i++) {
+          var h = raw.columnHeaders[i];
+          if (typeof h === "string") {
+            html += (i + 1) + ". " + h + "<br>";
+          } else if (h && h.name) {
+            html += (i + 1) + ". " + h.name + "<br>";
+          } else {
+            html += (i + 1) + ". [object]<br>";
+          }
+        }
+        html += "</div>";
+      }
+
+      // Row data
+      if (raw.rowData) {
+        html += '<div style="margin-bottom: 8px;"><strong>Rows: ' + raw.rowData.length + "</strong></div>";
+
+        if (raw.rowData.length > 0 && raw.columnHeaders) {
+          html += '<div style="overflow-x: auto;">';
+          html += '<table style="border-collapse: collapse; font-size: 11px; width: 100%;">';
+
+          // Header
+          html += "<tr>";
+          for (var c = 0; c < raw.columnHeaders.length; c++) {
+            var colName = typeof raw.columnHeaders[c] === "string" ? raw.columnHeaders[c] : raw.columnHeaders[c].name;
+            html += '<th style="border: 1px solid #ddd; padding: 6px; background: #fafafa; text-align: left;">' + colName + "</th>";
+          }
+          html += "</tr>";
+
+          // First 5 rows
+          var maxRows = Math.min(raw.rowData.length, 5);
+          for (var r = 0; r < maxRows; r++) {
+            html += "<tr>";
+            var row = raw.rowData[r];
+            for (var v = 0; v < row.length; v++) {
+              var val = row[v] !== null && row[v] !== undefined ? row[v] : '<span style="color: #999;">null</span>';
+              html += '<td style="border: 1px solid #ddd; padding: 6px;">' + val + "</td>";
+            }
+            html += "</tr>";
+          }
+          html += "</table></div>";
+        }
+      }
+
+      // Raw JSON
+      html += '<details style="margin-top: 12px;">';
+      html += '<summary style="cursor: pointer; color: #1890ff;">Raw JSON</summary>';
+      html += '<pre style="background: #1e1e1e; color: #d4d4d4; padding: 10px; font-size: 10px; overflow: auto; max-height: 300px;">';
+      try {
+        html += JSON.stringify(raw, null, 2).substring(0, 2000);
+      } catch (e) {
+        html += "Error: " + e.message;
+      }
+      html += "</pre></details>";
+
+      html += "</div>";
+      return html;
+    }
+  }
+
+  console.log("[ExtractionTest] Returning class");
   return ExtractionTest;
 });
