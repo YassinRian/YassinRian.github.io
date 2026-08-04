@@ -1,4 +1,4 @@
-define(["./data/CognosAdapter"], function (CognosAdapter) {
+define([], function (CognosAdapter) {
   "use strict";
 
   /**
