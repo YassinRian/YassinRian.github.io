@@ -4,10 +4,6 @@ define([], function () {
   /**
    * Financial Projection Chart - Combined bar + line chart.
    * Matches the 364 Cognos dashboard visualization.
-   *
-   * - Green bars: Revenues (Opbrengsten)
-   * - Red bars: Costs (Kosten + Resultaatneming)
-   * - Blue line: Cumulative Book Value (Lopend totaal)
    */
   class ProjectionChart {
     constructor(container, eventBus) {
@@ -15,9 +11,36 @@ define([], function () {
       this.eventBus = eventBus;
       this.chart = null;
       this.element = null;
+      this.echarts = null;
+
+      this.init();
+    }
+
+    async init() {
+      // Load ECharts dynamically if not already available
+      if (typeof echarts !== "undefined") {
+        this.echarts = echarts;
+      } else {
+        // Dynamically import ECharts
+        try {
+          const module = await import(
+            "https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.esm.min.js"
+          );
+          this.echarts = module;
+        } catch (err) {
+          console.error("[ProjectionChart] Failed to load ECharts:", err);
+          return;
+        }
+      }
 
       this.render();
       this.setupEvents();
+
+      // If data was already queued, render it
+      if (this._pendingData) {
+        this.update(this._pendingData);
+        this._pendingData = null;
+      }
     }
 
     render() {
@@ -26,7 +49,7 @@ define([], function () {
       this.element.style.height = "450px";
       this.container.appendChild(this.element);
 
-      this.chart = echarts.init(this.element);
+      this.chart = this.echarts.init(this.element);
     }
 
     setupEvents() {
@@ -47,6 +70,12 @@ define([], function () {
     update(data) {
       if (!data || data.length === 0) return;
 
+      // If chart isn't initialized yet, queue the data
+      if (!this.chart) {
+        this._pendingData = data;
+        return;
+      }
+
       // Sort by year
       const sorted = [...data].sort((a, b) => a.JAAR - b.JAAR);
 
@@ -58,11 +87,9 @@ define([], function () {
       const option = {
         tooltip: {
           trigger: "axis",
-          axisPointer: {
-            type: "cross",
-          },
+          axisPointer: { type: "cross" },
           formatter: function (params) {
-            let html = `<strong>${params[0].name}</strong><br/>`;
+            let html = "<strong>" + params[0].name + "</strong><br/>";
             params.forEach((p) => {
               const value =
                 typeof p.value === "number"
@@ -71,7 +98,13 @@ define([], function () {
                       maximumFractionDigits: 0,
                     })
                   : p.value;
-              html += `${p.marker} ${p.seriesName}: <strong>€ ${value}</strong><br/>`;
+              html +=
+                p.marker +
+                " " +
+                p.seriesName +
+                ": <strong>\u20AC " +
+                value +
+                "</strong><br/>";
             });
             return html;
           },
@@ -95,25 +128,20 @@ define([], function () {
         xAxis: {
           type: "category",
           data: years,
-          axisLabel: {
-            rotate: 45,
-            fontSize: 10,
-          },
+          axisLabel: { rotate: 45, fontSize: 10 },
           axisLine: { lineStyle: { color: "#333" } },
         },
         yAxis: {
           type: "value",
-          name: "€",
+          name: "\u20AC",
           nameTextStyle: { fontSize: 12 },
           axisLabel: {
             formatter: function (value) {
-              return "€ " + value.toLocaleString("nl-NL");
+              return "\u20AC " + value.toLocaleString("nl-NL");
             },
             fontSize: 10,
           },
-          splitLine: {
-            lineStyle: { color: "#e8e8e8" },
-          },
+          splitLine: { lineStyle: { color: "#e8e8e8" } },
           axisLine: { lineStyle: { color: "#333" } },
         },
         series: [
@@ -141,15 +169,9 @@ define([], function () {
             name: "Lopend totaal",
             type: "line",
             data: cumulative,
-            lineStyle: {
-              color: "#1890ff",
-              width: 2,
-            },
-            itemStyle: {
-              color: "#1890ff",
-            },
+            lineStyle: { color: "#1890ff", width: 2 },
+            itemStyle: { color: "#1890ff" },
             symbol: "none",
-            smooth: false,
           },
         ],
       };
