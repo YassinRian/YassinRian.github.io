@@ -71,11 +71,31 @@ define([], function () {
 
       console.log("[CognosDataConnector] Original column names:", colNames);
       console.log("[CognosDataConnector] Clean column names:", cleanNames);
+      console.log("[CognosDataConnector] columnValues length:", colValues ? colValues.length : "null");
 
-      // Debug: Show first few values of each column
-      for (var c = 0; c < Math.min(colNames.length, 9); c++) {
-        var sampleValues = colValues[c] ? colValues[c].slice(0, 3) : [];
-        console.log("[CognosDataConnector] Column '" + cleanNames[c] + "' sample:", sampleValues);
+      // Debug: Show detailed info for each column
+      for (var c = 0; c < colNames.length; c++) {
+        var col = colValues[c];
+        var colType = col ? typeof col : "undefined";
+        var colLength = col && col.length !== undefined ? col.length : "N/A";
+        var sampleValues = [];
+        
+        if (col && Array.isArray(col) && col.length > 0) {
+          // Get first 5 non-null values
+          for (var s = 0; s < Math.min(col.length, 20); s++) {
+            if (col[s] !== null && col[s] !== undefined) {
+              sampleValues.push(col[s]);
+              if (sampleValues.length >= 5) break;
+            }
+          }
+        }
+        
+        console.log("[CognosDataConnector] Column [" + c + "] '" + colNames[c] + "' -> '" + cleanNames[c] + "':", {
+          type: colType,
+          length: colLength,
+          sample: sampleValues,
+          firstValue: col && col.length > 0 ? col[0] : "empty"
+        });
       }
 
       // Convert column-oriented to row-oriented
