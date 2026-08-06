@@ -123,13 +123,14 @@ define([
       }
 
       // Query aggregated data by year
+      // Cast VARCHAR columns to DOUBLE for numeric aggregation
       var sql =
         "SELECT " +
-        "  Jaar as JAAR, " +
-        "  SUM(COALESCE(Restbudget_opbrengsten, 0)) as RESTBUDGET_OBRENGSTEN, " +
-        "  SUM(COALESCE(Restbudget_kosten, 0)) * -1 as RESTBUDGET__KST_RES, " +
-        "  SUM(COALESCE(Restbudget_resultaatneming, 0)) as RESTBUDGET_RESULTAATNEMING, " +
-        "  SUM(COALESCE(Lopend_totaal, 0)) as LOPEND_TOTAAL " +
+        "  CAST(Jaar AS INTEGER) as JAAR, " +
+        "  SUM(COALESCE(CAST(Restbudget_opbrengsten AS DOUBLE), 0)) as RESTBUDGET_OBRENGSTEN, " +
+        "  SUM(COALESCE(CAST(Restbudget_kosten AS DOUBLE), 0)) * -1 as RESTBUDGET__KST_RES, " +
+        "  SUM(COALESCE(CAST(Restbudget_resultaatneming AS DOUBLE), 0)) as RESTBUDGET_RESULTAATNEMING, " +
+        "  SUM(COALESCE(CAST(Lopend_totaal AS DOUBLE), 0)) as LOPEND_TOTAAL " +
         "FROM \"" + datasetName + "\" " +
         "WHERE Jaar IS NOT NULL " +
         "GROUP BY Jaar " +
