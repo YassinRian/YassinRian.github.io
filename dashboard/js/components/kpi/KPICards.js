@@ -1,4 +1,4 @@
-define(["../../utils/dom"], function (dom) {
+define(["../../utils/dom.js"], function (dom) {
   "use strict";
 
   /**
