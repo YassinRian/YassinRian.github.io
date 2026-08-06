@@ -1,12 +1,12 @@
 define([
-  "./core/EventBus.js",
-  "./core/StateStore.js",
-  "./core/Config.js",
-  "./data/DataEngine.js",
-  "./data/CognosDataConnector.js",
-  "./layout/DashboardLayout.js",
-  "./utils/Styles.js",
-  "./components/charts/ProjectionChart.js",
+  "./core/EventBus",
+  "./core/StateStore",
+  "./core/Config",
+  "./data/DataEngine",
+  "./data/CognosDataConnector",
+  "./layout/DashboardLayout",
+  "./utils/Styles",
+  "./components/charts/ProjectionChart",
 ], function (
   EventBus,
   StateStore,
@@ -137,7 +137,10 @@ define([
         "ORDER BY Jaar";
 
       console.log("[App] Running aggregation query...");
+      console.log("[App] SQL:", sql);
       var result = await this.dataEngine.query(sql);
+      console.log("[App] Raw aggregation result:", result);
+
       var rows = result.map(function (row) {
         return {
           JAAR: Number(row.JAAR),
@@ -147,6 +150,8 @@ define([
           LOPEND_TOTAAL: Number(row.LOPEND_TOTAAL),
         };
       });
+
+      console.log("[App] First 3 aggregated rows:", rows.slice(0, 3));
 
       // Calculate cumulative total
       var cumulative = 0;

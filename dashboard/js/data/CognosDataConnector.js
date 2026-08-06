@@ -69,6 +69,15 @@ define([], function () {
           .replace(/^_|_$/g, "");
       });
 
+      console.log("[CognosDataConnector] Original column names:", colNames);
+      console.log("[CognosDataConnector] Clean column names:", cleanNames);
+
+      // Debug: Show first few values of each column
+      for (var c = 0; c < Math.min(colNames.length, 9); c++) {
+        var sampleValues = colValues[c] ? colValues[c].slice(0, 3) : [];
+        console.log("[CognosDataConnector] Column '" + cleanNames[c] + "' sample:", sampleValues);
+      }
+
       // Convert column-oriented to row-oriented
       var rows = [];
       for (var r = 0; r < rowCount; r++) {
