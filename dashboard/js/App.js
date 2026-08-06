@@ -7,6 +7,7 @@ define([
   "./model/DashboardModel.js",
   "./layout/DashboardLayout.js",
   "./utils/Styles.js",
+  "./utils/dom.js",
   "./components/charts/ProjectionChart.js",
   "./components/tables/DetailTable.js",
   "./components/kpi/KPICards.js"
@@ -19,6 +20,7 @@ define([
   DashboardModel,
   DashboardLayout,
   Styles,
+  dom,
   ProjectionChart,
   DetailTable,
   KPICards
@@ -71,6 +73,7 @@ define([
     this.oControlHost = oControlHost;
 
     Styles.inject();
+    dom.initHtm(); // preload htm (non-blocking)
 
     // ── Layout ───────────────────────────────────────────────
     this.layout = new DashboardLayout(oControlHost.container);
@@ -224,7 +227,7 @@ define([
     }
     if (detailData) {
       try { this.layout.setRowCount(detailData.length); } catch (e) {}
-      try { this.detailTable.setData(detailData); } catch (e) { console.error("[App] Table update failed:", e); }
+      try { await this.detailTable.setData(detailData); } catch (e) { console.error("[App] Table update failed:", e); }
     }
 
     // Breadcrumb — pass clear-callback so clicks remove individual filters
