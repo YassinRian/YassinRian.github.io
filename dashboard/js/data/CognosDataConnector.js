@@ -2,14 +2,13 @@ define([], function () {
   "use strict";
 
   /**
-   * CognosDataConnector - Handles Cognos dataStore API and converts to row-oriented format.
-   * 
-   * Cognos dataStore structure:
-   * - columnNames: string[] (array of column names)
-   * - columnValues: Array[] (array of columns, each column is array of values)
-   * - rowCount: number
-   * - columnCount: number
-   * - name: string (dataset name)
+   * CognosDataConnector - Handles Cognos dataStore API.
+   *
+   * Cognos stores data differently for Categories vs Values:
+   * - Categories (string/decimal): column descriptor has `values` array with distinct values
+   * - Values (number): NO `values` array - actual data is in `_dqn.rows`
+   *
+   * We use `_dqn.rows` which contains ALL data for ALL columns.
    */
   class CognosDataConnector {
     constructor() {
@@ -18,86 +17,34 @@ define([], function () {
 
     /**
      * Register a Cognos dataStore.
-     * @param {string} name - Dataset name
-     * @param {Object} dataStore - Cognos dataStore object
      */
     register(name, dataStore) {
       console.log("[CognosDataConnector] Registering dataset:", name);
-      console.log("[CognosDataConnector] dataStore keys:", Object.keys(dataStore));
 
-      // Check multiple possible data sources
-      var columnNames = dataStore.columnNames || [];
-      var columnValues = dataStore.columnValues || [];
-      var columnFormattedValues = dataStore.columnFormattedValues || [];
-      var rowCount = dataStore.rowCount || 0;
+      // Get column names from _dqn.columns
+      var columns = dataStore._dqn ? dataStore._dqn.columns : [];
+      var columnNames = columns.map(function (col) {
+        return col.name;
+      });
 
-      console.log("[CognosDataConnector] columnValues length:", columnValues.length);
-      console.log("[CognosDataConnector] columnFormattedValues length:", columnFormattedValues.length);
+      // Get rows from _dqn.rows
+      var rows = dataStore._dqn ? dataStore._dqn.rows : [];
 
-      // Check if columnValues has undefined entries
-      var validColumns = 0;
-      var undefinedColumns = [];
-      for (var i = 0; i < columnValues.length; i++) {
-        if (columnValues[i] === undefined || columnValues[i] === null) {
-          undefinedColumns.push(columnNames[i] || "col_" + i);
-        } else {
-          validColumns++;
-        }
-      }
-      console.log("[CognosDataConnector] Valid columns in columnValues:", validColumns);
-      console.log("[CognosDataConnector] Undefined columns:", undefinedColumns);
-
-      // Try to get data from columnFormattedValues if columnValues has gaps
-      if (undefinedColumns.length > 0 && columnFormattedValues.length > 0) {
-        console.log("[CognosDataConnector] Checking columnFormattedValues for missing data...");
-        for (var i = 0; i < columnFormattedValues.length; i++) {
-          var formattedCol = columnFormattedValues[i];
-          if (formattedCol && columnValues[i] === undefined) {
-            console.log("[CognosDataConnector] columnFormattedValues[" + i + "] (" + columnNames[i] + "):", {
-              type: typeof formattedCol,
-              length: formattedCol ? formattedCol.length : "N/A",
-              sample: formattedCol ? formattedCol.slice(0, 3) : "N/A"
-            });
-          }
-        }
-      }
-
-      // Check raw _dqn structure
-      if (dataStore._dqn) {
-        console.log("[CognosDataConnector] _dqn keys:", Object.keys(dataStore._dqn));
-        if (dataStore._dqn.columns) {
-          console.log("[CognosDataConnector] _dqn.columns length:", dataStore._dqn.columns.length);
-          for (var i = 0; i < Math.min(dataStore._dqn.columns.length, 9); i++) {
-            var col = dataStore._dqn.columns[i];
-            console.log("[CognosDataConnector] _dqn.columns[" + i + "] (" + columnNames[i] + "):", {
-              name: col ? col.name : "N/A",
-              dataType: col ? col.dataType : "N/A",
-              valuesType: col && col.values ? typeof col.values : "undefined",
-              valuesLength: col && col.values && col.values.length !== undefined ? col.values.length : "N/A",
-              sample: col && col.values && col.values.length > 0 ? col.values.slice(0, 3) : "empty"
-            });
-          }
-        }
-      }
+      console.log("[CognosDataConnector] Column names:", columnNames);
+      console.log("[CognosDataConnector] Row count:", rows.length);
 
       this.datasets[name] = {
         raw: dataStore,
         columnNames: columnNames,
-        columnValues: columnValues,
-        columnFormattedValues: columnFormattedValues,
-        rowCount: rowCount,
-        columnCount: dataStore.columnCount || 0,
+        columns: columns,
+        rows: rows,
         name: name,
       };
-
-      console.log("[CognosDataConnector] Columns:", columnNames);
-      console.log("[CognosDataConnector] Rows:", rowCount);
     }
 
     /**
-     * Convert a Cognos dataStore to row-oriented format for DuckDB ingestion.
-     * @param {string} name - Dataset name
-     * @returns {Object[]} Array of row objects
+     * Convert Cognos rows to format suitable for DuckDB ingestion.
+     * Cleans column names for SQL compatibility.
      */
     toRows(name) {
       var ds = this.datasets[name];
@@ -106,19 +53,18 @@ define([], function () {
         return [];
       }
 
-      var colNames = ds.columnNames;
-      var colValues = ds.columnValues;
-      var rowCount = ds.rowCount;
+      var columnNames = ds.columnNames;
+      var rows = ds.rows;
 
-      if (!colNames || !colValues || rowCount === 0) {
-        console.log("[CognosDataConnector] No data to convert");
+      if (!rows || rows.length === 0) {
+        console.log("[CognosDataConnector] No rows to convert");
         return [];
       }
 
-      console.log("[CognosDataConnector] Converting " + rowCount + " rows...");
+      console.log("[CognosDataConnector] Converting " + rows.length + " rows...");
 
       // Clean column names for SQL compatibility
-      var cleanNames = colNames.map(function (name) {
+      var cleanNames = columnNames.map(function (name) {
         return name
           .replace(/[^a-zA-Z0-9_]/g, "_")
           .replace(/^(\d)/, "_$1")
@@ -126,64 +72,30 @@ define([], function () {
           .replace(/^_|_$/g, "");
       });
 
-      console.log("[CognosDataConnector] Original column names:", colNames);
       console.log("[CognosDataConnector] Clean column names:", cleanNames);
-      console.log("[CognosDataConnector] columnValues length:", colValues ? colValues.length : "null");
 
-      // Debug: Show detailed info for each column
-      for (var c = 0; c < colNames.length; c++) {
-        var col = colValues[c];
-        var colType = col ? typeof col : "undefined";
-        var colLength = col && col.length !== undefined ? col.length : "N/A";
-        var sampleValues = [];
-        
-        if (col && Array.isArray(col) && col.length > 0) {
-          // Get first 5 non-null values
-          for (var s = 0; s < Math.min(col.length, 20); s++) {
-            if (col[s] !== null && col[s] !== undefined) {
-              sampleValues.push(col[s]);
-              if (sampleValues.length >= 5) break;
-            }
-          }
+      // Convert rows to use clean column names
+      var result = [];
+      for (var r = 0; r < rows.length; r++) {
+        var row = rows[r];
+        var cleanRow = {};
+        for (var c = 0; c < columnNames.length; c++) {
+          cleanRow[cleanNames[c]] = row[columnNames[c]];
         }
-        
-        console.log("[CognosDataConnector] Column [" + c + "] '" + colNames[c] + "' -> '" + cleanNames[c] + "':", {
-          type: colType,
-          length: colLength,
-          sample: sampleValues,
-          firstValue: col && col.length > 0 ? col[0] : "empty"
-        });
+        result.push(cleanRow);
       }
 
-      // Convert column-oriented to row-oriented
-      var rows = [];
-      for (var r = 0; r < rowCount; r++) {
-        var row = {};
-        for (var c = 0; c < colNames.length; c++) {
-          var val =
-            colValues[c] && r < colValues[c].length ? colValues[c][r] : null;
-
-          // Try to convert numeric strings to numbers
-          if (val !== null && val !== undefined && typeof val === "string") {
-            var num = Number(val);
-            if (!isNaN(num) && val.trim() !== "") {
-              val = num;
-            }
-          }
-
-          row[cleanNames[c]] = val;
-        }
-        rows.push(row);
+      // Log sample of first row
+      if (result.length > 0) {
+        console.log("[CognosDataConnector] First row:", result[0]);
       }
 
-      console.log("[CognosDataConnector] Converted " + rows.length + " rows");
-      return rows;
+      console.log("[CognosDataConnector] Converted " + result.length + " rows");
+      return result;
     }
 
     /**
      * Get column names (cleaned for SQL).
-     * @param {string} name - Dataset name
-     * @returns {string[]} Clean column names
      */
     getCleanColumnNames(name) {
       var ds = this.datasets[name];
@@ -198,28 +110,10 @@ define([], function () {
       });
     }
 
-    /**
-     * Get dataset info.
-     * @param {string} name - Dataset name
-     * @returns {Object} Dataset info
-     */
-    getInfo(name) {
-      return this.datasets[name] || null;
-    }
-
-    /**
-     * Get all registered dataset names.
-     * @returns {string[]} Dataset names
-     */
     getNames() {
       return Object.keys(this.datasets);
     }
 
-    /**
-     * Check if a dataset exists.
-     * @param {string} name - Dataset name
-     * @returns {boolean}
-     */
     has(name) {
       return !!this.datasets[name];
     }
