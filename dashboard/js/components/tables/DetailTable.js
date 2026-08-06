@@ -32,6 +32,10 @@ define([], function () {
 
     async setData(rows) {
       console.log("[DetailTable] setData:", rows ? rows.length : 0, "rows");
+      if (rows && rows.length > 0) {
+        console.log("[DetailTable] First row keys:", Object.keys(rows[0]));
+        console.log("[DetailTable] First row sample:", rows[0]);
+      }
       this._data = rows;
 
       if (!this._node) return;
@@ -84,7 +88,8 @@ define([], function () {
      */
     async _loadTabulator() {
       if (typeof Tabulator !== "undefined") {
-        console.log("[DetailTable] Tabulator already loaded");
+        // Tabulator JS already loaded — ensure CSS is loaded too
+        this._injectTabulatorCSS();
         return true;
       }
 
@@ -129,6 +134,7 @@ define([], function () {
 
         if (typeof Tabulator !== "undefined") {
           console.log("[DetailTable] Tabulator loaded (define-bypass)");
+          this._injectTabulatorCSS();
           return true;
         }
       } catch (e) {
@@ -136,6 +142,29 @@ define([], function () {
       }
 
       return false;
+    }
+
+    /**
+     * Inject Tabulator CSS dynamically (Cognos has no <link> tag).
+     * Fetches the official CSS from CDN once.
+     */
+    _injectTabulatorCSS() {
+      if (document.getElementById("tabulator-css-dynamic")) return;
+
+      // Fetch + inject as <style> so it works without a <link> tag
+      fetch("https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css")
+        .then(function (r) { return r.text(); })
+        .then(function (css) {
+          var style = document.createElement("style");
+          style.id = "tabulator-css-dynamic";
+          style.textContent = css;
+          document.head.appendChild(style);
+          console.log("[DetailTable] Tabulator CSS injected");
+        })
+        .catch(function () {
+          console.warn("[DetailTable] Tabulator CSS fetch failed, using fallback");
+          // Already injected by Styles.js fallback
+        });
     }
 
     /**
