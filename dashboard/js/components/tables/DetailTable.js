@@ -89,7 +89,6 @@ define([], function () {
       }
 
       if (this._loading) {
-        // Another call is already loading — poll
         for (var i = 0; i < 50; i++) {
           await sleep(200);
           if (typeof Tabulator !== "undefined") return true;
@@ -100,32 +99,40 @@ define([], function () {
       this._loading = true;
       console.log("[DetailTable] Loading Tabulator from CDN…");
 
-      // Try ESM import first (faster, works in modern browsers)
+      // The UMD build has a define() call that Cognos's RequireJS intercepts
+      // as an anonymous module → "Mismatched anonymous define()" error.
+      //
+      // Fix: fetch the script as text, temporarily hide define from RequireJS,
+      // eval the code, then restore define. Tabulator falls back to setting
+      // window.Tabulator since define() is no longer detected.
       try {
-        await import("https://cdn.jsdelivr.net/npm/tabulator-tables@5.5.0/dist/js/tabulator.esm.min.js");
-        if (typeof Tabulator !== "undefined") {
-          console.log("[DetailTable] Tabulator loaded via ESM");
-          return true;
-        }
-      } catch (_e) {
-        console.log("[DetailTable] ESM load failed, trying script tag…");
-      }
+        var resp = await fetch(
+          "https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"
+        );
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        var code = await resp.text();
 
-      // Fallback: inject <script> tag
-      try {
-        await new Promise(function (resolve, reject) {
-          var s = document.createElement("script");
-          s.src = "https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js";
-          s.onload = function () { resolve(); };
-          s.onerror = function () { reject(new Error("script load failed")); };
-          document.head.appendChild(s);
-        });
+        // Temporarily neuter RequireJS's define detection
+        var _define = window.define;
+        var _defineAmd = _define ? _define.amd : undefined;
+        window.define = undefined;
+
+        try {
+          eval(code);
+        } finally {
+          // Restore RequireJS
+          window.define = _define;
+          if (_defineAmd !== undefined) {
+            try { window.define.amd = _defineAmd; } catch (_e) {}
+          }
+        }
+
         if (typeof Tabulator !== "undefined") {
-          console.log("[DetailTable] Tabulator loaded via script tag");
+          console.log("[DetailTable] Tabulator loaded (define-bypass)");
           return true;
         }
-      } catch (e2) {
-        console.error("[DetailTable] Script tag load failed:", e2.message);
+      } catch (e) {
+        console.error("[DetailTable] Tabulator load failed:", e.message);
       }
 
       return false;
