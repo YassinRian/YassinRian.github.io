@@ -23,18 +23,75 @@ define([], function () {
      */
     register(name, dataStore) {
       console.log("[CognosDataConnector] Registering dataset:", name);
+      console.log("[CognosDataConnector] dataStore keys:", Object.keys(dataStore));
+
+      // Check multiple possible data sources
+      var columnNames = dataStore.columnNames || [];
+      var columnValues = dataStore.columnValues || [];
+      var columnFormattedValues = dataStore.columnFormattedValues || [];
+      var rowCount = dataStore.rowCount || 0;
+
+      console.log("[CognosDataConnector] columnValues length:", columnValues.length);
+      console.log("[CognosDataConnector] columnFormattedValues length:", columnFormattedValues.length);
+
+      // Check if columnValues has undefined entries
+      var validColumns = 0;
+      var undefinedColumns = [];
+      for (var i = 0; i < columnValues.length; i++) {
+        if (columnValues[i] === undefined || columnValues[i] === null) {
+          undefinedColumns.push(columnNames[i] || "col_" + i);
+        } else {
+          validColumns++;
+        }
+      }
+      console.log("[CognosDataConnector] Valid columns in columnValues:", validColumns);
+      console.log("[CognosDataConnector] Undefined columns:", undefinedColumns);
+
+      // Try to get data from columnFormattedValues if columnValues has gaps
+      if (undefinedColumns.length > 0 && columnFormattedValues.length > 0) {
+        console.log("[CognosDataConnector] Checking columnFormattedValues for missing data...");
+        for (var i = 0; i < columnFormattedValues.length; i++) {
+          var formattedCol = columnFormattedValues[i];
+          if (formattedCol && columnValues[i] === undefined) {
+            console.log("[CognosDataConnector] columnFormattedValues[" + i + "] (" + columnNames[i] + "):", {
+              type: typeof formattedCol,
+              length: formattedCol ? formattedCol.length : "N/A",
+              sample: formattedCol ? formattedCol.slice(0, 3) : "N/A"
+            });
+          }
+        }
+      }
+
+      // Check raw _dqn structure
+      if (dataStore._dqn) {
+        console.log("[CognosDataConnector] _dqn keys:", Object.keys(dataStore._dqn));
+        if (dataStore._dqn.columns) {
+          console.log("[CognosDataConnector] _dqn.columns length:", dataStore._dqn.columns.length);
+          for (var i = 0; i < Math.min(dataStore._dqn.columns.length, 9); i++) {
+            var col = dataStore._dqn.columns[i];
+            console.log("[CognosDataConnector] _dqn.columns[" + i + "] (" + columnNames[i] + "):", {
+              name: col ? col.name : "N/A",
+              dataType: col ? col.dataType : "N/A",
+              valuesType: col && col.values ? typeof col.values : "undefined",
+              valuesLength: col && col.values && col.values.length !== undefined ? col.values.length : "N/A",
+              sample: col && col.values && col.values.length > 0 ? col.values.slice(0, 3) : "empty"
+            });
+          }
+        }
+      }
 
       this.datasets[name] = {
         raw: dataStore,
-        columnNames: dataStore.columnNames || [],
-        columnValues: dataStore.columnValues || [],
-        rowCount: dataStore.rowCount || 0,
+        columnNames: columnNames,
+        columnValues: columnValues,
+        columnFormattedValues: columnFormattedValues,
+        rowCount: rowCount,
         columnCount: dataStore.columnCount || 0,
         name: name,
       };
 
-      console.log("[CognosDataConnector] Columns:", this.datasets[name].columnNames);
-      console.log("[CognosDataConnector] Rows:", this.datasets[name].rowCount);
+      console.log("[CognosDataConnector] Columns:", columnNames);
+      console.log("[CognosDataConnector] Rows:", rowCount);
     }
 
     /**
