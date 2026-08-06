@@ -38,7 +38,7 @@ define([
      */
     setData(oControlHost, dataStore, name) {
       console.log("[App] setData called:", name);
-      var datasetName = name || dataStore._7rn || "dataset_" + (this.cognosConnector.getNames().length + 1);
+      var datasetName = name || dataStore.name || dataStore._7rn || "dataset_" + (this.cognosConnector.getNames().length + 1);
       this.cognosConnector.register(datasetName, dataStore);
       this.oControlHost = oControlHost;
     }

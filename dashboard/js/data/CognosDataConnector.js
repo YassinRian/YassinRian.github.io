@@ -2,121 +2,110 @@ define([], function () {
   "use strict";
 
   /**
-   * CognosDataConnector - Handles Cognos dataStore API.
+   * CognosDataConnector — Normalizes Cognos Data Module data for DuckDB.
    *
-   * Cognos stores data differently for Categories vs Values:
-   * - Categories (string/decimal): column descriptor has `values` array with distinct values
-   * - Values (number): NO `values` array - actual data is in `_dqn.rows`
+   * Cognos passes data via the standard Custom Control API:
+   *   oData.columnNames       – string[]  (column headers)
+   *   oData.columnCount       – number
+   *   oData.rowCount          – number
+   *   oData.getCellValue(r,c) – function  (returns cell value)
+   *   oData.name              – string    (dataset identifier)
    *
-   * We use `_dqn.rows` which contains ALL data for ALL columns.
+   * We extract ALL rows eagerly at register() time so DuckDB
+   * ingestion in draw() is synchronous with the data.
    */
-  class CognosDataConnector {
-    constructor() {
-      this.datasets = {};
-    }
+  function CognosDataConnector() {
+    this.datasets = {};
+  }
 
-    /**
-     * Register a Cognos dataStore.
-     */
-    register(name, dataStore) {
-      console.log("[CognosDataConnector] Registering dataset:", name);
+  /**
+   * Called by App.setData() for each dataset Cognos sends.
+   * Extracts rows immediately using getCellValue() — the only
+   * stable, documented Cognos API.
+   */
+  CognosDataConnector.prototype.register = function (name, oData) {
+    console.log("[CognosDataConnector] Registering:", name || oData.name);
 
-      // Get column names from _dqn.columns
-      var columns = dataStore._dqn ? dataStore._dqn.columns : [];
-      var columnNames = columns.map(function (col) {
-        return col.name;
-      });
+    var dsName = name || oData.name || "dataset";
+    var colNames = oData.columnNames || [];
+    var colCount = oData.columnCount || colNames.length;
+    var rowCount = oData.rowCount || 0;
 
-      // Get rows from _dqn.rows
-      var rows = dataStore._dqn ? dataStore._dqn.rows : [];
+    console.log("[CognosDataConnector]", dsName,
+      "— columns:", colCount, "rows:", rowCount);
 
-      console.log("[CognosDataConnector] Column names:", columnNames);
-      console.log("[CognosDataConnector] Row count:", rows.length);
-
-      this.datasets[name] = {
-        raw: dataStore,
-        columnNames: columnNames,
-        columns: columns,
-        rows: rows,
-        name: name,
-      };
-    }
-
-    /**
-     * Convert Cognos rows to format suitable for DuckDB ingestion.
-     * Cleans column names for SQL compatibility.
-     */
-    toRows(name) {
-      var ds = this.datasets[name];
-      if (!ds) {
-        console.error("[CognosDataConnector] Dataset not found:", name);
-        return [];
+    // Eagerly extract all rows using the stable getCellValue() API
+    var rows = [];
+    for (var r = 0; r < rowCount; r++) {
+      var row = {};
+      for (var c = 0; c < colCount; c++) {
+        var rawName = colNames[c];
+        var cleanName = cleanColumnName(rawName);
+        row[cleanName] = oData.getCellValue(r, c);
       }
-
-      var columnNames = ds.columnNames;
-      var rows = ds.rows;
-
-      if (!rows || rows.length === 0) {
-        console.log("[CognosDataConnector] No rows to convert");
-        return [];
-      }
-
-      console.log("[CognosDataConnector] Converting " + rows.length + " rows...");
-
-      // Clean column names for SQL compatibility
-      var cleanNames = columnNames.map(function (name) {
-        return name
-          .replace(/[^a-zA-Z0-9_]/g, "_")
-          .replace(/^(\d)/, "_$1")
-          .replace(/_+/g, "_")
-          .replace(/^_|_$/g, "");
-      });
-
-      console.log("[CognosDataConnector] Clean column names:", cleanNames);
-
-      // Convert rows to use clean column names
-      var result = [];
-      for (var r = 0; r < rows.length; r++) {
-        var row = rows[r];
-        var cleanRow = {};
-        for (var c = 0; c < columnNames.length; c++) {
-          cleanRow[cleanNames[c]] = row[columnNames[c]];
-        }
-        result.push(cleanRow);
-      }
-
-      // Log sample of first row
-      if (result.length > 0) {
-        console.log("[CognosDataConnector] First row:", result[0]);
-      }
-
-      console.log("[CognosDataConnector] Converted " + result.length + " rows");
-      return result;
+      rows.push(row);
     }
 
-    /**
-     * Get column names (cleaned for SQL).
-     */
-    getCleanColumnNames(name) {
-      var ds = this.datasets[name];
-      if (!ds) return [];
+    // Build cleaned column-name list
+    var cleanNames = colNames.map(function (n) {
+      return cleanColumnName(n);
+    });
 
-      return ds.columnNames.map(function (name) {
-        return name
-          .replace(/[^a-zA-Z0-9_]/g, "_")
-          .replace(/^(\d)/, "_$1")
-          .replace(/_+/g, "_")
-          .replace(/^_|_$/g, "");
-      });
-    }
+    this.datasets[dsName] = {
+      raw: oData,
+      columnNames: cleanNames,
+      rows: rows,
+      name: dsName
+    };
 
-    getNames() {
-      return Object.keys(this.datasets);
-    }
+    console.log("[CognosDataConnector] Stored",
+      rows.length, "rows for", dsName);
 
-    has(name) {
-      return !!this.datasets[name];
+    if (rows.length > 0) {
+      console.log("[CognosDataConnector] First row sample:", rows[0]);
     }
+  };
+
+  /**
+   * Return rows as an array of clean-keyed objects for DuckDB CSV ingestion.
+   */
+  CognosDataConnector.prototype.toRows = function (name) {
+    var ds = this.datasets[name];
+    if (!ds) {
+      console.error("[CognosDataConnector] Dataset not found:", name);
+      return [];
+    }
+    return ds.rows;
+  };
+
+  /**
+   * Return cleaned column names (SQL-safe).
+   */
+  CognosDataConnector.prototype.getCleanColumnNames = function (name) {
+    var ds = this.datasets[name];
+    return ds ? ds.columnNames : [];
+  };
+
+  CognosDataConnector.prototype.getNames = function () {
+    return Object.keys(this.datasets);
+  };
+
+  CognosDataConnector.prototype.has = function (name) {
+    return !!this.datasets[name];
+  };
+
+  /**
+   * Convert a raw Cognos column name to a SQL-safe identifier.
+   * "Project nummer"  →  "Project_nummer"
+   * "Restbudget (okr)" → "Restbudget__okr_"
+   */
+  function cleanColumnName(raw) {
+    if (!raw) return "_empty";
+    return raw
+      .replace(/[^a-zA-Z0-9_\u00C0-\u024F]/g, "_") // keep letters+digits+accented
+      .replace(/^(\d)/, "_$1")                     // can't start with digit
+      .replace(/_+/g, "_")                         // collapse runs
+      .replace(/^_|_$/g, "");                      // trim
   }
 
   return CognosDataConnector;

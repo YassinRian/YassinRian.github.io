@@ -57,15 +57,8 @@
                 "Lopend totaal"
             ];
 
-            var colProjectNummer = [];
-            var colProjectNaam = [];
-            var colJaar = [];
-            var colDatumEvent = [];
-            var colGebeurtenisCode = [];
-            var colRestbudgetOpbrengsten = [];
-            var colRestbudgetKosten = [];
-            var colRestbudgetResultaatneming = [];
-            var colLopendTotaal = [];
+            // Build row-oriented storage (matches Cognos's internal model)
+            var _rows = [];
 
             for (var p = 0; p < projects.length; p++) {
                 for (var year = 2025; year <= 2060; year++) {
@@ -75,34 +68,29 @@
                     var resultaatneming = (Math.random() - 0.5) * 500;
                     var lopendTotaal = revenue + costs + resultaatneming;
 
-                    colProjectNummer.push(projects[p]);
-                    colProjectNaam.push(projectNames[p] + " - " + projects[p]);
-                    colJaar.push(year);
-                    colDatumEvent.push("2026-02-02T15:05:16");
-                    colGebeurtenisCode.push(eventCodes[Math.floor(Math.random() * eventCodes.length)]);
-                    colRestbudgetOpbrengsten.push(Math.round(revenue));
-                    colRestbudgetKosten.push(Math.round(costs));
-                    colRestbudgetResultaatneming.push(Math.round(resultaatneming));
-                    colLopendTotaal.push(Math.round(lopendTotaal));
+                    _rows.push([
+                        projects[p],
+                        projectNames[p] + " - " + projects[p],
+                        year,
+                        "2026-02-02T15:05:16",
+                        eventCodes[Math.floor(Math.random() * eventCodes.length)],
+                        Math.round(revenue),
+                        Math.round(costs),
+                        Math.round(resultaatneming),
+                        Math.round(lopendTotaal)
+                    ]);
                 }
             }
 
+            // Return Cognos-standard oData shape with getCellValue()
             return {
                 name: "Data_set1",
                 columnNames: columnNames,
                 columnCount: columnNames.length,
-                rowCount: colProjectNummer.length,
-                columnValues: [
-                    colProjectNummer,
-                    colProjectNaam,
-                    colJaar,
-                    colDatumEvent,
-                    colGebeurtenisCode,
-                    colRestbudgetOpbrengsten,
-                    colRestbudgetKosten,
-                    colRestbudgetResultaatneming,
-                    colLopendTotaal
-                ]
+                rowCount: _rows.length,
+                getCellValue: function(row, col) {
+                    return _rows[row][col];
+                }
             };
         }
 
