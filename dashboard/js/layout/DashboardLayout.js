@@ -71,7 +71,9 @@ define([], function () {
       '      <span>Detailgegevens</span>',
       '      <span class="table-count" id="table-row-count"></span>',
       '    </div>',
-      '    <div id="table-mount" style="min-height: 300px;"></div>',
+      '    <div id="table-mount" style="min-height: 300px;">',
+      '      <div style="padding: 40px; text-align: center; color: #999;">Tabel wordt geladen…</div>',
+      '    </div>',
       '  </div>',
 
       '</div>'
@@ -83,6 +85,9 @@ define([], function () {
     this.chartContainer     = this.container.querySelector("#chart-area");
     this.tableContainer     = this.container.querySelector("#table-mount");
     this.breadcrumbContainer = this.container.querySelector("#breadcrumb");
+
+    // Show default message immediately
+    this.updateBreadcrumb({});
 
     return this;
   };

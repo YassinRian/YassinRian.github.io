@@ -205,29 +205,35 @@ define([
     var filters = this.filterState.get();
     console.log("[App] Refreshing with filters:", filters);
 
-    try {
-      // Run all three queries in parallel
-      var projectionPromise = this.model.getProjectionByYear(filters);
-      var kpiPromise        = this.model.getKPIs(filters);
-      var detailPromise     = this.model.getDetailTable(filters);
+    // Run all three queries in parallel
+    var projectionPromise = this.model.getProjectionByYear(filters);
+    var kpiPromise        = this.model.getKPIs(filters);
+    var detailPromise     = this.model.getDetailTable(filters);
 
-      var projectionData = await projectionPromise;
-      var kpiData        = await kpiPromise;
-      var detailData     = await detailPromise;
+    var projectionData, kpiData, detailData;
+    try { projectionData = await projectionPromise; } catch (e) { console.error("[App] Projection query failed:", e); }
+    try { kpiData        = await kpiPromise;        } catch (e) { console.error("[App] KPI query failed:", e); }
+    try { detailData     = await detailPromise;     } catch (e) { console.error("[App] Detail query failed:", e); }
 
-      // Update views
-      this.projectionChart.update(projectionData);
-      this.kpiCards.update(kpiData);
-      this.detailTable.setData(detailData);
-      this.layout.setRowCount(detailData.length);
-      this.layout.updateBreadcrumb(filters);
-
-      // Sync filter dropdown highlights
-      this._syncDropdowns(filters);
-
-    } catch (err) {
-      console.error("[App] Refresh error:", err);
+    // Update each view independently — one failure won't block the others
+    if (projectionData) {
+      try { this.projectionChart.update(projectionData); } catch (e) { console.error("[App] Chart update failed:", e); }
     }
+    if (kpiData) {
+      try { this.kpiCards.update(kpiData); } catch (e) { console.error("[App] KPI update failed:", e); }
+    }
+    if (detailData) {
+      try {
+        this.detailTable.setData(detailData);
+        this.layout.setRowCount(detailData.length);
+      } catch (e) { console.error("[App] Table update failed:", e); }
+    }
+
+    // Breadcrumb always updates (just needs filters, not data)
+    try { this.layout.updateBreadcrumb(filters); } catch (e) { console.error("[App] Breadcrumb update failed:", e); }
+
+    // Sync filter dropdown highlights
+    try { this._syncDropdowns(filters); } catch (e) { console.error("[App] Dropdown sync failed:", e); }
   };
 
   // ═══════════════════════════════════════════════════════════════

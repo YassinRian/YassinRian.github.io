@@ -26,7 +26,6 @@ define([], function () {
       {
         title: "Project Nr",
         field: "Project_nummer",
-        frozen: true,
         width: 130,
         headerFilter: "input"
       },
@@ -104,24 +103,43 @@ define([], function () {
    * Set or replace all data in the table.
    */
   DetailTable.prototype.setData = function (rows) {
+    console.log("[DetailTable] setData called with", rows ? rows.length : 0, "rows");
     this._data = rows;
 
+    if (!this._node) {
+      console.error("[DetailTable] No DOM node — cannot render");
+      return;
+    }
+
     if (this._table) {
-      // Efficient in-place replacement (keeps column defs + state)
+      // Efficient in-place replacement
       this._table.replaceData(rows);
-    } else {
+      return;
+    }
+
+    // First-time creation
+    console.log("[DetailTable] Creating Tabulator instance…");
+    console.log("[DetailTable] DOM node:", this._node.id, "| dimensions:",
+      this._node.offsetWidth + "×" + this._node.offsetHeight);
+    console.log("[DetailTable] Tabulator global:", typeof Tabulator);
+
+    try {
+      var columns = this._getColumns();
+      console.log("[DetailTable] Columns defined:", columns.length);
+
       this._table = new Tabulator(this._node, {
         data: rows,
-        columns: this._getColumns(),
-        layout: "fitDataStretch",
+        columns: columns,
+        layout: "fitColumns",
         height: "400px",
         selectable: true,
-        selectableRangeMode: "click",
         pagination: true,
         paginationSize: 15,
         paginationSizeSelector: [10, 15, 25, 50],
         initialSort: [{ column: "Jaar", dir: "desc" }]
       });
+
+      console.log("[DetailTable] Tabulator created successfully");
 
       // Row selection → emit for cross-filtering
       var self = this;
@@ -132,6 +150,8 @@ define([], function () {
           Project_nummer: [data.Project_nummer]
         });
       });
+    } catch (err) {
+      console.error("[DetailTable] Tabulator creation failed:", err.message, err.stack);
     }
   };
 
