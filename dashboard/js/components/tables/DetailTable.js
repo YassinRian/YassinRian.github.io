@@ -168,7 +168,7 @@ define([], function () {
         style.id = "tabulator-css-dynamic";
         style.textContent = css;
         document.head.appendChild(style);
-        console.log("[DetailTable] Tabulator CSS injected (" + css.length + " bytes)");
+        console.log("[DetailTable] ✅ Tabulator FULL CSS loaded from CDN (" + css.length + " bytes)");
       } catch (e) {
         console.warn("[DetailTable] Tabulator CSS fetch failed:", e.message);
         // Fallback: embedded minimal grid CSS
@@ -200,7 +200,7 @@ define([], function () {
       style.id = "tabulator-css-dynamic";
       style.textContent = css;
       document.head.appendChild(style);
-      console.log("[DetailTable] Tabulator CSS fallback injected");
+      console.log("[DetailTable] ⚠️ Tabulator CSS FALLBACK injected (CDN fetch failed)");
     }
 
     /**

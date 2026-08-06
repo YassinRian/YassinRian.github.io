@@ -71,7 +71,7 @@ define([], function () {
       '      <span>Detailgegevens</span>',
       '      <span class="table-count" id="table-row-count"></span>',
       '    </div>',
-      '    <div id="table-mount" style="min-height: 300px;">',
+      '    <div id="table-mount" style="min-height:300px;width:100%;position:relative;">',
       '      <div style="padding: 40px; text-align: center; color: #999;">Tabel wordt geladen…</div>',
       '    </div>',
       '  </div>',
