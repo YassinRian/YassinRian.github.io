@@ -56,14 +56,15 @@ define([], function () {
 
       console.log("[DetailTable] Creating Tabulator…");
 
-      // Ensure container is full-width before Tabulator measures it
+      // Force container to take full available width
       this._node.style.width = "100%";
+      this._node.style.display = "block";
 
       try {
         this._table = new Tabulator(this._node, {
           data: rows,
           columns: this._columns(),
-          layout: "fitColumns",
+          layout: "fitDataFill",
           resizableColumns: true,
           pagination: true,
           paginationSize: 15,
@@ -71,6 +72,38 @@ define([], function () {
           initialSort: [{ column: "Jaar", dir: "desc" }]
         });
         console.log("[DetailTable] Tabulator created");
+
+        // Force proper sizing after Tabulator has rendered
+        var tbl = this._table;
+        var node = this._node;
+        setTimeout(function () {
+          try {
+            tbl.redraw(true);
+            // Ensure the internal table holder spans full container width
+            var holder = node.querySelector(".tabulator-tableholder");
+            if (holder) holder.style.width = "100%";
+            var tab = node.querySelector(".tabulator");
+            if (tab) tab.style.width = "100%";
+          } catch (_e) {}
+        }, 150);
+
+        // ── Fix stuck column resize ──────────────────────────
+        // When mouseup happens outside Tabulator's overlay,
+        // the resize ghost can get stuck. This cleans it up.
+        var cleanupResize = function () {
+          try {
+            var indicator = document.querySelector(".tabulator-col-resize-indicator");
+            if (indicator && indicator.parentNode) {
+              indicator.parentNode.removeChild(indicator);
+            }
+            // Also remove any orphaned resize handles in "active" state
+            var handles = document.querySelectorAll(".tabulator-col-resize-handle.active");
+            for (var h = 0; h < handles.length; h++) {
+              handles[h].classList.remove("active");
+            }
+          } catch (_e) {}
+        };
+        document.addEventListener("mouseup", cleanupResize, { passive: true });
 
         var self = this;
         this._table.on("rowClick", function (_e, row) {
