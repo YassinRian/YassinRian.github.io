@@ -246,12 +246,31 @@ define([], function () {
 
   return {
     inject: function () {
-      const id = "cognos-dashboard-styles";
+      var id = "cognos-dashboard-styles";
       if (!document.getElementById(id)) {
-        const style = document.createElement("style");
+        var style = document.createElement("style");
         style.id = id;
         style.innerHTML = css;
         document.head.appendChild(style);
+      }
+
+      // Minimal Tabulator fallback CSS (in case CDN fails)
+      var tabId = "cognos-tabulator-fallback";
+      if (!document.getElementById(tabId)) {
+        var tabCss = [
+          ".tabulator { position:relative; border:1px solid #ddd; background:#fff; font-size:13px; }",
+          ".tabulator .tabulator-header { border-bottom:2px solid #1a237e; background:#e8eaf6; font-weight:600; }",
+          ".tabulator .tabulator-header .tabulator-col { padding:8px 6px; border-right:1px solid #ddd; }",
+          ".tabulator .tabulator-tableholder .tabulator-row { border-bottom:1px solid #eee; }",
+          ".tabulator .tabulator-tableholder .tabulator-row .tabulator-cell { padding:6px; }",
+          ".tabulator .tabulator-footer { border-top:1px solid #ddd; padding:6px 10px; background:#fafafa; }",
+          ".tabulator .tabulator-footer .tabulator-page { padding:4px 8px; border:1px solid #ccc; margin:0 2px; cursor:pointer; }",
+          ".tabulator .tabulator-footer .tabulator-page.active { background:#1a237e; color:#fff; }"
+        ].join("\n");
+        var tabStyle = document.createElement("style");
+        tabStyle.id = tabId;
+        tabStyle.innerHTML = tabCss;
+        document.head.appendChild(tabStyle);
       }
     },
   };

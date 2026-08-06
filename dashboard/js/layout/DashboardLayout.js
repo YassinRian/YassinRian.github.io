@@ -126,7 +126,7 @@ define([], function () {
   /**
    * Update breadcrumb showing active filters.
    */
-  DashboardLayout.prototype.updateBreadcrumb = function (filters) {
+  DashboardLayout.prototype.updateBreadcrumb = function (filters, onClearDim) {
     if (!this.breadcrumbContainer) return;
     var active = Object.keys(filters).filter(function (k) {
       return filters[k] && filters[k].length > 0;
@@ -141,15 +141,33 @@ define([], function () {
     var crumbs = active.map(function (dim) {
       var vals = filters[dim];
       var label = vals.length === 1 ? String(vals[0]) : vals.length + " geselecteerd";
-      return '<span class="breadcrumb-item">' + dim + ': <strong>' + label + "</strong></span>";
+      return '<span class="breadcrumb-item" data-clear-dim="' + dim +
+        '" style="cursor:pointer;" title="Klik om filter \'' + dim + '\' te verwijderen">' +
+        dim + ': <strong>' + label + '</strong> <span style="font-size:10px;color:#d94141;">✕</span></span>';
     });
 
     this.breadcrumbContainer.innerHTML = [
       '<div class="breadcrumb-trail">',
-      '  <span class="breadcrumb-home">Alles</span>',
+      '  <span class="breadcrumb-home" style="cursor:pointer;" title="Alle filters wissen">Alles</span>',
       crumbs.map(function (c) { return '<span class="breadcrumb-sep">›</span>' + c; }).join(""),
       "</div>"
     ].join("\n");
+
+    // Wire click handlers
+    var self = this;
+    var home = this.breadcrumbContainer.querySelector(".breadcrumb-home");
+    if (home && onClearDim) {
+      home.addEventListener("click", function () { onClearDim(null); });
+    }
+    var items = this.breadcrumbContainer.querySelectorAll(".breadcrumb-item");
+    for (var i = 0; i < items.length; i++) {
+      (function (el) {
+        var dim = el.getAttribute("data-clear-dim");
+        el.addEventListener("click", function () {
+          if (onClearDim) onClearDim(dim);
+        });
+      })(items[i]);
+    }
   };
 
   // ─── LOADING OVERLAY (reused from existing) ─────────────────────

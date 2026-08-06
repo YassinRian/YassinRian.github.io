@@ -8,7 +8,6 @@ define([], function () {
    *   - Sorting, filtering, pagination (built-in Tabulator)
    *   - Row selection emits "table:selection" for cross-filtering
    *   - Column formatting (currency, dates)
-   *   - Responsive layout
    */
   function DetailTable(domNode, eventBus) {
     this._node = domNode;
@@ -17,168 +16,118 @@ define([], function () {
     this._data = [];
   }
 
-  /**
-   * Define columns with formatters.
-   */
   DetailTable.prototype._getColumns = function () {
-    var self = this;
     return [
-      {
-        title: "Project Nr",
-        field: "Project_nummer",
-        width: 130,
-        headerFilter: "input"
-      },
-      {
-        title: "Project Naam",
-        field: "Project_naam_nummer",
-        width: 220,
-        headerFilter: "input"
-      },
-      {
-        title: "Jaar",
-        field: "Jaar",
-        width: 70,
-        hozAlign: "center",
-        headerFilter: "number",
-        headerFilterFunc: "="
-      },
-      {
-        title: "Datum Event",
-        field: "Datum_event",
-        width: 150,
-        formatter: function (cell) {
-          var v = cell.getValue();
-          if (!v) return "";
-          try {
-            return new Date(v).toLocaleDateString("nl-NL");
-          } catch (e) {
-            return v;
-          }
-        }
-      },
-      {
-        title: "Event",
-        field: "Gebeurtenis_code",
-        width: 70,
-        hozAlign: "center",
-        headerFilter: "list"
-      },
-      {
-        title: "Opbrengsten",
-        field: "Restbudget_opbrengsten",
-        width: 120,
-        hozAlign: "right",
-        formatter: formatEuro,
-        headerFilter: "number",
-        headerFilterFunc: ">="
-      },
-      {
-        title: "Kosten",
-        field: "Restbudget_kosten",
-        width: 120,
-        hozAlign: "right",
-        formatter: formatEuro,
-        headerFilter: "number",
-        headerFilterFunc: "<="
-      },
-      {
-        title: "Res. Neming",
-        field: "Restbudget_resultaatneming",
-        width: 120,
-        hozAlign: "right",
-        formatter: formatEuro
-      },
-      {
-        title: "Lopend Totaal",
-        field: "Lopend_totaal",
-        width: 130,
-        hozAlign: "right",
-        formatter: formatEuroBold
-      }
+      { title: "Project Nr",    field: "Project_nummer",            width: 120 },
+      { title: "Project Naam",  field: "Project_naam_nummer",       width: 200 },
+      { title: "Jaar",          field: "Jaar",                      width: 65,  hozAlign: "center" },
+      { title: "Event",         field: "Gebeurtenis_code",          width: 65,  hozAlign: "center" },
+      { title: "Opbrengsten",   field: "Restbudget_opbrengsten",    width: 120, hozAlign: "right", formatter: fmtEuro },
+      { title: "Kosten",        field: "Restbudget_kosten",         width: 120, hozAlign: "right", formatter: fmtEuro },
+      { title: "Res. Neming",   field: "Restbudget_resultaatneming", width: 120, hozAlign: "right", formatter: fmtEuro },
+      { title: "Lopend Totaal", field: "Lopend_totaal",             width: 130, hozAlign: "right", formatter: fmtEuroBold }
     ];
   };
 
-  /**
-   * Set or replace all data in the table.
-   */
   DetailTable.prototype.setData = function (rows) {
-    console.log("[DetailTable] setData called with", rows ? rows.length : 0, "rows");
+    console.log("[DetailTable] setData:", rows ? rows.length : 0, "rows, node:", !!this._node);
     this._data = rows;
 
     if (!this._node) {
-      console.error("[DetailTable] No DOM node — cannot render");
+      console.error("[DetailTable] No DOM node");
       return;
     }
 
+    // If table already exists, just update data
     if (this._table) {
-      // Efficient in-place replacement
       this._table.replaceData(rows);
       return;
     }
 
-    // First-time creation
-    console.log("[DetailTable] Creating Tabulator instance…");
-    console.log("[DetailTable] DOM node:", this._node.id, "| dimensions:",
-      this._node.offsetWidth + "×" + this._node.offsetHeight);
-    console.log("[DetailTable] Tabulator global:", typeof Tabulator);
+    // Check Tabulator is available
+    if (typeof Tabulator === "undefined") {
+      console.error("[DetailTable] Tabulator global not found — falling back to HTML table");
+      this._renderFallback(rows);
+      return;
+    }
 
+    console.log("[DetailTable] Creating Tabulator… node:", this._node.id);
     try {
-      var columns = this._getColumns();
-      console.log("[DetailTable] Columns defined:", columns.length);
-
       this._table = new Tabulator(this._node, {
         data: rows,
-        columns: columns,
-        layout: "fitColumns",
-        height: "400px",
-        selectable: true,
+        columns: this._getColumns(),
+        layout: "fitData",
         pagination: true,
         paginationSize: 15,
         paginationSizeSelector: [10, 15, 25, 50],
         initialSort: [{ column: "Jaar", dir: "desc" }]
       });
+      console.log("[DetailTable] Tabulator created OK");
 
-      console.log("[DetailTable] Tabulator created successfully");
-
-      // Row selection → emit for cross-filtering
       var self = this;
       this._table.on("rowClick", function (e, row) {
-        var data = row.getData();
+        var d = row.getData();
         self._bus.emit("table:selection", {
-          Jaar: [Number(data.Jaar)],
-          Project_nummer: [data.Project_nummer]
+          Jaar: [Number(d.Jaar)],
+          Project_nummer: [d.Project_nummer]
         });
       });
     } catch (err) {
-      console.error("[DetailTable] Tabulator creation failed:", err.message, err.stack);
+      console.error("[DetailTable] Tabulator error:", err.message);
+      this._renderFallback(rows);
     }
   };
 
   /**
-   * Get currently visible data (respects Tabulator filters).
+   * Fallback: plain HTML table if Tabulator is unavailable.
    */
-  DetailTable.prototype.getVisibleData = function () {
-    if (!this._table) return [];
-    return this._table.getData("active");
+  DetailTable.prototype._renderFallback = function (rows) {
+    console.log("[DetailTable] Rendering fallback HTML table");
+    var cols = this._getColumns();
+    var html = '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
+
+    // Header
+    html += "<tr>";
+    for (var c = 0; c < cols.length; c++) {
+      html += '<th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;text-align:left;">' + cols[c].title + "</th>";
+    }
+    html += "</tr>";
+
+    // Rows (max 50 for performance)
+    var max = Math.min(rows.length, 50);
+    for (var r = 0; r < max; r++) {
+      html += "<tr>";
+      for (var c2 = 0; c2 < cols.length; c2++) {
+        var val = rows[r][cols[c2].field];
+        html += '<td style="border:1px solid #eee;padding:6px;">' + (val != null ? val : "") + "</td>";
+      }
+      html += "</tr>";
+    }
+    html += "</table>";
+
+    if (rows.length > 50) {
+      html += '<p style="color:#999;font-size:11px;padding:8px;">Toont 50 van ' + rows.length + " rijen</p>";
+    }
+
+    this._node.innerHTML = html;
   };
 
-  // ─── FORMATTERS ─────────────────────────────────────────────────
+  // ─── FORMATTERS ─────────────────────────────────────────────
 
-  function formatEuro(cell) {
+  function fmtEuro(cell) {
     var v = cell.getValue();
     if (v == null || isNaN(v)) return "";
     var n = Number(v);
-    var cls = n >= 0 ? "color: #2d8a4e" : "color: #d94141";
-    return '<span style="' + cls + '">€ ' + n.toLocaleString("nl-NL") + "</span>";
+    var cls = n >= 0 ? "#2d8a4e" : "#d94141";
+    return '<span style="color:' + cls + '">€ ' + n.toLocaleString("nl-NL") + "</span>";
   }
 
-  function formatEuroBold(cell) {
+  function fmtEuroBold(cell) {
     var v = cell.getValue();
     if (v == null || isNaN(v)) return "";
     var n = Number(v);
-    var cls = n >= 0 ? "color: #1a237e; font-weight: 600" : "color: #d94141; font-weight: 600";
-    return '<span style="' + cls + '">€ ' + n.toLocaleString("nl-NL") + "</span>";
+    var cls = n >= 0 ? "#1a237e" : "#d94141";
+    return '<span style="color:' + cls + ';font-weight:600">€ ' + n.toLocaleString("nl-NL") + "</span>";
   }
 
   return DetailTable;

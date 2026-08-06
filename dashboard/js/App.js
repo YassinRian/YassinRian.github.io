@@ -223,14 +223,21 @@ define([
       try { this.kpiCards.update(kpiData); } catch (e) { console.error("[App] KPI update failed:", e); }
     }
     if (detailData) {
-      try {
-        this.detailTable.setData(detailData);
-        this.layout.setRowCount(detailData.length);
-      } catch (e) { console.error("[App] Table update failed:", e); }
+      try { this.layout.setRowCount(detailData.length); } catch (e) {}
+      try { this.detailTable.setData(detailData); } catch (e) { console.error("[App] Table update failed:", e); }
     }
 
-    // Breadcrumb always updates (just needs filters, not data)
-    try { this.layout.updateBreadcrumb(filters); } catch (e) { console.error("[App] Breadcrumb update failed:", e); }
+    // Breadcrumb — pass clear-callback so clicks remove individual filters
+    var self = this;
+    try {
+      this.layout.updateBreadcrumb(filters, function (dim) {
+        if (!dim) {
+          self.filterState.clearAll();
+        } else {
+          self.filterState.clear(dim);
+        }
+      });
+    } catch (e) { console.error("[App] Breadcrumb update failed:", e); }
 
     // Sync filter dropdown highlights
     try { this._syncDropdowns(filters); } catch (e) { console.error("[App] Dropdown sync failed:", e); }
@@ -280,8 +287,11 @@ define([
 
   function syncSelectValues(select, values) {
     if (!select) return;
+    // Convert both sides to strings — filter values may be numbers,
+    // but HTML option values are always strings
+    var strVals = values.map(function (v) { return String(v); });
     for (var i = 0; i < select.options.length; i++) {
-      select.options[i].selected = values.indexOf(select.options[i].value) >= 0;
+      select.options[i].selected = strVals.indexOf(select.options[i].value) >= 0;
     }
   }
 
