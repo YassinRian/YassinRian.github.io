@@ -96,9 +96,33 @@ define([
         }
       }
 
-      // Tell model which table to query
+      // Register the primary table with column mappings.
+      // The first Cognos dataset is assumed to be the primary
+      // project-financials star schema.
       this._datasetName = dsNames[0];
-      this.model.setTableName(this._datasetName);
+      this.model.registerTable(this._datasetName, {
+        primary: true,
+        columns: {
+          year:           "Jaar",
+          revenue:         "Restbudget_opbrengsten",
+          cost:            "Restbudget_kosten",
+          resultaatneming: "Restbudget_resultaatneming",
+          runningTotal:    "Lopend_totaal",
+          projectCode:     "Project_nummer",
+          projectName:     "Project_naam_nummer",
+          eventDate:       "Datum_event",
+          eventCode:       "Gebeurtenis_code"
+        }
+      });
+
+      // Additional datasets get registered without "primary: true".
+      // Their column mappings are defined when the star schema is added.
+      for (var k = 1; k < dsNames.length; k++) {
+        this.model.registerTable(dsNames[k], {
+          columns: {} // filled in when the schema is known
+        });
+        console.log("[App] Secondary table registered:", dsNames[k]);
+      }
 
       // ── Wire Components ────────────────────────────────────
       this.kpiCards = new KPICards(this.layout.kpiContainer);
