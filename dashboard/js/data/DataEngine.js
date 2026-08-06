@@ -38,6 +38,13 @@ define([], function () {
       return this;
     }
 
+    /**
+     * Quote a table name for DuckDB SQL (handles spaces and special characters).
+     */
+    _quoteTableName(tableName) {
+      return `"${tableName.replace(/"/g, '""')}"`;
+    }
+
     async ingest(tableName, data) {
       if (!data || data.length === 0) {
         console.warn("[DataEngine] No data to ingest");
@@ -61,9 +68,12 @@ define([], function () {
       const csv = [headers.join(","), ...csvRows].join("\n");
 
       // Register CSV in DuckDB and create table
-      await this.db.registerFileText(`${tableName}.csv`, csv);
+      // Use safe file name (replace spaces with underscores)
+      const safeFileName = tableName.replace(/[^a-zA-Z0-9_]/g, "_") + ".csv";
+      const quotedName = this._quoteTableName(tableName);
+      await this.db.registerFileText(safeFileName, csv);
       await this.conn.query(
-        `CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_csv_auto('${tableName}.csv')`,
+        `CREATE OR REPLACE TABLE ${quotedName} AS SELECT * FROM read_csv_auto('${safeFileName}')`,
       );
       this.tables.add(tableName);
 
@@ -104,7 +114,8 @@ define([], function () {
     }
 
     async selectAll(tableName, filters = {}) {
-      let sql = `SELECT * FROM ${tableName}`;
+      const quotedName = this._quoteTableName(tableName);
+      let sql = `SELECT * FROM ${quotedName}`;
       const whereClauses = this._buildWhereClauses(filters);
 
       if (whereClauses.length > 0) {
@@ -115,7 +126,8 @@ define([], function () {
     }
 
     async aggregate(tableName, dimension, measure, aggFn, filters = {}) {
-      let sql = `SELECT ${dimension}, ${aggFn}(${measure}) as value FROM ${tableName}`;
+      const quotedName = this._quoteTableName(tableName);
+      let sql = `SELECT ${dimension}, ${aggFn}(${measure}) as value FROM ${quotedName}`;
       const whereClauses = this._buildWhereClauses(filters);
 
       if (whereClauses.length > 0) {
@@ -127,7 +139,8 @@ define([], function () {
     }
 
     async getDistinct(tableName, column, filters = {}) {
-      let sql = `SELECT DISTINCT ${column} FROM ${tableName}`;
+      const quotedName = this._quoteTableName(tableName);
+      let sql = `SELECT DISTINCT ${column} FROM ${quotedName}`;
       const whereClauses = this._buildWhereClauses(filters);
 
       if (whereClauses.length > 0) {
@@ -140,11 +153,13 @@ define([], function () {
     }
 
     async getTableInfo(tableName) {
-      return this.query(`DESCRIBE ${tableName}`);
+      const quotedName = this._quoteTableName(tableName);
+      return this.query(`DESCRIBE ${quotedName}`);
     }
 
     async getRowCount(tableName, filters = {}) {
-      let sql = `SELECT COUNT(*) as count FROM ${tableName}`;
+      const quotedName = this._quoteTableName(tableName);
+      let sql = `SELECT COUNT(*) as count FROM ${quotedName}`;
       const whereClauses = this._buildWhereClauses(filters);
 
       if (whereClauses.length > 0) {
@@ -166,50 +181,6 @@ define([], function () {
         }
       }
       return clauses;
-    }
-
-    /**
-     * Ingest data directly from Cognos dataStore format.
-     * @param {string} tableName - Name for the DuckDB table
-     * @param {Object} cognosDataStore - Cognos dataStore with columnHeaders and rowData
-     */
-    async ingestFromCognos(tableName, cognosDataStore) {
-      if (
-        !cognosDataStore ||
-        !cognosDataStore.rowData ||
-        !cognosDataStore.columnHeaders
-      ) {
-        throw new Error("[DataEngine] Invalid Cognos dataStore format");
-      }
-
-      const headers = cognosDataStore.columnHeaders.map((h) =>
-        typeof h === "string" ? h : h.name || h.label,
-      );
-      const rows = cognosDataStore.rowData;
-
-      // Convert to CSV for DuckDB ingestion
-      const csvRows = rows.map((row) =>
-        row
-          .map((val) => {
-            if (val === null || val === undefined) return "";
-            const str = String(val);
-            return str.includes(",") || str.includes('"')
-              ? `"${str.replace(/"/g, '""')}"`
-              : str;
-          })
-          .join(","),
-      );
-      const csv = [headers.join(","), ...csvRows].join("\n");
-
-      await this.db.registerFileText(`${tableName}.csv`, csv);
-      await this.conn.query(
-        `CREATE OR REPLACE TABLE ${tableName} AS SELECT * FROM read_csv_auto('${tableName}.csv')`,
-      );
-      this.tables.add(tableName);
-
-      console.log(
-        `[DataEngine] Ingested Cognos dataset "${tableName}" (${rows.length} rows, ${headers.length} columns)`,
-      );
     }
 
     /**

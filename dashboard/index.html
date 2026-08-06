@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cognos DuckDB Dashboard</title>
+    
+    <style>
+        * { box-sizing: border-box; }
+        body { margin: 0; padding: 0; background: #f0f2f5; }
+        #cognos_container { width: 100%; min-height: 100vh; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+    </style>
+</head>
+<body>
+  <div id="cognos_container"></div>
+
+    <!-- ECharts -->
+    <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.3/dist/echarts.min.js"></script>
+
+    <!-- RequireJS -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.6/require.min.js"></script>
+    
+    <script>
+        requirejs.config({
+            baseUrl: 'js'
+        });
+
+        // Mock oControlHost for local development
+        var mockControlHost = {
+            container: document.getElementById("cognos_container")
+        };
+
+        // Generate mock data matching Cognos Data Module structure
+        function generateMockDataStore() {
+            var projects = [
+                "G100006109", "G100006123", "G100006132", "G100006217",
+                "G100006258", "G100006313", "G100006365", "G100006380",
+                "G100006420", "G100006468", "G100006500", "G100006550"
+            ];
+            var projectNames = [
+                "Waterwegcentr. HvH", "Dirk v/d Burgweg", "Oranjebonnen", "Leonidas",
+                "Ontw.Locaties RCD", "Vierhavenstrip", "Brainpark III", "Prinsenland 2De Fas",
+                "Kleinpolder Zuidwes", "Revit Spaanse pld", "Nieuwe Maas", "Kop van Zuid"
+            ];
+            var eventCodes = ["NTV", "NAV", "NJV"];
+
+            var columnNames = [
+                "Project nummer",
+                "Project naam nummer",
+                "Jaar",
+                "Datum event",
+                "Gebeurtenis code",
+                "Restbudget opbrengsten",
+                "Restbudget kosten",
+                "Restbudget resultaatneming",
+                "Lopend totaal"
+            ];
+
+            var colProjectNummer = [];
+            var colProjectNaam = [];
+            var colJaar = [];
+            var colDatumEvent = [];
+            var colGebeurtenisCode = [];
+            var colRestbudgetOpbrengsten = [];
+            var colRestbudgetKosten = [];
+            var colRestbudgetResultaatneming = [];
+            var colLopendTotaal = [];
+
+            for (var p = 0; p < projects.length; p++) {
+                for (var year = 2025; year <= 2060; year++) {
+                    var yearOffset = year - 2025;
+                    var revenue = Math.max(0, 8000 - yearOffset * 200 + Math.random() * 1000);
+                    var costs = -(Math.max(0, 5000 - yearOffset * 150 + Math.random() * 800));
+                    var resultaatneming = (Math.random() - 0.5) * 500;
+                    var lopendTotaal = revenue + costs + resultaatneming;
+
+                    colProjectNummer.push(projects[p]);
+                    colProjectNaam.push(projectNames[p] + " - " + projects[p]);
+                    colJaar.push(year);
+                    colDatumEvent.push("2026-02-02T15:05:16");
+                    colGebeurtenisCode.push(eventCodes[Math.floor(Math.random() * eventCodes.length)]);
+                    colRestbudgetOpbrengsten.push(Math.round(revenue));
+                    colRestbudgetKosten.push(Math.round(costs));
+                    colRestbudgetResultaatneming.push(Math.round(resultaatneming));
+                    colLopendTotaal.push(Math.round(lopendTotaal));
+                }
+            }
+
+            return {
+                name: "Data_set1",
+                columnNames: columnNames,
+                columnCount: columnNames.length,
+                rowCount: colProjectNummer.length,
+                columnValues: [
+                    colProjectNummer,
+                    colProjectNaam,
+                    colJaar,
+                    colDatumEvent,
+                    colGebeurtenisCode,
+                    colRestbudgetOpbrengsten,
+                    colRestbudgetKosten,
+                    colRestbudgetResultaatneming,
+                    colLopendTotaal
+                ]
+            };
+        }
+
+        require(["App"], function(App) {
+            var app = new App();
+
+            // Simulate Cognos setData() with mock data
+            console.log("[Local] Generating mock Cognos dataStore...");
+            var mockDataStore = generateMockDataStore();
+            console.log("[Local] Mock data: " + mockDataStore.rowCount + " rows, " + mockDataStore.columnCount + " columns");
+
+            // Call setData() like Cognos would
+            app.setData(mockControlHost, mockDataStore, "Data_set1");
+
+            // Call draw() like Cognos would
+            app.draw(mockControlHost);
+        });
+    </script>
+</body>
+</html>
