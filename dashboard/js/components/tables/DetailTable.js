@@ -55,11 +55,16 @@ define([], function () {
       }
 
       console.log("[DetailTable] Creating Tabulator…");
+
+      // Ensure container is full-width before Tabulator measures it
+      this._node.style.width = "100%";
+
       try {
         this._table = new Tabulator(this._node, {
           data: rows,
           columns: this._columns(),
-          layout: "fitData",
+          layout: "fitColumns",
+          resizableColumns: true,
           pagination: true,
           paginationSize: 15,
           paginationSizeSelector: [10, 15, 25, 50],
@@ -177,13 +182,15 @@ define([], function () {
     _injectTabulatorCSSFallback() {
       if (document.getElementById("tabulator-css-dynamic")) return;
       var css = [
-        ".tabulator{position:relative;border:1px solid #999;background:#fff;font-size:14px;text-align:left;overflow:hidden;transform:translateZ(0)}",
-        ".tabulator .tabulator-header{position:relative;box-sizing:border-box;width:100%;border-bottom:2px solid #1a237e;background:#e8eaf6;color:#333;font-weight:700;white-space:nowrap;overflow:hidden;user-select:none}",
-        ".tabulator .tabulator-header .tabulator-col{display:inline-flex;position:relative;box-sizing:border-box;flex-direction:column;border-right:1px solid #ddd;background:#e8eaf6;text-align:left;vertical-align:bottom;overflow:hidden}",
-        ".tabulator .tabulator-header .tabulator-col .tabulator-col-content{padding:4px 8px}",
+        ".tabulator{position:relative;border:1px solid #999;background:#fff;font-size:13px;text-align:left;overflow:hidden;transform:translateZ(0)}",
+        ".tabulator .tabulator-header{position:relative;box-sizing:border-box;width:100%;border-bottom:2px solid #1a237e;background:#e8eaf6;color:#333;font-weight:700;white-space:nowrap;overflow:hidden;user-select:none;-moz-user-select:none}",
+        ".tabulator .tabulator-header .tabulator-col{display:inline-flex;position:relative;box-sizing:border-box;flex-direction:column;border-right:1px solid #ddd;background:#e8eaf6;text-align:left;vertical-align:bottom;overflow:visible}",
+        ".tabulator .tabulator-header .tabulator-col .tabulator-col-content{padding:6px 8px;position:relative}",
+        ".tabulator .tabulator-header .tabulator-col .tabulator-col-resize-handle{position:absolute;top:0;right:-4px;bottom:0;width:8px;cursor:col-resize;z-index:10}",
         ".tabulator .tabulator-tableholder{position:relative;width:100%;white-space:nowrap;overflow:auto}",
-        ".tabulator .tabulator-tableholder .tabulator-table{display:inline-block}",
+        ".tabulator .tabulator-tableholder .tabulator-table{display:inline-block;min-width:100%}",
         ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row{display:flex;align-items:stretch;box-sizing:border-box;min-height:24px;border-bottom:1px solid #eee}",
+        ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row:hover{background:#f5f8ff}",
         ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row .tabulator-cell{display:inline-block;box-sizing:border-box;padding:4px 8px;border-right:1px solid #eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}",
         ".tabulator .tabulator-footer{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-top:1px solid #999;background:#f5f5f5;color:#555;font-weight:700;white-space:nowrap;user-select:none}",
         ".tabulator .tabulator-footer .tabulator-page{border:1px solid #aaa;border-radius:3px;padding:2px 5px;margin:0 2px;cursor:pointer;color:#555}",
