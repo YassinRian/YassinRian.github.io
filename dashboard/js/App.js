@@ -1,187 +1,281 @@
 define([
   "./core/EventBus.js",
-  "./core/StateStore.js",
+  "./core/FilterState.js",
   "./core/Config.js",
   "./data/DataEngine.js",
   "./data/CognosDataConnector.js",
+  "./model/DashboardModel.js",
   "./layout/DashboardLayout.js",
   "./utils/Styles.js",
   "./components/charts/ProjectionChart.js",
+  "./components/tables/DetailTable.js",
+  "./components/kpi/KPICards.js"
 ], function (
   EventBus,
-  StateStore,
+  FilterState,
   Config,
   DataEngine,
   CognosDataConnector,
+  DashboardModel,
   DashboardLayout,
   Styles,
   ProjectionChart,
+  DetailTable,
+  KPICards
 ) {
   "use strict";
 
   console.log("[App] Module loaded");
 
-  class App {
-    constructor() {
-      console.log("[App] Constructor called");
-      this.eventBus = new EventBus();
-      this.stateStore = new StateStore(this.eventBus);
-      this.dataEngine = new DataEngine();
-      this.cognosConnector = new CognosDataConnector();
-      this.layout = null;
-      this.projectionChart = null;
-      this.initialized = false;
-    }
+  /**
+   * App — Cognos Custom Control lifecycle + cross-filtering orchestrator.
+   *
+   * Lifecycle:
+   *   1. Cognos calls setData(oControlHost, oData) — once per dataset
+   *   2. Cognos calls draw(oControlHost) — initialise & render
+   *
+   * Cross-filtering:
+   *   chart:click  → FilterState.toggle("Jaar", year) → re-query model → all views update
+   *   table:click  → FilterState.set("Project_nummer", [...]) → re-query → all views update
+   *   filter bar   → FilterState.set(dim, selectedValues) → re-query → all views update
+   *   reset button → FilterState.clearAll() → re-query → all views update
+   */
+  function App() {
+    this.eventBus        = new EventBus();
+    this.filterState     = new FilterState(this.eventBus);
+    this.dataEngine      = new DataEngine();
+    this.cognosConnector = new CognosDataConnector();
+    this.model           = new DashboardModel(this.dataEngine);
+    this.layout          = null;
+    this.projectionChart = null;
+    this.detailTable     = null;
+    this.kpiCards        = null;
+    this._datasetName    = null;
+    this._initialised    = false;
+  }
 
-    /**
-     * Cognos calls setData() for each data source.
-     */
-    setData(oControlHost, dataStore, name) {
-      console.log("[App] setData called:", name);
-      var datasetName = name || dataStore.name || dataStore._7rn || "dataset_" + (this.cognosConnector.getNames().length + 1);
-      this.cognosConnector.register(datasetName, dataStore);
-      this.oControlHost = oControlHost;
-    }
+  // ═══════════════════════════════════════════════════════════════
+  // COGNOS LIFECYCLE
+  // ═══════════════════════════════════════════════════════════════
 
-    /**
-     * Cognos calls draw() after all setData() calls.
-     */
-    async draw(oControlHost) {
-      console.log("[App] draw() called");
-      this.oControlHost = oControlHost;
+  App.prototype.setData = function (oControlHost, dataStore, name) {
+    console.log("[App] setData called:", name || dataStore.name);
+    var dsName = name || dataStore.name || dataStore._7rn ||
+      "dataset_" + (this.cognosConnector.getNames().length + 1);
+    this.cognosConnector.register(dsName, dataStore);
+    this.oControlHost = oControlHost;
+  };
 
-      Styles.inject();
+  App.prototype.draw = async function (oControlHost) {
+    console.log("[App] draw() called");
+    this.oControlHost = oControlHost;
 
-      this.layout = new DashboardLayout(oControlHost.container);
-      this.layout.render();
-      this.layout.showLoading("Initializing DuckDB...");
+    Styles.inject();
 
-      try {
-        // Initialize DuckDB
-        await this.dataEngine.initialize();
-        console.log("[App] DuckDB initialized");
+    // ── Layout ───────────────────────────────────────────────
+    this.layout = new DashboardLayout(oControlHost.container);
+    this.layout.render();
+    this.layout.showLoading("DuckDB initialiseren…");
 
-        // Ingest all registered datasets
-        var datasetNames = this.cognosConnector.getNames();
-        console.log("[App] Datasets to ingest:", datasetNames);
+    try {
+      // ── DuckDB + Ingest ────────────────────────────────────
+      await this.dataEngine.initialize();
+      console.log("[App] DuckDB ready");
 
-        for (var i = 0; i < datasetNames.length; i++) {
-          var dsName = datasetNames[i];
-          var rows = this.cognosConnector.toRows(dsName);
-          if (rows.length > 0) {
-            await this.dataEngine.ingest(dsName, rows);
-          }
+      var dsNames = this.cognosConnector.getNames();
+      console.log("[App] Datasets:", dsNames);
+
+      for (var i = 0; i < dsNames.length; i++) {
+        var dsName = dsNames[i];
+        var rows = this.cognosConnector.toRows(dsName);
+        if (rows.length > 0) {
+          await this.dataEngine.ingest(dsName, rows);
         }
-
-        // Query aggregated data
-        var aggregatedData = await this.getAggregatedData();
-        console.log("[App] Aggregated data:", aggregatedData.length, "years");
-
-        this.layout.hideLoading();
-
-        // Initialize Projection Chart
-        this.projectionChart = new ProjectionChart(
-          this.layout.chartContainer,
-          this.eventBus,
-        );
-
-        // Render chart
-        this.projectionChart.update(aggregatedData);
-
-        // Render summary table
-        this.renderSummaryTable(aggregatedData);
-
-        this.initialized = true;
-        console.log("[App] Dashboard ready!");
-      } catch (err) {
-        this.layout.hideLoading();
-        console.error("[App] Error:", err);
-        oControlHost.container.innerHTML =
-          '<div style="padding:40px;color:red;">Error: ' + err.message + "</div>";
       }
+
+      // Tell model which table to query
+      this._datasetName = dsNames[0];
+      this.model.setTableName(this._datasetName);
+
+      // ── Wire Components ────────────────────────────────────
+      this.kpiCards = new KPICards(this.layout.kpiContainer);
+
+      this.projectionChart = new ProjectionChart(
+        this.layout.chartContainer,
+        this.eventBus
+      );
+
+      this.detailTable = new DetailTable(
+        this.layout.tableContainer,
+        this.eventBus
+      );
+
+      // ── Populate Filter Dropdowns ──────────────────────────
+      await this._populateFilterOptions();
+
+      // ── Subscribe to Events ────────────────────────────────
+      this._wireEvents();
+
+      // ── Initial Render ─────────────────────────────────────
+      this.layout.hideLoading();
+      await this._refreshAll();
+
+      this._initialised = true;
+      console.log("[App] Dashboard ready!");
+
+    } catch (err) {
+      this.layout.hideLoading();
+      console.error("[App] Fatal error:", err);
+      oControlHost.container.innerHTML +=
+        '<div style="padding:20px;color:#d94141;font-weight:bold;">' +
+        "Fout: " + err.message + "</div>";
     }
+  };
 
-    /**
-     * Aggregate data by year using DuckDB SQL.
-     */
-    async getAggregatedData() {
-      var datasetName = this.cognosConnector.getNames()[0];
-      if (!datasetName) return [];
+  // ═══════════════════════════════════════════════════════════════
+  // EVENT WIRING (cross-filtering)
+  // ═══════════════════════════════════════════════════════════════
 
-      var sql =
-        "SELECT " +
-        "  CAST(Jaar AS INTEGER) as JAAR, " +
-        "  SUM(COALESCE(CAST(Restbudget_opbrengsten AS DOUBLE), 0)) as RESTBUDGET_OBRENGSTEN, " +
-        "  SUM(COALESCE(CAST(Restbudget_kosten AS DOUBLE), 0)) * -1 as RESTBUDGET__KST_RES, " +
-        "  SUM(COALESCE(CAST(Restbudget_resultaatneming AS DOUBLE), 0)) as RESTBUDGET_RESULTAATNEMING, " +
-        "  SUM(COALESCE(CAST(Lopend_totaal AS DOUBLE), 0)) as LOPEND_TOTAAL " +
-        "FROM \"" + datasetName + "\" " +
-        "WHERE Jaar IS NOT NULL " +
-        "GROUP BY Jaar " +
-        "ORDER BY Jaar";
+  App.prototype._wireEvents = function () {
+    var self = this;
 
-      console.log("[App] Running aggregation query...");
-      var result = await this.dataEngine.query(sql);
-      console.log("[App] Aggregation result:", result.length, "rows");
+    // Chart click → toggle Jaar filter
+    this.eventBus.on("chart:selection", function (payload) {
+      if (payload && payload.dimension === "JAAR" && payload.values) {
+        for (var i = 0; i < payload.values.length; i++) {
+          // Normalize to number — chart click returns strings
+          self.filterState.toggle("Jaar", Number(payload.values[i]));
+        }
+      }
+    });
 
-      var rows = result.map(function (row) {
-        return {
-          JAAR: Number(row.JAAR),
-          RESTBUDGET_OBRENGSTEN: Number(row.RESTBUDGET_OBRENGSTEN),
-          RESTBUDGET__KST_RES: Number(row.RESTBUDGET__KST_RES),
-          RESTBUDGET_RESULTAATNEMING: Number(row.RESTBUDGET_RESULTAATNEMING),
-          LOPEND_TOTAAL: Number(row.LOPEND_TOTAAL),
-        };
+    // Table row click → set Project filter + Jaar filter
+    this.eventBus.on("table:selection", function (payload) {
+      if (payload) {
+        if (payload.Project_nummer) {
+          self.filterState.set("Project_nummer", payload.Project_nummer);
+        }
+        if (payload.Jaar) {
+          // Jaar from Tabulator data may be string or number; normalise
+          var jaarVals = payload.Jaar.map(function (v) { return Number(v); });
+          self.filterState.set("Jaar", jaarVals);
+        }
+      }
+    });
+
+    // Filter dropdowns changed
+    var filterJaar = this.layout.container.querySelector("#filter-jaar");
+    var filterProject = this.layout.container.querySelector("#filter-project");
+
+    if (filterJaar) {
+      filterJaar.addEventListener("change", function () {
+        var selected = getSelectValues(filterJaar);
+        // Select values are always strings; convert to numbers
+        var nums = selected.map(function (v) { return Number(v); });
+        self.filterState.set("Jaar", nums.length > 0 ? nums : null);
       });
-
-      // Calculate cumulative total
-      var cumulative = 0;
-      for (var i = 0; i < rows.length; i++) {
-        cumulative += rows[i].RESTBUDGET_OBRENGSTEN + rows[i].RESTBUDGET__KST_RES;
-        rows[i].CUMULATIEVE_BOEKWAARDE = Math.round(cumulative * 100) / 100;
-      }
-
-      return rows;
     }
 
-    /**
-     * Render summary table.
-     */
-    renderSummaryTable(data) {
-      var tableContainer = this.layout.tableContainer;
-      if (!tableContainer) return;
-
-      var html =
-        '<div style="background: white; border-radius: 8px; box-shadow: 0 1px 3px rgba(0,0,0,0.1); overflow: hidden;">';
-      html += '<div style="padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-weight: 600;">Samenvatting per Jaar</div>';
-      html += '<div style="overflow-x: auto;"><table style="border-collapse: collapse; font-size: 12px; width: 100%;">';
-
-      html += "<tr>";
-      html += '<th style="border: 1px solid #ddd; padding: 8px; background: #fafafa;">Jaar</th>';
-      html += '<th style="border: 1px solid #ddd; padding: 8px; background: #fafafa;">Opbrengsten</th>';
-      html += '<th style="border: 1px solid #ddd; padding: 8px; background: #fafafa;">Kosten</th>';
-      html += '<th style="border: 1px solid #ddd; padding: 8px; background: #fafafa;">Cumulatief</th>';
-      html += "</tr>";
-
-      var maxRows = Math.min(data.length, 20);
-      for (var i = 0; i < maxRows; i++) {
-        var r = data[i];
-        html += "<tr>";
-        html += '<td style="border: 1px solid #ddd; padding: 8px;">' + r.JAAR + "</td>";
-        html += '<td style="border: 1px solid #ddd; padding: 8px; text-align: right;">\u20AC ' + r.RESTBUDGET_OBRENGSTEN.toLocaleString("nl-NL") + "</td>";
-        html += '<td style="border: 1px solid #ddd; padding: 8px; text-align: right;">\u20AC ' + r.RESTBUDGET__KST_RES.toLocaleString("nl-NL") + "</td>";
-        html += '<td style="border: 1px solid #ddd; padding: 8px; text-align: right;">\u20AC ' + r.CUMULATIEVE_BOEKWAARDE.toLocaleString("nl-NL") + "</td>";
-        html += "</tr>";
-      }
-
-      html += "</table></div></div>";
-      tableContainer.innerHTML = html;
+    if (filterProject) {
+      filterProject.addEventListener("change", function () {
+        var selected = getSelectValues(filterProject);
+        self.filterState.set("Project_nummer", selected.length > 0 ? selected : null);
+      });
     }
 
-    destroy() {
-      console.log("[App] Destroying...");
-      if (this.projectionChart) this.projectionChart.dispose();
-      if (this.dataEngine) this.dataEngine.close();
+    // Reset button
+    var btnReset = this.layout.container.querySelector("#btn-reset-filters");
+    if (btnReset) {
+      btnReset.addEventListener("click", function () {
+        self.filterState.clearAll();
+      });
+    }
+
+    // Core cross-filter loop: filter change → re-query → re-render
+    this.eventBus.on("filters:changed", function () {
+      self._refreshAll();
+    });
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // REFRESH ALL VIEWS
+  // ═══════════════════════════════════════════════════════════════
+
+  App.prototype._refreshAll = async function () {
+    var filters = this.filterState.get();
+    console.log("[App] Refreshing with filters:", filters);
+
+    try {
+      // Run all three queries in parallel
+      var projectionPromise = this.model.getProjectionByYear(filters);
+      var kpiPromise        = this.model.getKPIs(filters);
+      var detailPromise     = this.model.getDetailTable(filters);
+
+      var projectionData = await projectionPromise;
+      var kpiData        = await kpiPromise;
+      var detailData     = await detailPromise;
+
+      // Update views
+      this.projectionChart.update(projectionData);
+      this.kpiCards.update(kpiData);
+      this.detailTable.setData(detailData);
+      this.layout.setRowCount(detailData.length);
+      this.layout.updateBreadcrumb(filters);
+
+      // Sync filter dropdown highlights
+      this._syncDropdowns(filters);
+
+    } catch (err) {
+      console.error("[App] Refresh error:", err);
+    }
+  };
+
+  // ═══════════════════════════════════════════════════════════════
+  // HELPERS
+  // ═══════════════════════════════════════════════════════════════
+
+  App.prototype._populateFilterOptions = async function () {
+    try {
+      var years = await this.model.getFilterOptions("Jaar");
+      this.layout.setJaarOptions(years);
+
+      // Use Project_nummer (codes) as filter dimension, consistent with table row clicks
+      var projects = await this.model.getFilterOptions("Project_nummer");
+      this.layout.setProjectOptions(projects);
+    } catch (err) {
+      console.warn("[App] Could not load filter options:", err);
+    }
+  };
+
+  App.prototype._syncDropdowns = function (filters) {
+    syncSelectValues(this.layout.container.querySelector("#filter-jaar"),
+      filters.Jaar || []);
+    syncSelectValues(this.layout.container.querySelector("#filter-project"),
+      filters.Project_nummer || []);
+  };
+
+  App.prototype.destroy = function () {
+    console.log("[App] Destroying…");
+    if (this.projectionChart) this.projectionChart.dispose();
+    if (this.dataEngine) this.dataEngine.close();
+  };
+
+  // ─── Static Helpers ────────────────────────────────────────────
+
+  function getSelectValues(select) {
+    var result = [];
+    for (var i = 0; i < select.options.length; i++) {
+      if (select.options[i].selected) {
+        result.push(select.options[i].value);
+      }
+    }
+    return result;
+  }
+
+  function syncSelectValues(select, values) {
+    if (!select) return;
+    for (var i = 0; i < select.options.length; i++) {
+      select.options[i].selected = values.indexOf(select.options[i].value) >= 0;
     }
   }
 
