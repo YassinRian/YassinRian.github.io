@@ -88,8 +88,8 @@ define([], function () {
      */
     async _loadTabulator() {
       if (typeof Tabulator !== "undefined") {
-        // Tabulator JS already loaded — ensure CSS is loaded too
-        this._injectTabulatorCSS();
+        // JS loaded — ensure CSS is loaded before use
+        await this._injectTabulatorCSS();
         return true;
       }
 
@@ -133,8 +133,8 @@ define([], function () {
         }
 
         if (typeof Tabulator !== "undefined") {
-          console.log("[DetailTable] Tabulator loaded (define-bypass)");
-          this._injectTabulatorCSS();
+          console.log("[DetailTable] Tabulator JS loaded (define-bypass)");
+          await this._injectTabulatorCSS();
           return true;
         }
       } catch (e) {
@@ -145,26 +145,55 @@ define([], function () {
     }
 
     /**
-     * Inject Tabulator CSS dynamically (Cognos has no <link> tag).
-     * Fetches the official CSS from CDN once.
+     * Inject the full Tabulator CSS. Fetches from CDN and awaits it
+     * so the stylesheet is in the DOM before the table is created.
      */
-    _injectTabulatorCSS() {
+    async _injectTabulatorCSS() {
       if (document.getElementById("tabulator-css-dynamic")) return;
 
-      // Fetch + inject as <style> so it works without a <link> tag
-      fetch("https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css")
-        .then(function (r) { return r.text(); })
-        .then(function (css) {
-          var style = document.createElement("style");
-          style.id = "tabulator-css-dynamic";
-          style.textContent = css;
-          document.head.appendChild(style);
-          console.log("[DetailTable] Tabulator CSS injected");
-        })
-        .catch(function () {
-          console.warn("[DetailTable] Tabulator CSS fetch failed, using fallback");
-          // Already injected by Styles.js fallback
-        });
+      console.log("[DetailTable] Loading Tabulator CSS…");
+      try {
+        var resp = await fetch(
+          "https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css"
+        );
+        if (!resp.ok) throw new Error("HTTP " + resp.status);
+        var css = await resp.text();
+
+        var style = document.createElement("style");
+        style.id = "tabulator-css-dynamic";
+        style.textContent = css;
+        document.head.appendChild(style);
+        console.log("[DetailTable] Tabulator CSS injected (" + css.length + " bytes)");
+      } catch (e) {
+        console.warn("[DetailTable] Tabulator CSS fetch failed:", e.message);
+        // Fallback: embedded minimal grid CSS
+        this._injectTabulatorCSSFallback();
+      }
+    }
+
+    /**
+     * Minimal CSS fallback if CDN fetch fails.
+     */
+    _injectTabulatorCSSFallback() {
+      if (document.getElementById("tabulator-css-dynamic")) return;
+      var css = [
+        ".tabulator{position:relative;border:1px solid #999;background:#fff;font-size:14px;text-align:left;overflow:hidden;transform:translateZ(0)}",
+        ".tabulator .tabulator-header{position:relative;box-sizing:border-box;width:100%;border-bottom:2px solid #1a237e;background:#e8eaf6;color:#333;font-weight:700;white-space:nowrap;overflow:hidden;user-select:none}",
+        ".tabulator .tabulator-header .tabulator-col{display:inline-flex;position:relative;box-sizing:border-box;flex-direction:column;border-right:1px solid #ddd;background:#e8eaf6;text-align:left;vertical-align:bottom;overflow:hidden}",
+        ".tabulator .tabulator-header .tabulator-col .tabulator-col-content{padding:4px 8px}",
+        ".tabulator .tabulator-tableholder{position:relative;width:100%;white-space:nowrap;overflow:auto}",
+        ".tabulator .tabulator-tableholder .tabulator-table{display:inline-block}",
+        ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row{display:flex;align-items:stretch;box-sizing:border-box;min-height:24px;border-bottom:1px solid #eee}",
+        ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row .tabulator-cell{display:inline-block;box-sizing:border-box;padding:4px 8px;border-right:1px solid #eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}",
+        ".tabulator .tabulator-footer{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-top:1px solid #999;background:#f5f5f5;color:#555;font-weight:700;white-space:nowrap;user-select:none}",
+        ".tabulator .tabulator-footer .tabulator-page{border:1px solid #aaa;border-radius:3px;padding:2px 5px;margin:0 2px;cursor:pointer;color:#555}",
+        ".tabulator .tabulator-footer .tabulator-page.active{background:#1a237e;color:#fff}"
+      ].join("\n");
+      var style = document.createElement("style");
+      style.id = "tabulator-css-dynamic";
+      style.textContent = css;
+      document.head.appendChild(style);
+      console.log("[DetailTable] Tabulator CSS fallback injected");
     }
 
     /**
