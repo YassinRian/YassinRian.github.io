@@ -227,7 +227,7 @@ define([
     }
     if (detailData) {
       try { this.layout.setRowCount(detailData.length); } catch (e) {}
-      try { await this.detailTable.setData(detailData); } catch (e) { console.error("[App] Table update failed:", e); }
+      try { this.detailTable.setData(detailData); } catch (e) { console.error("[App] Table update failed:", e); }
     }
 
     // Breadcrumb — pass clear-callback so clicks remove individual filters

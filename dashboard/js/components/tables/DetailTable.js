@@ -2,288 +2,291 @@ define([], function () {
   "use strict";
 
   /**
-   * DetailTable — Tabulator data table (class syntax + dynamic CDN load).
+   * DetailTable — Zero-dependency sortable, pageable data table.
    *
-   * If Tabulator isn't already loaded, we inject a <script> tag from
-   * CDN before creating the instance — works in Cognos with no
-   * index.html script tags.
+   * Features:
+   *   - Click header to sort (asc → desc → none)
+   *   - Pagination with page-size selector
+   *   - Column resize via drag handle
+   *   - Currency/number formatting
+   *   - Row click → cross-filter event
    */
   class DetailTable {
     constructor(domNode, eventBus) {
       this._node = domNode;
       this._bus = eventBus;
-      this._table = null;
-      this._data = [];
-      this._loading = false;
+      this._rows = [];
+      this._cols = null;
+      this._sortCol = null;
+      this._sortDir = "asc";
+      this._page = 0;
+      this._pageSize = 15;
+      this._resizeCol = null;
+      this._resizeStartX = 0;
+      this._resizeStartW = 0;
+      this._onMouseMove = this._onMouseMove.bind(this);
+      this._onMouseUp = this._onMouseUp.bind(this);
+      this._injectCSS();
     }
 
-    _columns() {
+    // ═══════════════════════════════════════════════════════════
+    // PUBLIC
+    // ═══════════════════════════════════════════════════════════
+
+    setData(rows) {
+      this._rows = rows || [];
+      this._page = 0;
+      this._cols = this._cols || this._buildColumns();
+      this._render();
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // COLUMNS
+    // ═══════════════════════════════════════════════════════════
+
+    _buildColumns() {
       return [
-        { title: "Project Nr",    field: "Project_nummer",             width: 120 },
-        { title: "Project Naam",  field: "Project_naam_nummer",        width: 200 },
-        { title: "Jaar",          field: "Jaar",                       width: 65,  hozAlign: "center" },
-        { title: "Event",         field: "Gebeurtenis_code",           width: 65,  hozAlign: "center" },
-        { title: "Opbrengsten",   field: "Restbudget_opbrengsten",     width: 120, hozAlign: "right", formatter: fmtEuro },
-        { title: "Kosten",        field: "Restbudget_kosten",          width: 120, hozAlign: "right", formatter: fmtEuro },
-        { title: "Res. Neming",   field: "Restbudget_resultaatneming", width: 120, hozAlign: "right", formatter: fmtEuro },
-        { title: "Lopend Totaal", field: "Lopend_totaal",              width: 130, hozAlign: "right", formatter: fmtEuroBold }
+        { field: "Project_nummer",             title: "Project Nr",   w: 120, align: "left" },
+        { field: "Project_naam_nummer",        title: "Project Naam", w: 200, align: "left" },
+        { field: "Jaar",                       title: "Jaar",         w: 65,  align: "center" },
+        { field: "Gebeurtenis_code",           title: "Event",        w: 60,  align: "center" },
+        { field: "Restbudget_opbrengsten",     title: "Opbrengsten",  w: 120, align: "right", fmt: "euro" },
+        { field: "Restbudget_kosten",          title: "Kosten",       w: 120, align: "right", fmt: "euro" },
+        { field: "Restbudget_resultaatneming", title: "Res. Neming",  w: 120, align: "right", fmt: "euro" },
+        { field: "Lopend_totaal",              title: "Lopend Totaal",w: 130, align: "right", fmt: "euroBold" }
       ];
     }
 
-    async setData(rows) {
-      console.log("[DetailTable] setData:", rows ? rows.length : 0, "rows");
-      if (rows && rows.length > 0) {
-        console.log("[DetailTable] First row keys:", Object.keys(rows[0]));
-        console.log("[DetailTable] First row sample:", rows[0]);
-      }
-      this._data = rows;
+    // ═══════════════════════════════════════════════════════════
+    // RENDER
+    // ═══════════════════════════════════════════════════════════
 
-      if (!this._node) return;
+    _render() {
+      var sorted = this._sortedRows();
+      var total = sorted.length;
+      var totalPages = Math.ceil(total / this._pageSize);
+      var pageRows = sorted.slice(this._page * this._pageSize, (this._page + 1) * this._pageSize);
+      var cols = this._cols;
 
-      // Already created — just swap data
-      if (this._table) {
-        this._table.replaceData(rows);
-        return;
-      }
+      var h = '<div class="dt-wrap">';
+      h += '<table class="dt-table" style="width:100%">';
 
-      // Ensure Tabulator is loaded (dynamic CDN injection)
-      var ok = await this._loadTabulator();
-      if (!ok) {
-        console.warn("[DetailTable] Tabulator unavailable — using HTML fallback");
-        this._renderFallback(rows);
-        return;
-      }
-
-      console.log("[DetailTable] Creating Tabulator…");
-
-      // Force container to take full available width
-      this._node.style.width = "100%";
-      this._node.style.display = "block";
-
-      try {
-        this._table = new Tabulator(this._node, {
-          data: rows,
-          columns: this._columns(),
-          layout: "fitDataFill",
-          resizableColumns: true,
-          pagination: true,
-          paginationSize: 15,
-          paginationSizeSelector: [10, 15, 25, 50],
-          initialSort: [{ column: "Jaar", dir: "desc" }]
-        });
-        console.log("[DetailTable] Tabulator created");
-
-        // Force proper sizing after Tabulator has rendered
-        var tbl = this._table;
-        var node = this._node;
-        setTimeout(function () {
-          try {
-            tbl.redraw(true);
-            // Ensure the internal table holder spans full container width
-            var holder = node.querySelector(".tabulator-tableholder");
-            if (holder) holder.style.width = "100%";
-            var tab = node.querySelector(".tabulator");
-            if (tab) tab.style.width = "100%";
-          } catch (_e) {}
-        }, 150);
-
-        // ── Fix stuck column resize ──────────────────────────
-        // When mouseup happens outside Tabulator's overlay,
-        // the resize ghost can get stuck. This cleans it up.
-        var cleanupResize = function () {
-          try {
-            var indicator = document.querySelector(".tabulator-col-resize-indicator");
-            if (indicator && indicator.parentNode) {
-              indicator.parentNode.removeChild(indicator);
-            }
-            // Also remove any orphaned resize handles in "active" state
-            var handles = document.querySelectorAll(".tabulator-col-resize-handle.active");
-            for (var h = 0; h < handles.length; h++) {
-              handles[h].classList.remove("active");
-            }
-          } catch (_e) {}
-        };
-        document.addEventListener("mouseup", cleanupResize, { passive: true });
-
-        var self = this;
-        this._table.on("rowClick", function (_e, row) {
-          var d = row.getData();
-          self._bus.emit("table:selection", {
-            Jaar: [Number(d.Jaar)],
-            Project_nummer: [d.Project_nummer]
-          });
-        });
-
-      } catch (err) {
-        console.error("[DetailTable] Tabulator creation failed:", err.message);
-        this._renderFallback(rows);
-      }
-    }
-
-    /**
-     * Load Tabulator dynamically from CDN if not already available.
-     * Returns true if Tabulator global is ready.
-     */
-    async _loadTabulator() {
-      if (typeof Tabulator !== "undefined") {
-        // JS loaded — ensure CSS is loaded before use
-        await this._injectTabulatorCSS();
-        return true;
-      }
-
-      if (this._loading) {
-        for (var i = 0; i < 50; i++) {
-          await sleep(200);
-          if (typeof Tabulator !== "undefined") return true;
-        }
-        return false;
-      }
-
-      this._loading = true;
-      console.log("[DetailTable] Loading Tabulator from CDN…");
-
-      // The UMD build has a define() call that Cognos's RequireJS intercepts
-      // as an anonymous module → "Mismatched anonymous define()" error.
-      //
-      // Fix: fetch the script as text, temporarily hide define from RequireJS,
-      // eval the code, then restore define. Tabulator falls back to setting
-      // window.Tabulator since define() is no longer detected.
-      try {
-        var resp = await fetch(
-          "https://unpkg.com/tabulator-tables@5.5.0/dist/js/tabulator.min.js"
-        );
-        if (!resp.ok) throw new Error("HTTP " + resp.status);
-        var code = await resp.text();
-
-        // Temporarily neuter RequireJS's define detection
-        var _define = window.define;
-        var _defineAmd = _define ? _define.amd : undefined;
-        window.define = undefined;
-
-        try {
-          eval(code);
-        } finally {
-          // Restore RequireJS
-          window.define = _define;
-          if (_defineAmd !== undefined) {
-            try { window.define.amd = _defineAmd; } catch (_e) {}
-          }
-        }
-
-        if (typeof Tabulator !== "undefined") {
-          console.log("[DetailTable] Tabulator JS loaded (define-bypass)");
-          await this._injectTabulatorCSS();
-          return true;
-        }
-      } catch (e) {
-        console.error("[DetailTable] Tabulator load failed:", e.message);
-      }
-
-      return false;
-    }
-
-    /**
-     * Inject the full Tabulator CSS. Fetches from CDN and awaits it
-     * so the stylesheet is in the DOM before the table is created.
-     */
-    async _injectTabulatorCSS() {
-      if (document.getElementById("tabulator-css-dynamic")) return;
-
-      console.log("[DetailTable] Loading Tabulator CSS…");
-      try {
-        var resp = await fetch(
-          "https://unpkg.com/tabulator-tables@5.5.0/dist/css/tabulator.min.css"
-        );
-        if (!resp.ok) throw new Error("HTTP " + resp.status);
-        var css = await resp.text();
-
-        var style = document.createElement("style");
-        style.id = "tabulator-css-dynamic";
-        style.textContent = css;
-        document.head.appendChild(style);
-        console.log("[DetailTable] ✅ Tabulator FULL CSS loaded from CDN (" + css.length + " bytes)");
-      } catch (e) {
-        console.warn("[DetailTable] Tabulator CSS fetch failed:", e.message);
-        // Fallback: embedded minimal grid CSS
-        this._injectTabulatorCSSFallback();
-      }
-    }
-
-    /**
-     * Minimal CSS fallback if CDN fetch fails.
-     */
-    _injectTabulatorCSSFallback() {
-      if (document.getElementById("tabulator-css-dynamic")) return;
-      var css = [
-        ".tabulator{position:relative;border:1px solid #999;background:#fff;font-size:13px;text-align:left;overflow:hidden;transform:translateZ(0)}",
-        ".tabulator .tabulator-header{position:relative;box-sizing:border-box;width:100%;border-bottom:2px solid #1a237e;background:#e8eaf6;color:#333;font-weight:700;white-space:nowrap;overflow:hidden;user-select:none;-moz-user-select:none}",
-        ".tabulator .tabulator-header .tabulator-col{display:inline-flex;position:relative;box-sizing:border-box;flex-direction:column;border-right:1px solid #ddd;background:#e8eaf6;text-align:left;vertical-align:bottom;overflow:visible}",
-        ".tabulator .tabulator-header .tabulator-col .tabulator-col-content{padding:6px 8px;position:relative}",
-        ".tabulator .tabulator-header .tabulator-col .tabulator-col-resize-handle{position:absolute;top:0;right:-4px;bottom:0;width:8px;cursor:col-resize;z-index:10}",
-        ".tabulator .tabulator-tableholder{position:relative;width:100%;white-space:nowrap;overflow:auto}",
-        ".tabulator .tabulator-tableholder .tabulator-table{display:inline-block;min-width:100%}",
-        ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row{display:flex;align-items:stretch;box-sizing:border-box;min-height:24px;border-bottom:1px solid #eee}",
-        ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row:hover{background:#f5f8ff}",
-        ".tabulator .tabulator-tableholder .tabulator-table .tabulator-row .tabulator-cell{display:inline-block;box-sizing:border-box;padding:4px 8px;border-right:1px solid #eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;flex-shrink:0}",
-        ".tabulator .tabulator-footer{display:flex;align-items:center;justify-content:space-between;padding:5px 10px;border-top:1px solid #999;background:#f5f5f5;color:#555;font-weight:700;white-space:nowrap;user-select:none}",
-        ".tabulator .tabulator-footer .tabulator-page{border:1px solid #aaa;border-radius:3px;padding:2px 5px;margin:0 2px;cursor:pointer;color:#555}",
-        ".tabulator .tabulator-footer .tabulator-page.active{background:#1a237e;color:#fff}"
-      ].join("\n");
-      var style = document.createElement("style");
-      style.id = "tabulator-css-dynamic";
-      style.textContent = css;
-      document.head.appendChild(style);
-      console.log("[DetailTable] ⚠️ Tabulator CSS FALLBACK injected (CDN fetch failed)");
-    }
-
-    /**
-     * Fallback plain HTML table when Tabulator can't load.
-     */
-    _renderFallback(rows) {
-      var cols = this._columns();
-      var h = '<table style="width:100%;border-collapse:collapse;font-size:12px;">';
-      h += "<tr>";
+      // Header
+      h += "<thead><tr>";
       for (var c = 0; c < cols.length; c++) {
-        h += '<th style="border:1px solid #ddd;padding:8px;background:#f5f5f5;text-align:left;">' + cols[c].title + "</th>";
+        var col = cols[c];
+        var sortIcon = "";
+        if (this._sortCol === c) {
+          sortIcon = this._sortDir === "asc" ? " ▴" : " ▾";
+        }
+        h += '<th class="dt-th" data-col="' + c + '" style="width:' + col.w + 'px;text-align:' + col.align + '">';
+        h += '<span class="dt-th-title">' + col.title + sortIcon + "</span>";
+        h += '<span class="dt-resize" data-col="' + c + '"></span>';
+        h += "</th>";
       }
-      h += "</tr>";
-      var max = Math.min(rows.length, 50);
-      for (var r = 0; r < max; r++) {
-        h += "<tr>";
+      h += "</tr></thead>";
+
+      // Body
+      h += "<tbody>";
+      for (var r = 0; r < pageRows.length; r++) {
+        h += '<tr class="dt-row" data-row="' + r + '">';
         for (var c2 = 0; c2 < cols.length; c2++) {
-          var v = rows[r][cols[c2].field];
-          h += '<td style="border:1px solid #eee;padding:6px;">' + (v != null ? v : "") + "</td>";
+          var col2 = cols[c2];
+          var val = pageRows[r][col2.field];
+          h += '<td class="dt-cell" style="text-align:' + col2.align + '">' +
+            this._formatVal(val, col2.fmt) + "</td>";
         }
         h += "</tr>";
       }
-      h += "</table>";
-      if (rows.length > 50) {
-        h += '<p style="color:#999;font-size:11px;padding:8px;">Toont 50 van ' + rows.length + " rijen</p>";
+      if (pageRows.length === 0) {
+        h += '<tr><td class="dt-cell" colspan="' + cols.length +
+          '" style="text-align:center;padding:40px;color:#999;">Geen gegevens</td></tr>';
       }
+      h += "</tbody>";
+      h += "</table>";
+
+      // Footer
+      h += '<div class="dt-foot">';
+      h += '<span class="dt-count">' + total + " rijen</span>";
+      h += '<div class="dt-pager">';
+      h += '<span class="dt-page-label">Rijen per pagina:</span>';
+      h += '<select class="dt-select">';
+      [10, 15, 25, 50].forEach(function (n) {
+        h += '<option value="' + n + '"' + (n === this._pageSize ? " selected" : "") + ">" + n + "</option>";
+      }, this);
+      h += "</select>";
+      h += '<button class="dt-btn' + (this._page === 0 ? " dt-btn-disabled" : "") + '" data-action="first">««</button>';
+      h += '<button class="dt-btn' + (this._page === 0 ? " dt-btn-disabled" : "") + '" data-action="prev">«</button>';
+      h += '<span class="dt-page-info">' + (this._page + 1) + " / " + (totalPages || 1) + "</span>";
+      h += '<button class="dt-btn' + (this._page >= totalPages - 1 ? " dt-btn-disabled" : "") + '" data-action="next">»</button>';
+      h += '<button class="dt-btn' + (this._page >= totalPages - 1 ? " dt-btn-disabled" : "") + '" data-action="last">»»</button>';
+      h += "</div></div>";
+      h += "</div>";
+
       this._node.innerHTML = h;
+      this._wireEvents();
     }
-  }
 
-  // ─── Formatters ───────────────────────────────────────────────
+    _sortedRows() {
+      if (this._sortCol === null) return this._rows.slice();
+      var col = this._cols[this._sortCol];
+      var field = col.field;
+      var dir = this._sortDir === "asc" ? 1 : -1;
+      return this._rows.slice().sort(function (a, b) {
+        var va = a[field], vb = b[field];
+        if (va == null) va = "";
+        if (vb == null) vb = "";
+        if (typeof va === "number" && typeof vb === "number") return (va - vb) * dir;
+        return String(va).localeCompare(String(vb)) * dir;
+      });
+    }
 
-  function fmtEuro(cell) {
-    var v = cell.getValue();
-    if (v == null || isNaN(v)) return "";
-    var n = Number(v);
-    var c = n >= 0 ? "#2d8a4e" : "#d94141";
-    return '<span style="color:' + c + '">€ ' + n.toLocaleString("nl-NL") + "</span>";
-  }
+    // ═══════════════════════════════════════════════════════════
+    // FORMAT
+    // ═══════════════════════════════════════════════════════════
 
-  function fmtEuroBold(cell) {
-    var v = cell.getValue();
-    if (v == null || isNaN(v)) return "";
-    var n = Number(v);
-    var c = n >= 0 ? "#1a237e" : "#d94141";
-    return '<span style="color:' + c + ';font-weight:600">€ ' + n.toLocaleString("nl-NL") + "</span>";
-  }
+    _formatVal(val, fmt) {
+      if (val == null || val === "") return "";
+      if (fmt === "euro" || fmt === "euroBold") {
+        var n = Number(val);
+        if (isNaN(n)) return val;
+        var cls = n >= 0 ? "dt-green" : "dt-red";
+        if (fmt === "euroBold") cls += " dt-bold";
+        return '<span class="' + cls + '">€ ' + n.toLocaleString("nl-NL") + "</span>";
+      }
+      return String(val);
+    }
 
-  function sleep(ms) {
-    return new Promise(function (r) { setTimeout(r, ms); });
+    // ═══════════════════════════════════════════════════════════
+    // EVENTS
+    // ═══════════════════════════════════════════════════════════
+
+    _wireEvents() {
+      var self = this;
+
+      // Sort on header click
+      this._node.querySelectorAll(".dt-th").forEach(function (th) {
+        th.addEventListener("click", function (e) {
+          if (e.target.classList.contains("dt-resize")) return;
+          var c = parseInt(th.getAttribute("data-col"));
+          if (self._sortCol === c) {
+            self._sortDir = self._sortDir === "asc" ? "desc" : self._sortDir === "desc" ? null : "asc";
+            if (self._sortDir === null) self._sortCol = null;
+          } else {
+            self._sortCol = c;
+            self._sortDir = "asc";
+          }
+          self._page = 0;
+          self._render();
+        });
+      });
+
+      // Row click → cross-filter
+      this._node.querySelectorAll(".dt-row").forEach(function (tr) {
+        tr.addEventListener("click", function () {
+          var idx = parseInt(tr.getAttribute("data-row"));
+          var sorted = self._sortedRows();
+          var row = sorted[self._page * self._pageSize + idx];
+          if (row) {
+            self._bus.emit("table:selection", {
+              Jaar: [Number(row.Jaar)],
+              Project_nummer: [row.Project_nummer]
+            });
+          }
+        });
+      });
+
+      // Pagination buttons
+      this._node.querySelectorAll(".dt-btn").forEach(function (btn) {
+        btn.addEventListener("click", function () {
+          var action = btn.getAttribute("data-action");
+          var total = Math.ceil(self._rows.length / self._pageSize);
+          if (action === "first") self._page = 0;
+          if (action === "prev")  self._page = Math.max(0, self._page - 1);
+          if (action === "next")  self._page = Math.min(total - 1, self._page + 1);
+          if (action === "last")  self._page = total - 1;
+          self._render();
+        });
+      });
+
+      // Page size
+      var sel = this._node.querySelector(".dt-select");
+      if (sel) {
+        sel.addEventListener("change", function () {
+          self._pageSize = parseInt(sel.value);
+          self._page = 0;
+          self._render();
+        });
+      }
+
+      // Column resize
+      this._node.querySelectorAll(".dt-resize").forEach(function (handle) {
+        handle.addEventListener("mousedown", function (e) {
+          e.preventDefault();
+          e.stopPropagation();
+          var c = parseInt(handle.getAttribute("data-col"));
+          self._resizeCol = self._cols[c];
+          self._resizeStartX = e.clientX;
+          self._resizeStartW = self._resizeCol.w;
+          document.addEventListener("mousemove", self._onMouseMove);
+          document.addEventListener("mouseup", self._onMouseUp);
+        });
+      });
+    }
+
+    _onMouseMove(e) {
+      if (!this._resizeCol) return;
+      var diff = e.clientX - this._resizeStartX;
+      this._resizeCol.w = Math.max(40, this._resizeStartW + diff);
+      // Update header width live
+      var th = this._node.querySelector('.dt-th[data-col="' +
+        this._cols.indexOf(this._resizeCol) + '"]');
+      if (th) th.style.width = this._resizeCol.w + "px";
+    }
+
+    _onMouseUp() {
+      document.removeEventListener("mousemove", this._onMouseMove);
+      document.removeEventListener("mouseup", this._onMouseUp);
+      this._resizeCol = null;
+      this._render(); // re-render with new widths
+    }
+
+    // ═══════════════════════════════════════════════════════════
+    // CSS (self-contained — no external stylesheet needed)
+    // ═══════════════════════════════════════════════════════════
+
+    _injectCSS() {
+      if (document.getElementById("dt-css")) return;
+      var css = [
+        ".dt-wrap{font-size:13px;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif}",
+        ".dt-table{width:100%;border-collapse:collapse;table-layout:fixed}",
+        ".dt-th{position:relative;background:#e8eaf6;color:#1a237e;font-weight:600;padding:10px 8px;border-bottom:2px solid #1a237e;cursor:pointer;user-select:none;white-space:nowrap;overflow:hidden}",
+        ".dt-th:hover{background:#c5cae9}",
+        ".dt-th-title{pointer-events:none}",
+        ".dt-resize{position:absolute;top:0;right:0;bottom:0;width:6px;cursor:col-resize;z-index:1}",
+        ".dt-resize:hover{background:rgba(26,35,126,0.15)}",
+        ".dt-cell{padding:7px 8px;border-bottom:1px solid #eee;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}",
+        ".dt-row{cursor:pointer;transition:background 0.1s}",
+        ".dt-row:hover{background:#f0f4ff}",
+        ".dt-row:nth-child(even){background:#fafafa}",
+        ".dt-row:nth-child(even):hover{background:#f0f4ff}",
+        ".dt-green{color:#2d8a4e}",
+        ".dt-red{color:#d94141}",
+        ".dt-bold{font-weight:600}",
+        ".dt-foot{display:flex;align-items:center;justify-content:space-between;padding:10px 8px;border-top:1px solid #e0e0e0;background:#fafafa;font-size:12px;color:#666}",
+        ".dt-pager{display:flex;align-items:center;gap:4px}",
+        ".dt-btn{padding:3px 8px;border:1px solid #ccc;border-radius:3px;background:#fff;cursor:pointer;font-size:12px}",
+        ".dt-btn:hover:not(.dt-btn-disabled){background:#e8eaf6}",
+        ".dt-btn-disabled{opacity:0.4;cursor:default}",
+        ".dt-select{padding:3px 4px;border:1px solid #ccc;border-radius:3px;font-size:12px}",
+        ".dt-page-info{font-weight:600;color:#333}",
+        ".dt-page-label{margin-right:4px}"
+      ].join("\n");
+      var style = document.createElement("style");
+      style.id = "dt-css";
+      style.textContent = css;
+      document.head.appendChild(style);
+    }
   }
 
   return DetailTable;
