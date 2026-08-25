@@ -41,4 +41,6 @@ define([], function() {
 		}
 	}, 150);
 }
+
+return CustomSearchOption;
 });
