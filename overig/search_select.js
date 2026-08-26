@@ -16,6 +16,7 @@ define([], function () {
             const optionIndex = (oConfig.searchOptionIndex !== undefined) ? oConfig.searchOptionIndex : 2;
 
             const promptControl = oControlHost.page.getControlByName(targetPromptName);
+            console.log(promptControl);
             if (!promptControl) {
                 console.warn(`SetSearchOption: Prompt '${targetPromptName}' niet gevonden.`);
                 return;
