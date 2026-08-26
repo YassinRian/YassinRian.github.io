@@ -1,3 +1,4 @@
+
 define([], function () {
     "use strict";
 
@@ -5,54 +6,42 @@ define([], function () {
         constructor() {}
 
         draw(oControlHost) {
-            const oConfig = oControlHost.configuration;
-
-            if (!oConfig || !oConfig.targetPrompt) {
-                console.warn("SetSearchOption: Geen 'targetPrompt' opgegeven in JSON.");
-                return;
-            }
-
-            const targetPromptName = oConfig.targetPrompt;
+            const oConfig = oControlHost.configuration || {};
             const optionIndex = (oConfig.searchOptionIndex !== undefined) ? oConfig.searchOptionIndex : 2;
 
-            const promptControl = oControlHost.page.getControlByName(targetPromptName);
-            console.log(promptControl);
-            if (!promptControl) {
-                console.warn(`SetSearchOption: Prompt '${targetPromptName}' niet gevonden.`);
-                return;
-            }
+            const applySelection = () => {
+                // Zoek alle <select> elementen in het document
+                const allSelects = Array.from(document.querySelectorAll("select"));
 
-            const applySelection = (selectElem) => {
-                // Controleer of de optie nog niet goed staat
-                if (selectElem.selectedIndex !== optionIndex) {
-                    selectElem.selectedIndex = optionIndex;
+                // Zoek exact de dropdown die de "Start met..." optie bevat
+                const searchOptionSelect = allSelects.find(select => {
+                    if (select.multiple || select.options.length < 3) return false;
+                    const firstOpt = select.options[0]?.text || "";
+                    return firstOpt.includes("Start met") || firstOpt.includes("Starts with");
+                });
 
-                    // Trigger alle relevant browser events voor Cognos UI bindings
-                    selectElem.dispatchEvent(new Event("change", { bubbles: true }));
-                    selectElem.dispatchEvent(new Event("input", { bubbles: true }));
+                if (searchOptionSelect) {
+                    searchOptionSelect.selectedIndex = optionIndex;
+                    
+                    // Trigger events zodat Cognos de status update
+                    searchOptionSelect.dispatchEvent(new Event("change", { bubbles: true }));
+                    searchOptionSelect.dispatchEvent(new Event("input", { bubbles: true }));
 
-                    if (typeof selectElem.onchange === "function") {
-                        selectElem.onchange();
+                    if (typeof searchOptionSelect.onchange === "function") {
+                        searchOptionSelect.onchange();
                     }
+                    return true;
                 }
+                return false;
             };
 
-            // Observeren tot Cognos de opties in de dropdown heeft geschreven
-            const observer = new MutationObserver(() => {
-                const container = promptControl.element;
-                if (!container) return;
+            // 1. Probeer direct uit te voeren
+            if (applySelection()) return;
 
-                const selectElements = Array.from(container.querySelectorAll("select"));
-                // Pak de enkele dropdown (en niet de multi-select resultatenlijsten)
-                const searchOptionSelect = selectElements.find(el => !el.multiple);
-
-                if (searchOptionSelect && searchOptionSelect.options.length > optionIndex) {
-                    observer.disconnect(); // Stop met observeren
-
-                    // Laat Cognos eerst zijn eigen default-scripts afronden, pas daarna aan
-                    setTimeout(() => {
-                        applySelection(searchOptionSelect);
-                    }, 250);
+            // 2. Als de UI nog bezig is met opbouwen, wacht via MutationObserver
+            const observer = new MutationObserver((mutations, obs) => {
+                if (applySelection()) {
+                    obs.disconnect(); // Stop observer direct zodra hij is ingesteld
                 }
             });
 
