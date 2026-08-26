@@ -21,39 +21,41 @@ define([], function () {
                 return;
             }
 
-            // Hulpfunctie om de optie direct in te stellen
-            const applyOption = (container) => {
-                const selectElements = Array.from(container.querySelectorAll("select"));
-                const searchOptionSelect = selectElements.find(el => !el.multiple && el.options.length > 0);
+            const applySelection = (selectElem) => {
+                // Controleer of de optie nog niet goed staat
+                if (selectElem.selectedIndex !== optionIndex) {
+                    selectElem.selectedIndex = optionIndex;
 
-                if (searchOptionSelect && searchOptionSelect.options.length > optionIndex) {
-                    searchOptionSelect.selectedIndex = optionIndex;
-                    searchOptionSelect.dispatchEvent(new Event("change", { bubbles: true }));
-                    
-                    if (typeof searchOptionSelect.onchange === "function") {
-                        searchOptionSelect.onchange();
+                    // Trigger alle relevant browser events voor Cognos UI bindings
+                    selectElem.dispatchEvent(new Event("change", { bubbles: true }));
+                    selectElem.dispatchEvent(new Event("input", { bubbles: true }));
+
+                    if (typeof selectElem.onchange === "function") {
+                        selectElem.onchange();
                     }
-                    return true;
                 }
-                return false;
             };
 
-            const container = promptControl.element;
+            // Observeren tot Cognos de opties in de dropdown heeft geschreven
+            const observer = new MutationObserver(() => {
+                const container = promptControl.element;
+                if (!container) return;
 
-            // 1. Probeer direct (als de DOM al klaar is)
-            if (container && applyOption(container)) {
-                return;
-            }
+                const selectElements = Array.from(container.querySelectorAll("select"));
+                // Pak de enkele dropdown (en niet de multi-select resultatenlijsten)
+                const searchOptionSelect = selectElements.find(el => !el.multiple);
 
-            // 2. Zo niet: luister via MutationObserver naar DOM-updates (zonder timers)
-            const observer = new MutationObserver((mutations, obs) => {
-                const currentContainer = promptControl.element;
-                if (currentContainer && applyOption(currentContainer)) {
-                    obs.disconnect(); // Stop direct met observeren zodra de optie is gezet
+                if (searchOptionSelect && searchOptionSelect.options.length > optionIndex) {
+                    observer.disconnect(); // Stop met observeren
+
+                    // Laat Cognos eerst zijn eigen default-scripts afronden, pas daarna aan
+                    setTimeout(() => {
+                        applySelection(searchOptionSelect);
+                    }, 250);
                 }
             });
 
-            observer.observe(container || document.body, {
+            observer.observe(document.body, {
                 childList: true,
                 subtree: true
             });
