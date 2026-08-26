@@ -1,16 +1,12 @@
-
 define([], function () {
     "use strict";
 
     class SetSearchOption {
-        constructor() {
-            // Eventuele initialisatie kan hier plaatsvinden
-        }
+        constructor() {}
 
         draw(oControlHost) {
             const oConfig = oControlHost.configuration;
 
-            // Validatie van de JSON configuratie
             if (!oConfig || !oConfig.targetPrompt) {
                 console.warn("SetSearchOption: Geen 'targetPrompt' opgegeven in JSON.");
                 return;
@@ -19,32 +15,50 @@ define([], function () {
             const targetPromptName = oConfig.targetPrompt;
             const optionIndex = (oConfig.searchOptionIndex !== undefined) ? oConfig.searchOptionIndex : 2;
 
-            // Haal de Cognos prompt control op
             const promptControl = oControlHost.page.getControlByName(targetPromptName);
             if (!promptControl) {
                 console.warn(`SetSearchOption: Prompt '${targetPromptName}' niet gevonden.`);
                 return;
             }
 
-            // Arrow function behoudt de lexical scope van 'this'
-            setTimeout(() => {
-                const container = promptControl.element;
-                if (!container) return;
+            // Hulpfunctie om de optie direct in te stellen
+            const applyOption = (container) => {
+                const selectElements = Array.from(container.querySelectorAll("select"));
+                const searchOptionSelect = selectElements.find(el => !el.multiple && el.options.length > 0);
 
-                const selectElem = container.querySelector("select");
-
-                if (selectElem && selectElem.options.length > optionIndex) {
-                    selectElem.selectedIndex = optionIndex;
-
-                    // Trigger het change-event zodat Cognos de wijziging registreert
-                    const event = document.createEvent("HTMLEvents");
-                    event.initEvent("change", true, true);
-                    selectElem.dispatchEvent(event);
+                if (searchOptionSelect && searchOptionSelect.options.length > optionIndex) {
+                    searchOptionSelect.selectedIndex = optionIndex;
+                    searchOptionSelect.dispatchEvent(new Event("change", { bubbles: true }));
+                    
+                    if (typeof searchOptionSelect.onchange === "function") {
+                        searchOptionSelect.onchange();
+                    }
+                    return true;
                 }
-            }, 300);
+                return false;
+            };
+
+            const container = promptControl.element;
+
+            // 1. Probeer direct (als de DOM al klaar is)
+            if (container && applyOption(container)) {
+                return;
+            }
+
+            // 2. Zo niet: luister via MutationObserver naar DOM-updates (zonder timers)
+            const observer = new MutationObserver((mutations, obs) => {
+                const currentContainer = promptControl.element;
+                if (currentContainer && applyOption(currentContainer)) {
+                    obs.disconnect(); // Stop direct met observeren zodra de optie is gezet
+                }
+            });
+
+            observer.observe(container || document.body, {
+                childList: true,
+                subtree: true
+            });
         }
     }
 
-    // Exporteer de klasse direct naar Cognos
     return SetSearchOption;
 });
