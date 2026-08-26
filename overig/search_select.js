@@ -1,46 +1,50 @@
-define([], function() {
- "use strict";
 
- function CustomSearchOption() {};
+define([], function () {
+    "use strict";
 
- CustomSearchOption.prototype.draw = function(oControlHost) {
-	var oConfig = oControlHost.configuration;
+    class SetSearchOption {
+        constructor() {
+            // Eventuele initialisatie kan hier plaatsvinden
+        }
 
-	if(!oConfig || !oConfig.targetPrompt) {
-		console.error("CustomControl Error: 'targetPrompt' is niet gedefinieerd in de JSON configuratie");
-		return;
-	}
+        draw(oControlHost) {
+            const oConfig = oControlHost.configuration;
 
-	var targetPromptName = oConfig.targetPrompt;
-	// Default optie index: 0 = Start met.., 1 = Start met het 1ste trefwoord.., 2 = Bevat een van deze trefwoorden, 3 = Bevat alle trefwoorden
+            // Validatie van de JSON configuratie
+            if (!oConfig || !oConfig.targetPrompt) {
+                console.warn("SetSearchOption: Geen 'targetPrompt' opgegeven in JSON.");
+                return;
+            }
 
-	var optionIndex = (oConfig.searchOptionIndex !== undefined) ? oConfig.searchOptionIndex: 2;
+            const targetPromptName = oConfig.targetPrompt;
+            const optionIndex = (oConfig.searchOptionIndex !== undefined) ? oConfig.searchOptionIndex : 2;
 
-	// Haal het Cognos prompt control object op
-	var promptControl = oControlHost.page.getControlByName(targetPromptName);
+            // Haal de Cognos prompt control op
+            const promptControl = oControlHost.page.getControlByName(targetPromptName);
+            if (!promptControl) {
+                console.warn(`SetSearchOption: Prompt '${targetPromptName}' niet gevonden.`);
+                return;
+            }
 
-	if(!promptControl) {
-		console.error("CustomControl Error: Prompt met naam" + targetPromptName + "niet gevonden.");
-		return;
-	}
+            // Arrow function behoudt de lexical scope van 'this'
+            setTimeout(() => {
+                const container = promptControl.element;
+                if (!container) return;
 
-	setTimeout(function() {
-		var container = promptControl.element;
-		if(!container) return;
+                const selectElem = container.querySelector("select");
 
-		// Zoek het uitklapmenu van de zoekopties(select element)
-		var selectElem = container.querySelector("select")
+                if (selectElem && selectElem.options.length > optionIndex) {
+                    selectElem.selectedIndex = optionIndex;
 
-		if(selectElem && selectElem.options.length > optionIndex) {
-			selectElem.selectedIndex = optionIndex;
+                    // Trigger het change-event zodat Cognos de wijziging registreert
+                    const event = document.createEvent("HTMLEvents");
+                    event.initEvent("change", true, true);
+                    selectElem.dispatchEvent(event);
+                }
+            }, 300);
+        }
+    }
 
-			// Voer event uit zodat Cognos de gewijzigde selectie herkent
-			var event = document.createEvent("HTMLEvents");
-			event.initEvent("change", true, true);
-			selectElem.dispatchEvent(event);
-		}
-	}, 150);
-}
-
-return CustomSearchOption;
+    // Exporteer de klasse direct naar Cognos
+    return SetSearchOption;
 });
